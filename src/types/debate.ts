@@ -48,6 +48,8 @@ export interface Agent {
   memory: AgentMemory;
 }
 
+export type DialecticalOutcome = 'consenso' | 'aporia' | 'sintese';
+
 export interface DebateMessage {
   id: string;
   agentId: string;
@@ -62,6 +64,7 @@ export interface DebateMessage {
   isHuman?: boolean;
   replyToAgentName?: string;
   keyPoints?: string[];
+  dialecticalConclusion?: DialecticalOutcome;
 }
 
 export interface PresetTopic {
@@ -78,7 +81,7 @@ export interface DebateState {
   topicDescription: string;
   status: 'idle' | 'running' | 'paused' | 'concluded';
   currentRound: number;
-  maxRounds: number;
+  maxRounds?: number;
   activeSpeakerId: string | null;
   speedDelayMs: number;
   selectedAgentIds: string[];
@@ -87,6 +90,7 @@ export interface DebateState {
   conclusionSummary?: string;
   consensusPoints?: string[];
   divergencePoints?: string[];
+  dialecticalOutcome?: DialecticalOutcome;
 }
 
 export interface OpenRouterConfig {

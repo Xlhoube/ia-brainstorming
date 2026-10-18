@@ -1,4 +1,4 @@
-import { DebateMessage, AgentMemory, AgentMemoryEntry } from '@/types/debate';
+import { DebateMessage, AgentMemory, AgentMemoryEntry, DialecticalOutcome } from '@/types/debate';
 
 export interface SavedDebateSession {
   id: string;
@@ -7,7 +7,8 @@ export interface SavedDebateSession {
   messages: DebateMessage[];
   selectedAgentIds: string[];
   currentRound: number;
-  maxRounds: number;
+  maxRounds?: number;
+  dialecticalOutcome?: DialecticalOutcome;
   synthesisResult: any | null;
   createdAt: number;
   updatedAt: number;

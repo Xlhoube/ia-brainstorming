@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateAgentResponse } from '@/lib/ai/openrouter';
+import { generateAgentResponse, extractDialecticalConclusion } from '@/lib/ai/openrouter';
 import { Agent, DebateMessage, LanguageTone } from '@/types/debate';
 
 export async function POST(req: NextRequest) {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const content = await generateAgentResponse({
+    const rawContent = await generateAgentResponse({
       agent,
       topic,
       topicDescription,
@@ -32,6 +32,8 @@ export async function POST(req: NextRequest) {
       tone: tone || 'simples',
     });
 
+    const { cleanText, dialecticalConclusion } = extractDialecticalConclusion(rawContent);
+
     const newMessage: DebateMessage = {
       id: 'msg-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
       agentId: agent.id,
@@ -40,12 +42,17 @@ export async function POST(req: NextRequest) {
       avatar: agent.avatar,
       image: agent.image,
       accentColor: agent.accentColor,
-      content,
+      content: cleanText,
       round: (messages && messages.length > 0 ? messages[messages.length - 1].round : 1),
       timestamp: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
+      dialecticalConclusion,
     };
 
-    return NextResponse.json({ success: true, message: newMessage });
+    return NextResponse.json({
+      success: true,
+      message: newMessage,
+      dialecticalConclusion,
+    });
   } catch (error: any) {
     console.error('Erro na rota next-turn:', error);
     return NextResponse.json(

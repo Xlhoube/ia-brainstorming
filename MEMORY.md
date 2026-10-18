@@ -3,17 +3,18 @@
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
 - **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e soluções globais.
-- **Versão:** v0.10.3
-- **Data da Última Atualização:** 2026-10-18
+- **Versão:** v0.11.0
+- **Data da Última Atualização:** 2026-10-19
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
 - **Ambiente de Execução e Deploy:** Web Browser (Desktop, Tablet e Telemóvel com layout responsivo 100dvh) / Vercel
 - **Stack:**
   - **Frontend / Fullstack:** Next.js 16 (App Router, Turbopack, TypeScript, React 19) + Tailwind CSS v4.
   - **Backend & Cloud Database:** Appwrite Cloud (Projeto `6ad53e750013ac9f2271`, Endpoint `https://fra.cloud.appwrite.io/v1`) via SDK oficial `appwrite` com arquitetura resiliente híbrida *Local-First + Cloud Sync*.
-  - **Sistema de Memória Cognitiva Persistente & Aprendizagem dos Especialistas:** Cada pensador possui memória viva de longo prazo (`AgentMemory`), composta por: (1) Filosofia Nuclear Inegociável; (2) Perceção pessoal e relacional de cada colega de mesa; (3) Arquivo episódico de temas e posições já defendidas; (4) Aprendizagens e lições acumuladas (incluindo ensinamentos transmitidos diretamente pelo utilizador). Esta memória é injetada ativamente nos prompts do OpenRouter e arquivada automaticamente no fim de cada ronda.
-  - **Motor de Diálogo Dialético Orgânico & Cascata:** Diálogos ágeis, curtos (50-90 palavras) e reativos. Fim dos monólogos e discursos académicos debitados. Sistema de escuta ativa que cita o orador anterior pelo nome, questiona diretamente os pressupostos e reage como numa conversa humana autêntica de mesa redonda. Cascata resiliente de modelos OpenRouter de alto desempenho gratuitos (`google/gemini-2.0-flash-exp:free`, `meta-llama/llama-3.3-70b-instruct:free`, `qwen/qwen-2.5-72b-instruct:free`, `mistralai/mistral-small-24b-instruct-2501:free`) para contornar restrições orçamentais e erros 402/404.
-  - **Perfis Psicológicos & Evolução de Opinião:** Modelo de dados `AgentPersonality` atribuído aos 5 pensadores com temperamento, traços dominantes, gatilhos de reação emocional e dinâmica de amadurecimento ao longo das rondas.
+  - **Dialética Livre Sem Limite de Turnos & Conclusão Emergente dos Especialistas:** Fim da limitação artificial por número de rondas. O debate decorre com total autonomia enquanto existirem contradições, teses e paradoxos vivos. Os próprios pensadores avaliam a maturidade dialética da discussão e declaram autonomamente o encerramento da mesa através de três desfechos epistemológicos: (1) Síntese Dialética; (2) Consenso Emergente; ou (3) Aporia / Divergência Irreconciliável.
+  - **Sistema de Memória Cognitiva Persistente & Aprendizagem dos Especialistas:** Cada pensador possui memória viva de longo prazo (`AgentMemory`), composta por: (1) Filosofia Nuclear Inegociável; (2) Perceção pessoal e relacional de cada colega de mesa; (3) Arquivo episódico de temas e posições já defendidas; (4) Aprendizagens e lições acumuladas (incluindo ensinamentos transmitidos diretamente pelo utilizador). Esta memória é injetada ativamente nos prompts do OpenRouter e arquivada automaticamente no fim de cada debate.
+  - **Motor de Diálogo Dialético Orgânico & Cascata:** Diálogos ágeis, curtos (50-90 palavras) e reativos. Fim dos monólogos e discursos académicos debitados. Sistema de escuta ativa que cita o orador anterior pelo nome, questiona diretamente os pressupostos e reage como numa conversa humana autêntica de mesa redonda. Cascata resiliente de modelos OpenRouter de alto desempenho gratuitos (`google/gemini-2.0-flash-exp:free`, `meta-llama/llama-3.3-70b-instruct:free`, `qwen/qwen-2.5-72b-instruct:free`, `mistralai/mistral-small-24b-instruct-2501:free`).
+  - **Perfis Psicológicos & Evolução de Opinião:** Modelo de dados `AgentPersonality` atribuído aos 5 pensadores com temperamento, traços dominantes, gatilhos de reação emocional e dinâmica de amadurecimento.
   - **Avatares Fotográficos com Enquadramento Facial Perfeito & Painel Panorâmico:** Recorte e centralização biométrica dos 5 especialistas (`*_face.png`) garantindo que as faces ficam sempre visíveis em qualquer ecrã ou proporção sem corte de cabeças ou queixos. Banner panorâmico cinemático (`painel_especialistas_banner.png`) calibrado na proporção 16:6 com todos os pensadores visíveis simultaneamente.
   - **Higienização de Prefixos Teatrais:** Eliminação automática de etiquetas redundantes do tipo `[Nome do Especialista - Cargo]:` geradas por modelos de IA, assegurando que o texto começa imediatamente e de forma limpa na interpelação direta ao colega de debate.
   - **Painel de Especialistas Integral & Limpo:** Exibição completa da imagem cinemática do Conselho (1536x1024) com todas as 5 figuras, ícones, cargos e citações centrais, sem legendas ou caixas sobrepostas no topo esquerdo.
@@ -46,10 +47,15 @@
 - **[2026-10-18] ADR-017:** Centralização e Enquadramento Facial dos Avatares: Recorte biométrico 1:1 e novo banner panorâmico 16:6.
 - **[2026-10-18] ADR-018:** Higienização de Prefixos Teatrais e Interpelação Direta nas Mensagens: Remoção de tags redundantes de identificação de autor.
 - **[2026-10-18] ADR-019:** Remoção de Legendas e Enquadramento Integral do Painel de Especialistas: Remoção da badge sobreposta no topo esquerdo do banner e ajuste de auto-scroll inicial no hook de debate, permitindo a visualização 100% integral dos 5 pensadores e das citações sem cortes e com centralização harmónica.
+- **[2026-10-19] ADR-020:** Dialética Livre Sem Limites de Turnos & Conclusão Emergente Autonoma pelo Conselho de Especialistas: Remoção de qualquer teto rígido ou forçado de rondas (como "Ronda 1/4"). O debate progride livremente pelo tempo necessário com contador de ciclos dinâmico (`Dialética Livre • Ciclo X`). Os especialistas têm autoridade para avaliar a maturidade da discussão e declarar autonomamente a conclusão da mesa por Síntese, Consenso ou Aporia, despoletando instantaneamente o distintivo editorial na mensagem, o arquivo de memória e a síntese final do Conselho.
 
 ---
 
-## ✅ O Que Já Funciona (v0.10.3)
+## ✅ O Que Já Funciona (v0.11.0)
+- [x] Dialética livre sem teto fixo de rondas: o debate corre sem interrupção forçada aos 4 turnos, avançando por ciclos orgânicos enquanto os agentes tiverem argumentos vivos.
+- [x] Conclusão emergente e autónoma pelos pensadores: agentes declaram conclusão (Síntese, Consenso ou Aporia) com badge visual destacado na linha temporal.
+- [x] Atualização da Navbar para `Dialética Livre • Ciclo X` durante o debate e `⚖️ Conclusão da Mesa` quando o conselho delibera o encerramento.
+- [x] Despoletamento automático de relatório de síntese e arquivo de memória nos especialistas aquando da declaração de conclusão.
 - [x] Painel de especialistas integral e limpo: exibição dos 5 pensadores com cabeças, torsos, nomes e citações sem legendas sobrepostas no canto superior esquerdo.
 - [x] Prevenção de auto-scroll no arranque: a área principal abre fixada no topo (`scrollTop = 0`), garantindo visibilidade total do tema central e do painel.
 - [x] Higienização de prefixos redundantes de auto-identificação: o texto das mensagens surge sem etiquetas de guião de teatro e entra logo na conversa direta com o colega.

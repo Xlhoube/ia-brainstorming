@@ -224,6 +224,30 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                     </div>
                   </div>
 
+                  {/* Distintivo de Conclusão Dialética Emergente */}
+                  {msg.dialecticalConclusion && (
+                    <div
+                      className={`mb-2.5 sm:mb-3 px-3 py-1.5 rounded-xl border text-[11px] sm:text-xs font-semibold flex items-center gap-2 shadow-md ${
+                        msg.dialecticalConclusion === 'sintese'
+                          ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300 shadow-emerald-950/30'
+                          : msg.dialecticalConclusion === 'consenso'
+                          ? 'bg-blue-950/60 border-blue-500/50 text-blue-300 shadow-blue-950/30'
+                          : 'bg-amber-950/60 border-amber-500/50 text-amber-300 shadow-amber-950/30'
+                      }`}
+                    >
+                      <span className="text-sm">
+                        {msg.dialecticalConclusion === 'sintese' ? '⚖️' : msg.dialecticalConclusion === 'consenso' ? '🤝' : '⚡'}
+                      </span>
+                      <span>
+                        {msg.dialecticalConclusion === 'sintese'
+                          ? 'Síntese Dialética Declarada pelo Orador'
+                          : msg.dialecticalConclusion === 'consenso'
+                          ? 'Consenso Emergente Declarado pelo Orador'
+                          : 'Aporia / Divergência Irreconciliável Declarada'}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Conteúdo com Formatação Limpa de Parágrafos (Sem prefixos de identificação) */}
                   <div className="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2 sm:space-y-2.5 font-normal">
                     {cleanAgentResponsePrefix(msg.content, msg.agentName).split('\n\n').map((paragraph, pIdx) => (

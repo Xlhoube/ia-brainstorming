@@ -211,24 +211,28 @@ export function useDebate() {
         speechService.speak(currentAgent.id, data.message.content);
 
         if (currentSpeakerIndexRef.current % activeAgents.length === 0) {
-          setCurrentRound(r => {
-            const nextR = r + 1;
-            if (nextR > maxRounds) {
-              setStatus('concluded');
-              // Registar a experiência do debate concluído na memória de cada pensador ativo
-              try {
-                activeAgents.forEach(ag => {
-                  const agentMsgs = [...messages, data.message].filter(m => m.agentId === ag.id);
-                  const lastSpeak = agentMsgs[agentMsgs.length - 1];
-                  const summary = lastSpeak ? lastSpeak.content.slice(0, 140) + '...' : `Defendeu a sua posição sobre "${topic}"`;
-                  LocalDatabase.recordDebateMemoryForAgent(ag.id, topic, summary);
-                });
-              } catch (memErr) {
-                console.warn('Erro ao arquivar memórias de debate:', memErr);
-              }
-            }
-            return nextR;
-          });
+          setCurrentRound(r => r + 1);
+        }
+
+        // Se o especialista declarou autonomamente a conclusão dialética da mesa (Síntese, Consenso ou Aporia)
+        const conclusion = data.message.dialecticalConclusion || data.dialecticalConclusion;
+        if (conclusion) {
+          setStatus('concluded');
+          try {
+            activeAgents.forEach(ag => {
+              const agentMsgs = [...messages, data.message].filter(m => m.agentId === ag.id);
+              const lastSpeak = agentMsgs[agentMsgs.length - 1];
+              const summary = lastSpeak ? lastSpeak.content.slice(0, 140) + '...' : `Defendeu a sua posição sobre "${topic}"`;
+              LocalDatabase.recordDebateMemoryForAgent(ag.id, topic, summary);
+            });
+          } catch (memErr) {
+            console.warn('Erro ao arquivar memórias de debate:', memErr);
+          }
+
+          // Despoleta automaticamente a síntese editorial do Conselho
+          setTimeout(() => {
+            synthesizeDebate();
+          }, 1200);
         }
       }
     } catch (err) {
@@ -237,7 +241,7 @@ export function useDebate() {
       setIsGenerating(false);
       setActiveSpeakerId(null);
     }
-  }, [agents, selectedAgentIds, isGenerating, topic, topicDescription, messages, apiKey, tone, maxRounds]);
+  }, [agents, selectedAgentIds, isGenerating, topic, topicDescription, messages, apiKey, tone]);
 
   const addAgentLearning = (agentId: string, insight: string) => {
     if (!insight.trim()) return;
@@ -395,6 +399,24 @@ export function useDebate() {
       if (data.success && data.message) {
         setMessages(prev => [...prev, data.message]);
         speechService.speak(respondingAgent.id, data.message.content);
+
+        const conclusion = data.message.dialecticalConclusion || data.dialecticalConclusion;
+        if (conclusion) {
+          setStatus('concluded');
+          try {
+            activeAgents.forEach(ag => {
+              const agentMsgs = [...nextMessages, data.message].filter(m => m.agentId === ag.id);
+              const lastSpeak = agentMsgs[agentMsgs.length - 1];
+              const summary = lastSpeak ? lastSpeak.content.slice(0, 140) + '...' : `Defendeu a sua posição sobre "${topic}"`;
+              LocalDatabase.recordDebateMemoryForAgent(ag.id, topic, summary);
+            });
+          } catch (memErr) {
+            console.warn('Erro ao arquivar memórias de debate:', memErr);
+          }
+          setTimeout(() => {
+            synthesizeDebate();
+          }, 1200);
+        }
       }
     } catch (err) {
       console.error('Erro ao responder à fala humana na sala:', err);

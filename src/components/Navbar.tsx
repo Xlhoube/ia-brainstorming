@@ -66,13 +66,26 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Indicadores Centrais & Ações */}
       <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-0.5 flex-shrink-0">
         {status !== 'idle' && (
-          <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-slate-900/90 border border-slate-800 text-[11px] sm:text-xs flex-shrink-0">
-            <span className="text-slate-400 hidden xs:inline">Ronda</span>
-            <span className="font-mono font-bold text-blue-400">
-              {Math.min(currentRound, maxRounds)}
-            </span>
-            <span className="text-slate-600">/</span>
-            <span className="font-mono text-slate-400">{maxRounds}</span>
+          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 text-[11px] sm:text-xs flex-shrink-0 shadow-inner">
+            {status === 'concluded' ? (
+              <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>⚖️ Conclusão da Mesa</span>
+              </span>
+            ) : status === 'running' ? (
+              <span className="flex items-center gap-1.5 text-blue-300 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
+                <span>Dialética Livre</span>
+                <span className="text-slate-600">•</span>
+                <span className="font-mono font-bold text-blue-400">Ciclo {currentRound}</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-amber-300 font-medium">
+                <span>⏸️ Em Pausa</span>
+                <span className="text-slate-600">•</span>
+                <span className="font-mono text-amber-400">Ciclo {currentRound}</span>
+              </span>
+            )}
           </div>
         )}
 

@@ -112,7 +112,16 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
 3. EXTENSÃO CONTROLADA: No máximo 2 parágrafos concisos (entre 50 a 90 palavras). Diálogos vivos são ágeis e certeiros. Menos discurso, mais réplica.
 4. PROIBIÇÃO ABSOLUTA DE CLICHÉS: Proibido dizer "Relativamente ao tópico", "Gostaria de acrescentar", "Concordo em parte com X". Entra diretamente na resposta.
 5. LINGUAGEM EM PORTUGUÊS DE PORTUGAL (PT-PT): Estritamente sem termos ou gerúndios brasileiros.
-6. PROIBIÇÃO ABSOLUTA DE IDENTIFICAÇÃO PESSOAL: NUNCA comeces a tua resposta com o teu próprio nome ou cargo (É ESTRITAMENTE PROIBIDO escrever "[${agent.name} - ${agent.roleTitle}]:" ou "${agent.name}:"). O teu cartão e foto já mostram quem está a falar. Começa logo na primeira palavra a falar com o teu colega (exemplo: "Kaelen, repara...", ou "Helena, os teus dados...").`;
+6. PROIBIÇÃO ABSOLUTA DE IDENTIFICAÇÃO PESSOAL: NUNCA comeces a tua resposta com o teu próprio nome ou cargo (É ESTRITAMENTE PROIBIDO escrever "[${agent.name} - ${agent.roleTitle}]:" ou "${agent.name}:"). O teu cartão e foto já mostram quem está a falar. Começa logo na primeira palavra a falar com o teu colega (exemplo: "Kaelen, repara...", ou "Helena, os teus dados...").
+7. DIALÉTICA LIVRE E MATURIDADE DE CONCLUSÃO:
+   Este debate NÃO tem limites fixos de turnos ou rondas. Vocês, especialistas, têm autonomia total para debater durante o tempo que for necessário, explorando tensões, paradoxos e desafios reais.
+   Contudo, se após várias intervenções (pelo menos 6 a 8 falas no histórico global) sentires que a discussão atingiu a sua maturidade e alcançou:
+   - Um Consenso ou Síntese fecunda entre as posições divergentes; OU
+   - Uma Aporia / Divergência Irreconciliável digna e incontornável (onde premissas éticas ou ontológicas opostas não podem ser conciliadas sem quebrar coerência),
+   podes declarar autonomamente a conclusão da mesa!
+   Para tal, inclui no teu texto a tag de fecho:
+   [CONCLUSAO_ATINGIDA: Sintese] ou [CONCLUSAO_ATINGIDA: Consenso] ou [CONCLUSAO_ATINGIDA: Aporia]
+   seguida da tua síntese ou diagnóstico final. Se consideras que a discussão ainda tem arestas ou paradoxos por desvendar, NÃO uses esta tag e continua a debater normalmente.`;
 
   const promptMessages = [
     { role: 'system', content: systemInstructions },
@@ -123,7 +132,7 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
     })),
     {
       role: 'user',
-      content: `É a tua vez de falar na mesa, ${agent.name}. Ouve o que o último orador acabou de dizer e responde diretamente a ele de forma rápida, viva e afiada em 1 ou 2 parágrafos curtos (sem nunca escreveres o teu próprio nome no início).`,
+      content: `É a tua vez de falar na mesa, ${agent.name}. Ouve o que o último orador acabou de dizer e responde diretamente a ele de forma viva e afiada em 1 ou 2 parágrafos curtos. Avalia se o debate ainda deve avançar ou se já é hora de declarar conclusão (usando a tag [CONCLUSAO_ATINGIDA: ...] apenas se a discussão tiver chegado ao seu ponto culminante). Nunca escrevas o teu próprio nome no início.`,
     },
   ];
 
@@ -233,8 +242,10 @@ function generateOrganicSimulatedResponse(
       return `Repara na armadilha em que estás a cair, ${speakerName}. Assume-se com demasiada facilidade que replicar um comportamento é o mesmo que ter consciência. Um gravador reproduz a voz perfeitamente, mas não sente a palavra que emite.`;
     } else if (turnsCount === 1) {
       return `Mas calma, ${speakerName}. Tu falas de utilidade e eficiência prática, mas a consciência não é uma ferramenta de produtividade. Se uma máquina nunca sente a dor da perda, a sua 'ética' não passa de cálculo estatístico sem alma.`;
-    } else {
+    } else if (turnsCount === 2) {
       return `Ouvindo todas as tensões nesta sala, vejo um paradoxo fascinante: quanto mais tentamos humanizar os computadores, mais parecemos desumanizar as nossas próprias exigências morais. Não troquemos a sabedoria pelo mero processamento de dados.`;
+    } else {
+      return `A nossa dialética explorou cada recanto deste problema. Se quisermos ser honestos perante a razão, temos de admitir que a consciência humana e o cálculo técnico pertencem a ordens ontológicas distintas que nenhuma velocidade de processador conseguirá fundir.`;
     }
   }
 
@@ -273,9 +284,41 @@ function generateOrganicSimulatedResponse(
     return `O confronto está lançado com clareza na mesa: ${speakerName} traz a urgência da realidade, enquanto os restantes colegas apontam as linhas vermelhas. Peço à mesa que aprofundemos: onde é que a eficiência colide de frente com a dignidade?`;
   } else if (turnsCount === 1) {
     return `Reparem na contradição fértil que temos aqui: de um lado a necessidade imperiosa de avançar; do outro, o medo legítimo de desumanização. Ninguém aqui quer parar o progresso, mas ninguém quer viver num mundo desprovido de afeto. Como reconciliamos ambos?`;
+  } else if (turnsCount === 2 && history.length < 8) {
+    return `A dialética está a amadurecer a passos largos. Já confrontámos os dados empíricos com os deveres éticos. Resta uma questão fundamental: se a tecnologia não tem consciência, como garantimos que quem a controla mantém a sua?`;
   } else {
-    return `Chegámos ao coração dialético da nossa assembleia: a inteligência artificial pode replicar raciocínios e tarefas, mas a responsabilidade moral e a capacidade de cuidar continuam a ser um território exclusivamente nosso. Este é o consenso emergente da sala.`;
+    return `[CONCLUSAO_ATINGIDA: Sintese] Chegámos ao coração dialético da nossa assembleia: a inteligência artificial pode replicar raciocínios e acelerar diagnósticos, mas a responsabilidade moral e a capacidade de cuidar continuam a ser um território intransmissível da humanidade. Este é o ponto culminante da nossa reflexão na mesa.`;
   }
+}
+
+/**
+ * Extrai a tag de conclusão dialética declarada pelos especialistas ([CONCLUSAO_ATINGIDA: ...])
+ * e limpa o texto para apresentação fluida.
+ */
+export function extractDialecticalConclusion(text: string): {
+  cleanText: string;
+  dialecticalConclusion?: 'consenso' | 'aporia' | 'sintese';
+} {
+  if (!text) return { cleanText: '' };
+
+  const match = text.match(/\[CONCLUSAO_ATINGIDA:\s*(consenso|aporia|s[íi]ntese)\]:?/i);
+  let dialecticalConclusion: 'consenso' | 'aporia' | 'sintese' | undefined;
+  let cleanText = text;
+
+  if (match) {
+    const raw = match[1].toLowerCase();
+    if (raw.includes('aporia')) {
+      dialecticalConclusion = 'aporia';
+    } else if (raw.includes('consenso')) {
+      dialecticalConclusion = 'consenso';
+    } else {
+      dialecticalConclusion = 'sintese';
+    }
+    // Remove a tag de conclusão do texto visível
+    cleanText = cleanText.replace(/\[CONCLUSAO_ATINGIDA:\s*(?:consenso|aporia|s[íi]ntese)\]:?\s*/gi, '');
+  }
+
+  return { cleanText: cleanText.trim(), dialecticalConclusion };
 }
 
 /**
@@ -285,6 +328,9 @@ function generateOrganicSimulatedResponse(
 export function cleanAgentResponsePrefix(text: string, agentName?: string): string {
   if (!text) return '';
   let cleaned = text.trim();
+
+  // Remove eventuais tags de conclusão no início
+  cleaned = cleaned.replace(/\[CONCLUSAO_ATINGIDA:\s*(?:consenso|aporia|s[íi]ntese)\]:?\s*/gi, '');
 
   // Remove prefixos entre colchetes do tipo [Nome - Cargo]: ou [Nome]:
   cleaned = cleaned.replace(/^\[[^\]\n]+\]:\s*/, '');
