@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Agent, DebateMessage } from '@/types/debate';
 import { Copy, Check, Volume2, User, Brain, Sparkles } from 'lucide-react';
+import { cleanAgentResponsePrefix } from '@/lib/ai/openrouter';
 
 interface DebateTimelineProps {
   messages: DebateMessage[];
@@ -204,7 +205,7 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                     <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
                       {onSpeakMessage && !isHuman && (
                         <button
-                          onClick={() => onSpeakMessage(msg.agentId, msg.content)}
+                          onClick={() => onSpeakMessage(msg.agentId, cleanAgentResponsePrefix(msg.content, msg.agentName))}
                           className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity p-1 sm:p-1.5 rounded-lg text-slate-400 hover:text-indigo-300 hover:bg-slate-800"
                           title="Ouvir novamente esta intervenção"
                         >
@@ -213,7 +214,7 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                       )}
 
                       <button
-                        onClick={() => handleCopy(msg.id, msg.content)}
+                        onClick={() => handleCopy(msg.id, cleanAgentResponsePrefix(msg.content, msg.agentName))}
                         className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity p-1 sm:p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
                         title="Copiar citação"
                       >
@@ -226,9 +227,9 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                     </div>
                   </div>
 
-                  {/* Conteúdo com Formatação Limpa de Parágrafos */}
+                  {/* Conteúdo com Formatação Limpa de Parágrafos (Sem prefixos de identificação) */}
                   <div className="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2 sm:space-y-2.5 font-normal">
-                    {msg.content.split('\n\n').map((paragraph, pIdx) => (
+                    {cleanAgentResponsePrefix(msg.content, msg.agentName).split('\n\n').map((paragraph, pIdx) => (
                       <p key={pIdx}>{paragraph}</p>
                     ))}
                   </div>

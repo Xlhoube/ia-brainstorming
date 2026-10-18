@@ -111,18 +111,19 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
 2. PENSA EM VOZ ALTA: Mostra hesitação, surpresa ou convicção. Não sejas um robô formal.
 3. EXTENSÃO CONTROLADA: No máximo 2 parágrafos concisos (entre 50 a 90 palavras). Diálogos vivos são ágeis e certeiros. Menos discurso, mais réplica.
 4. PROIBIÇÃO ABSOLUTA DE CLICHÉS: Proibido dizer "Relativamente ao tópico", "Gostaria de acrescentar", "Concordo em parte com X". Entra diretamente na resposta.
-5. LINGUAGEM EM PORTUGUÊS DE PORTUGAL (PT-PT): Estritamente sem termos ou gerúndios brasileiros.`;
+5. LINGUAGEM EM PORTUGUÊS DE PORTUGAL (PT-PT): Estritamente sem termos ou gerúndios brasileiros.
+6. PROIBIÇÃO ABSOLUTA DE IDENTIFICAÇÃO PESSOAL: NUNCA comeces a tua resposta com o teu próprio nome ou cargo (É ESTRITAMENTE PROIBIDO escrever "[${agent.name} - ${agent.roleTitle}]:" ou "${agent.name}:"). O teu cartão e foto já mostram quem está a falar. Começa logo na primeira palavra a falar com o teu colega (exemplo: "Kaelen, repara...", ou "Helena, os teus dados...").`;
 
   const promptMessages = [
     { role: 'system', content: systemInstructions },
     ...messages.slice(-8).map(msg => ({
       role: msg.isHuman ? 'user' : 'assistant',
       name: sanitizeName(msg.agentName),
-      content: `[${msg.agentName} - ${msg.agentRole}]:\n${msg.content}`,
+      content: msg.content,
     })),
     {
       role: 'user',
-      content: `É a tua vez de falar na mesa, ${agent.name}. Ouve o que o último orador acabou de dizer e responde de forma rápida, viva e afiada em 1 ou 2 parágrafos curtos.`,
+      content: `É a tua vez de falar na mesa, ${agent.name}. Ouve o que o último orador acabou de dizer e responde diretamente a ele de forma rápida, viva e afiada em 1 ou 2 parágrafos curtos (sem nunca escreveres o teu próprio nome no início).`,
     },
   ];
 
@@ -150,7 +151,7 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
         const data = await res.json();
         const reply = data.choices?.[0]?.message?.content;
         if (reply && reply.trim() !== '') {
-          return reply.trim();
+          return cleanAgentResponsePrefix(reply, agent.name);
         }
       } else {
         const errorText = await res.text();
@@ -276,3 +277,28 @@ function generateOrganicSimulatedResponse(
     return `Chegámos ao coração dialético da nossa assembleia: a inteligência artificial pode replicar raciocínios e tarefas, mas a responsabilidade moral e a capacidade de cuidar continuam a ser um território exclusivamente nosso. Este é o consenso emergente da sala.`;
   }
 }
+
+/**
+ * Higieniza o texto gerado por modelos LLM, removendo prefixos de identificação teatral
+ * como "[Dra. Helena Rostova - A Cientista Empírica]:" ou "Dr. Marcus Vance:"
+ */
+export function cleanAgentResponsePrefix(text: string, agentName?: string): string {
+  if (!text) return '';
+  let cleaned = text.trim();
+
+  // Remove prefixos entre colchetes do tipo [Nome - Cargo]: ou [Nome]:
+  cleaned = cleaned.replace(/^\[[^\]\n]+\]:\s*/, '');
+
+  // Remove prefixos sem colchetes com o nome do agente
+  if (agentName) {
+    const escaped = agentName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const nameRegex = new RegExp(`^${escaped}(?:\\s*-[^:]+)?:\\s*`, 'i');
+    cleaned = cleaned.replace(nameRegex, '');
+  }
+
+  // Remove qualquer prefixo genérico de agente conhecido
+  cleaned = cleaned.replace(/^(?:Dr\.\s*Marcus Vance|Dra\.\s*Helena Rostova|Aura Chen|Kaelen Voss|Sophia Veris)(?:\s*-[^:]+)?:?\s*/i, '');
+
+  return cleaned.trim();
+}
+
