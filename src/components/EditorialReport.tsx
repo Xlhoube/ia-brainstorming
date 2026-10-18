@@ -196,7 +196,7 @@ export const EditorialReport: React.FC<EditorialReportProps> = ({
 
       {/* Rodapé Editorial */}
       <footer className="mt-12 pt-4 border-t border-slate-300 text-center text-[10px] font-sans text-slate-500 flex justify-between items-center">
-        <span>Produzido pelo sistema IA Brain Storming • Versão v0.6.0</span>
+        <span>Produzido pelo sistema IA Brain Storming • Versão v0.12.0</span>
         <span>Documento certificado para consulta e arquivo</span>
       </footer>
     </div>
