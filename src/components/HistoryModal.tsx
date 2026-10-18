@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { LocalDatabase, SavedDebateSession } from '@/lib/db/localDatabase';
-import { X, History, Trash2, ArrowRight, MessageSquare, Calendar, Award } from 'lucide-react';
+import { AppwriteDatabaseService } from '@/lib/appwrite/databaseService';
+import { X, History, Trash2, ArrowRight, MessageSquare, Calendar, Award, Cloud } from 'lucide-react';
 
 interface HistoryModalProps {
   isOpen: boolean;
@@ -16,19 +17,31 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
   onLoadSession,
 }) => {
   const [sessions, setSessions] = useState<SavedDebateSession[]>([]);
+  const [isLoadingCloud, setIsLoadingCloud] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
+      // Carregamento instantâneo do cache local
       setSessions(LocalDatabase.listSessions());
+
+      // Sincronização em segundo plano com Appwrite Cloud
+      setIsLoadingCloud(true);
+      AppwriteDatabaseService.listSessions()
+        .then(list => {
+          if (list && list.length > 0) {
+            setSessions(list);
+          }
+        })
+        .finally(() => setIsLoadingCloud(false));
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handleDelete = (id: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    LocalDatabase.deleteSession(id);
     setSessions(prev => prev.filter(s => s.id !== id));
+    await AppwriteDatabaseService.deleteSession(id);
   };
 
   return (
@@ -41,11 +54,17 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
               <History className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">
-                Histórico de Debates Guardados
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-white">
+                  Histórico de Debates Guardados
+                </h3>
+                <span className="flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 font-mono">
+                  <Cloud className="w-2.5 h-2.5" />
+                  Appwrite Cloud Sync
+                </span>
+              </div>
               <p className="text-[11px] text-slate-400">
-                Base de dados local • {sessions.length} debates registados
+                Sincronização em tempo real • {sessions.length} debates registados {isLoadingCloud && '(a sincronizar...)'}
               </p>
             </div>
           </div>

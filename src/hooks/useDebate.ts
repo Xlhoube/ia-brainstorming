@@ -5,6 +5,7 @@ import { Agent, DebateMessage, DebateState, LanguageTone } from '@/types/debate'
 import { DEFAULT_AGENTS } from '@/lib/constants/agents';
 import { speechService } from '@/lib/speech/speechService';
 import { LocalDatabase, SavedDebateSession } from '@/lib/db/localDatabase';
+import { AppwriteDatabaseService } from '@/lib/appwrite/databaseService';
 
 const STORAGE_KEY_API = 'ia_brainstorming_openrouter_key';
 const STORAGE_KEY_AGENTS = 'ia_brainstorming_selected_agents';
@@ -86,10 +87,10 @@ export function useDebate() {
     }
   }, []);
 
-  // Gravação automática em base de dados local
+  // Gravação automática em base de dados (Local-First + Appwrite Cloud Sync)
   useEffect(() => {
     if (messages.length > 0) {
-      LocalDatabase.saveSession({
+      AppwriteDatabaseService.saveSession({
         id: sessionId,
         topic,
         topicDescription,

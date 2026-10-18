@@ -3,13 +3,14 @@
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
 - **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e soluções globais.
-- **Versão:** v0.7.0
+- **Versão:** v0.8.0
 - **Data da Última Atualização:** 2026-10-18
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
 - **Ambiente de Execução e Deploy:** Web Browser (Desktop e Telemóvel responsivo) / Vercel
 - **Stack:**
   - **Frontend / Fullstack:** Next.js 16 (App Router, Turbopack, TypeScript, React 19) + Tailwind CSS v4.
+  - **Backend & Cloud Database:** Appwrite Cloud (Projeto `6ad53e750013ac9f2271`, Endpoint `https://fra.cloud.appwrite.io/v1`) via SDK oficial `appwrite` com arquitetura resiliente híbrida *Local-First + Cloud Sync*.
   - **Perfis Psicológicos & Evolução de Opinião:** Modelo de dados `AgentPersonality` atribuído aos 5 pensadores com temperamento, traços dominantes, gatilhos de reação emocional e dinâmica de amadurecimento ao longo das rondas.
   - **Avatares Fotográficos & Painel Cinemático:** Integração completa dos 5 retratos fotográficos em alta definição dos especialistas (`/avatars/01_Dr_Marcus_Vance.png`, `02_Dra_Helena_Rostova.png`, `03_Aura_Chen.png`, `04_Kaelen_Voss.png`, `05_Sophia_Veris.png`) na barra fixa superior, nas mensagens da timeline e no relatório editorial. Inclui ainda o banner cinemático de equipa (`/avatars/painel_especialistas.png`) tanto no ecrã de boas-vindas como num modal dedicado de alta resolução.
   - **Camada de Inferência de IA:** OpenRouter API com suporte a múltiplos modelos (Claude 3.5 Sonnet, GPT-4o, DeepSeek V3, Llama 3.3 70B, Gemini 2.0 Flash) e motor dialético dinâmico sem repetições.
@@ -18,7 +19,6 @@
   - **Controlo de Linguagem & Tom:** Alternador dinâmico entre **Linguagem Simples & Acessível** (sem jargão técnico, com analogias do dia a dia) e **Linguagem Académica** (formal, rigorosa e filosófica).
   - **Exportação Editorial em PDF:** Módulo `EditorialReport` com design *white paper* / *think-tank*, otimizado para gravação em PDF e impressão A4 (`@media print`).
   - **Síntese de Voz (TTS):** Web Speech Synthesis nativo do browser com perfis acústicos e timbres individualizados por agente.
-  - **Persistência / Base de Dados:** Base de dados local (*Local-First* via `LocalDatabase`), com gravação automática de debates, contagem de rondas, intervenções e recuperação instantânea.
   - **Idioma de Comunicação e UI:** Português de Portugal (PT-PT).
 
 ---
@@ -35,11 +35,15 @@
 - **[2026-10-18] ADR-009:** Motor Dialético Multi-Fase sem repetições.
 - **[2026-10-18] ADR-010:** Interação Direta Humana na Sala: Qualquer fala humana (incluindo cumprimentos como "Boa noite") ativa a sala e gera reação imediata e falada por parte dos agentes.
 - **[2026-10-18] ADR-011:** Avatares Fotográficos Realistas e Painel Cinemático com layout de ecrã fixo.
-- **[2026-10-18] ADR-012:** Psiques e Personalidades Dialéticas: Atribuição de temperamento, traços dominantes e gatilhos emocionais aos especialistas, que influenciam as suas respostas e transformam a sua opinião ao longo do debate.
+- **[2026-10-18] ADR-012:** Psiques e Personalidades Dialéticas: Atribuição de temperamento, traços dominantes e gatilhos emocionais aos especialistas.
+- **[2026-10-18] ADR-013:** Integração Appwrite Cloud (Project ID: `6ad53e750013ac9f2271`): Arquitetura híbrida de persistência onde cada intervenção e debate é guardado instantaneamente no cliente e sincronizado com o Appwrite Cloud.
 
 ---
 
-## ✅ O Que Já Funciona (v0.7.0)
+## ✅ O Que Já Funciona (v0.8.0)
+- [x] Integração completa com o Appwrite Cloud (Endpoint: `https://fra.cloud.appwrite.io/v1`, Projeto: `6ad53e750013ac9f2271`).
+- [x] Serviço `AppwriteDatabaseService` híbrido: gravação automática em tempo real e sincronização transparente de debates.
+- [x] Modal de Histórico com selo ativo `Appwrite Cloud Sync` e recuperação de sessões passadas.
 - [x] Perfis psicológicos e traços dominantes com visualização em badges `🎭` na barra superior e no cabeçalho das mensagens.
 - [x] Modal cinemático expansível com cartões detalhados de personalidade, temperamento e dinâmica de evolução da opinião.
 - [x] Injeção dinâmica do perfil comportamental e evolução dialética no prompt do OpenRouter e no motor de simulação.
