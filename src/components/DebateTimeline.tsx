@@ -32,7 +32,9 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length > 0 || isGenerating) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, isGenerating]);
 
   const handleCopy = (id: string, text: string) => {
@@ -74,27 +76,22 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
 
         {/* Mensagens do Debate */}
         {messages.length === 0 ? (
-          <div className="text-center py-4 sm:py-8 px-2 sm:px-4 space-y-4 sm:space-y-6">
+          <div className="text-center py-1 sm:py-3 px-2 sm:px-4 space-y-2.5 sm:space-y-3.5">
             {/* Banner Cinemático do Painel de Especialistas */}
-            <div className="relative max-w-2xl mx-auto rounded-xl sm:rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 group">
-              <div className="relative aspect-[16/6] w-full overflow-hidden">
+            <div className="relative max-w-2xl mx-auto rounded-xl sm:rounded-2xl overflow-hidden border border-slate-800/90 shadow-2xl bg-slate-950 flex flex-col items-center">
+              <div className="w-full flex items-center justify-center p-2 bg-slate-950">
                 <img
-                  src="/avatars/painel_especialistas_banner.png"
+                  src="/avatars/painel_especialistas.png"
                   alt="Painel de Especialistas da Mesa Redonda"
-                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 brightness-95"
+                  className="w-full h-auto object-contain mx-auto"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-                <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-slate-950/80 border border-slate-700/60 text-[9px] sm:text-[10px] text-indigo-300 font-semibold backdrop-blur-sm">
-                  <Sparkles className="w-3 h-3 text-amber-400" />
-                  <span>Painel de Especialistas Convocado</span>
-                </div>
               </div>
-              <div className="p-3 sm:p-4 bg-slate-950/90 text-left border-t border-slate-800/80">
+              <div className="w-full p-2 sm:p-2.5 bg-slate-950/90 text-left border-t border-slate-800/80">
                 <h3 className="text-xs sm:text-sm font-bold text-white tracking-tight">
                   Mesa Redonda Pronta para Diálogo
                 </h3>
-                <p className="text-[11px] sm:text-xs text-slate-400 mt-1 leading-relaxed">
-                  Os 5 especialistas aguardam a tua questão ou uma saudação direta. Podes falar pelo campo inferior ou usar uma das saudações abaixo:
+                <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                  Os 5 pensadores aguardam a tua pergunta ou saudação. Fala pelo campo abaixo ou usa as sugestões rápidas:
                 </p>
               </div>
             </div>
