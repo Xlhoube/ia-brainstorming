@@ -72,7 +72,10 @@
 - [x] Síntese de voz TTS com perfis distintos por agente e controlo de mudo.
 - [x] Base de dados local com histórico de debates gravados.
 
+- [x] Conectado e sincronizado com o repositório remoto do GitHub: https://github.com/Xlhoube/ia-brainstorming.
+
 ---
 
 ## ⏳ Open Issues / Próximos Passos
-- [ ] Conectar ao repositório remoto do GitHub quando o utilizador criar o repositório em https://github.com/new.
+- [ ] Implementar exportação direta de áudio ou podcast dos debates gerados.
+- [ ] Explorar novos temas dialéticos de fronteira científica.
