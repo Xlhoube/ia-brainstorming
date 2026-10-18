@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Volume2, VolumeX, History, Key, BookOpen, RotateCcw, BrainCircuit } from 'lucide-react';
+import { Volume2, VolumeX, History, Key, BookOpen, RotateCcw, BrainCircuit, Sparkles, GraduationCap } from 'lucide-react';
+import { LanguageTone } from '@/types/debate';
 
 interface NavbarProps {
   onOpenSettings: () => void;
@@ -11,6 +12,8 @@ interface NavbarProps {
   isAudioEnabled: boolean;
   isSpeakingAudio: boolean;
   onToggleAudio: () => void;
+  tone: LanguageTone;
+  onToggleTone: () => void;
   apiKey: string;
   status: string;
   currentRound: number;
@@ -25,13 +28,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   isAudioEnabled,
   isSpeakingAudio,
   onToggleAudio,
+  tone,
+  onToggleTone,
   apiKey,
   status,
   currentRound,
   maxRounds,
 }) => {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#050814]/85 backdrop-blur-md px-4 lg:px-8 py-3.5 flex items-center justify-between">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#050814]/85 backdrop-blur-md px-4 lg:px-8 py-3 flex items-center justify-between">
       {/* Logo & Marca */}
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 p-0.5 shadow-lg shadow-indigo-500/20">
@@ -49,11 +54,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               IA Brain Storming
             </h1>
             <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              Arena v0.3.0
+              Arena v0.4.0
             </span>
           </div>
           <p className="text-[11px] text-slate-400 hidden sm:block">
-            Voz TTS Nativa • Base de Dados Local • Multi-Agentes
+            Voz TTS • PDF Editorial • Linguagem {tone === 'simples' ? 'Simples & Acessível' : 'Académica'}
           </p>
         </div>
       </div>
@@ -70,6 +75,24 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="font-mono text-slate-400">{maxRounds}</span>
           </div>
         )}
+
+        {/* Seletor de Tom: Linguagem Simples vs Académica */}
+        <button
+          onClick={onToggleTone}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all shadow-sm ${
+            tone === 'simples'
+              ? 'bg-amber-950/40 border-amber-700/60 text-amber-300 hover:bg-amber-900/40'
+              : 'bg-purple-950/40 border-purple-700/60 text-purple-300 hover:bg-purple-900/40'
+          }`}
+          title={tone === 'simples' ? 'Modo Linguagem Simples ativo (Clica para mudar para Académica)' : 'Modo Linguagem Académica ativo (Clica para mudar para Simples)'}
+        >
+          {tone === 'simples' ? (
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          ) : (
+            <GraduationCap className="w-3.5 h-3.5 text-purple-400" />
+          )}
+          <span>{tone === 'simples' ? 'Linguagem Simples' : 'Linguagem Académica'}</span>
+        </button>
 
         {/* Controlo de Áudio TTS */}
         <button

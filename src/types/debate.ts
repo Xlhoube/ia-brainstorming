@@ -8,13 +8,15 @@ export type AgentRole =
   | 'psicologo'
   | 'personalizado';
 
+export type LanguageTone = 'simples' | 'academico';
+
 export interface Agent {
   id: string;
   name: string;
   roleTitle: string;
   category: AgentRole;
   avatar: string;
-  accentColor: string; // Tailwind color string e.g. '#3b82f6' or 'from-blue-500 to-indigo-600'
+  accentColor: string;
   badgeColor: string;
   systemPrompt: string;
   model: string;
@@ -56,6 +58,7 @@ export interface DebateState {
   speedDelayMs: number;
   selectedAgentIds: string[];
   messages: DebateMessage[];
+  tone: LanguageTone;
   conclusionSummary?: string;
   consensusPoints?: string[];
   divergencePoints?: string[];

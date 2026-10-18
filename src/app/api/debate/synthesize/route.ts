@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DebateMessage } from '@/types/debate';
+import { DebateMessage, LanguageTone } from '@/types/debate';
 
 export async function POST(req: NextRequest) {
   try {
-    const { topic, messages, apiKey } = await req.json() as {
+    const { topic, messages, apiKey, tone } = await req.json() as {
       topic: string;
       messages: DebateMessage[];
       apiKey?: string;
+      tone?: LanguageTone;
     };
 
     if (!topic || !messages || messages.length === 0) {
@@ -17,6 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     const activeKey = apiKey || process.env.OPENROUTER_API_KEY;
+    const selectedTone: LanguageTone = tone || 'simples';
     const nowTime = new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     if (activeKey && activeKey.trim() !== '') {
@@ -25,16 +27,25 @@ export async function POST(req: NextRequest) {
           .map((m, i) => `[#${i + 1} - ${m.agentName} (${m.agentRole})]:\n${m.content}`)
           .join('\n\n');
 
+        const toneRule = selectedTone === 'simples'
+          ? `USA EXCLUSIVAMENTE LINGUAGEM SIMPLES E CLARA:
+- Explica as ideias de forma acessível para que qualquer pessoa sem estudos na área compreenda perfeitamente.
+- Proibido usar termos difíceis como 'ontológico', 'epistemológico', 'heurística', 'entropia' ou 'axiológico'.
+- Usa analogias práticas e frases diretas.`
+          : `USA LINGUAGEM FORMAL E ACADÉMICA com rigor filosófico e metodológico.`;
+
         const systemPrompt = `És uma analista intelectual de elite e moderadora neutra. A tua tarefa é produzir uma síntese executiva rigorosa, dinâmica e atualizada de um debate entre inteligências artificiais.
 Deves analisar OBRIGATORIAMENTE TODAS as ${messages.length} intervenções fornecidas, incorporando as opiniões mais recentes dos últimos especialistas que falaram.
 Escreve EXCLUSIVAMENTE em Português de Portugal (PT-PT).
+${toneRule}
+
 Estrutura a resposta rigorosamente em formato JSON com o seguinte schema:
 {
-  "centralThesis": "1 parágrafo com o cerne ontológico e prático da discussão, citando nominalmente as linhas de pensamento dos oradores",
-  "consensus": ["ponto de consenso 1", "ponto de consenso 2", "ponto de consenso 3"],
-  "divergences": ["divergência crítica 1 (mencionar nomes dos agentes em conflito)", "divergência crítica 2", "divergência crítica 3"],
-  "openQuestions": ["questão em aberto 1", "questão em aberto 2"],
-  "overallVerdict": "Conclusão final equilibrada e prospetiva integrando as últimas perspetivas partilhadas"
+  "centralThesis": "1 parágrafo com a ideia principal e o ponto em discussão",
+  "consensus": ["ponto de acordo 1", "ponto de acordo 2", "ponto de acordo 3"],
+  "divergences": ["onde é que eles discordam 1", "onde é que eles discordam 2", "onde é que eles discordam 3"],
+  "openQuestions": ["pergunta para o futuro 1", "pergunta para o futuro 2"],
+  "overallVerdict": "Conclusão final clara e compreensível"
 }`;
 
         const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -51,7 +62,7 @@ Estrutura a resposta rigorosamente em formato JSON com o seguinte schema:
               { role: 'system', content: systemPrompt },
               {
                 role: 'user',
-                content: `Tópico em debate: "${topic}"\nTotal de intervenções a sintetizar: ${messages.length}\n\nTranscrição completa do debate:\n${transcript}\n\nGera a síntese executiva atualizada em JSON:`,
+                content: `Tópico em debate: "${topic}"\nTotal de intervenções a sintetizar: ${messages.length}\nTom: ${selectedTone}\n\nTranscrição completa do debate:\n${transcript}\n\nGera a síntese executiva atualizada em JSON:`,
               },
             ],
             response_format: { type: 'json_object' },
@@ -70,6 +81,7 @@ Estrutura a resposta rigorosamente em formato JSON com o seguinte schema:
                 ...parsed,
                 analyzedCount: messages.length,
                 updatedAt: nowTime,
+                tone: selectedTone,
               },
             });
           }
@@ -79,8 +91,8 @@ Estrutura a resposta rigorosamente em formato JSON com o seguinte schema:
       }
     }
 
-    // Geração Dinâmica Baseada Estritamente nas Mensagens e Oradores Reais do Debate
-    const dynamicSynthesis = generateDynamicSynthesis(topic, messages, nowTime);
+    // Geração Dinâmica Local com Tom Simples vs Académico
+    const dynamicSynthesis = generateDynamicSynthesis(topic, messages, nowTime, selectedTone);
 
     return NextResponse.json({ success: true, synthesis: dynamicSynthesis });
   } catch (error: any) {
@@ -92,63 +104,66 @@ Estrutura a resposta rigorosamente em formato JSON com o seguinte schema:
   }
 }
 
-/**
- * Analisador dinâmico que inspeciona as mensagens e constrói a síntese conforme os especialistas que falaram
- */
-function generateDynamicSynthesis(topic: string, messages: DebateMessage[], timestamp: string) {
+function generateDynamicSynthesis(
+  topic: string,
+  messages: DebateMessage[],
+  timestamp: string,
+  tone: LanguageTone
+) {
   const participants = Array.from(new Set(messages.map(m => m.agentName)));
-  const participantRoles = Array.from(new Set(messages.map(m => m.agentRole)));
   const humanInterventions = messages.filter(m => m.isHuman);
   const lastSpeaker = messages[messages.length - 1];
   const totalCount = messages.length;
-
   const namesList = participants.join(', ');
 
-  // Tese central dinâmica
-  const centralThesis = `A análise de ${totalCount} intervenções sobre "${topic}" contou com as perspetivas de ${namesList}. O diálogo evoluiu de premissas iniciais para um debate profundo sobre as consequências práticas, onde a última intervenção de ${lastSpeaker.agentName} colocou em evidência a necessidade de confrontar a teoria com a realidade empírica e os valores fundamentais.`;
-
-  // Consensos dinâmicos
-  const consensus = [
-    `Concordância unânime entre os ${participants.length} oradores de que a questão de "${topic}" não comporta respostas simplistas e exige abordagem interdisciplinar.`,
-    `Reconhecimento geral de que qualquer solução teórica tem de respeitar salvaguardas éticas e a dignidade dos intervenientes.`,
-    totalCount >= 4 
-      ? `Consenso emergente nas rondas mais recentes sobre a urgência de estabelecer critérios claros de governação e responsabilidade.`
-      : `Reconhecimento de que as ferramentas atuais apenas arranham a superfície da complexidade em causa.`
-  ];
-
-  // Divergências dinâmicas
-  const divergences = [];
-  if (participants.length >= 2) {
-    divergences.push(`Conflito dialético entre a postura metodológica de ${participants[0]} e as premissas defendidas por ${participants[1] || 'outros especialistas'}.`);
-  }
-  if (participants.length >= 3) {
-    divergences.push(`Tensão entre o pragmatismo materialista e a exigência de proteção bioética e humanista destacada por ${participants[2] || participants[participants.length - 1]}.`);
-  } else {
-    divergences.push(`Divergência quanto ao ritmo e celeridade com que a sociedade deve adotar conclusões definitivas.`);
-  }
-
-  if (humanInterventions.length > 0) {
-    divergences.push(`A intervenção direta da Voz da Humanidade confrontou os modelos teóricos dos agentes, forçando a reavaliar os custos sociais concretos.`);
-  } else {
-    divergences.push(`A cisão entre a aceleração contínua e a prudência preventiva permanece sem resolução formal.`);
+  if (tone === 'simples') {
+    return {
+      centralThesis: `Após ${totalCount} opiniões partilhadas por ${namesList}, a conclusão principal sobre "${topic}" é simples: estamos perante uma escolha entre aproveitar o que a tecnologia nos dá de melhor, sem nunca esquecer o que nos torna verdadeiramente humanos. Como destacou ${lastSpeaker.agentName}, as máquinas são ferramentas muito úteis, mas a vida real das pessoas tem de estar sempre em primeiro lugar.`,
+      consensus: [
+        `Todos os ${participants.length} participantes concordam que este assunto é sério e não se resolve com respostas fáceis.`,
+        `Ficou claro para todos que o avanço das máquinas tem de respeitar a dignidade, o bem-estar e os sentimentos das pessoas.`,
+        `Houve acordo de que o ser humano não pode ser deixado para trás nem reduzido a um mero número num computador.`
+      ],
+      divergences: [
+        `Discordância sobre a velocidade: uns querem acelerar e usar já tudo o que a inteligência artificial permite, enquanto outros pedem calma e prudência.`,
+        `Dúvida sobre a consciência: uns defendem que um robô nunca terá sentimentos verdadeiros, enquanto outros acreditam que as máquinas podem aprender a imitar quase tudo.`,
+        humanInterventions.length > 0
+          ? `A intervenção do utilizador veio alertar para a vida real e para os problemas concretos do dia a dia das pessoas.`
+          : `Permanece a discussão sobre quem deve mandar e controlar estas novas tecnologias no futuro.`
+      ],
+      openQuestions: [
+        `Como podemos usar a inteligência artificial para vivermos melhor sem perdermos os nossos empregos e a nossa tranquilidade?`,
+        `Quem deve decidir as regras e os limites das máquinas no nosso país e no mundo?`
+      ],
+      overallVerdict: `Em resumo simples: a tecnologia é uma aliada fantástica, mas quem manda e tem de ser protegido é sempre o ser humano. O debate mostra que pensar em conjunto com bom senso é o melhor caminho para não cometermos erros graves.`,
+      analyzedCount: totalCount,
+      updatedAt: timestamp,
+      tone,
+    };
   }
 
-  // Questões em aberto
-  const openQuestions = [
-    `Como articular as perspetivas divergentes entre ${participants.slice(0, 2).join(' e ')} num modelo aplicável à sociedade contemporânea?`,
-    `Qual o papel da agência individual perante as forças sistémicas abordadas na intervenção de ${lastSpeaker.agentName}?`
-  ];
-
-  // Veredito final
-  const overallVerdict = `Com ${totalCount} contributos registados até às ${timestamp}, a assembleia conclui que o valor do debate reside na dialética contínua: a confrontação rigorosa entre perspetivas céticas, empíricas e humanistas impede a cristalização de dogmas e abre caminho a um discernimento lúcido e transformador.`;
-
+  // Tom académico
   return {
-    centralThesis,
-    consensus,
-    divergences,
-    openQuestions,
-    overallVerdict,
+    centralThesis: `A análise de ${totalCount} intervenções sobre "${topic}" contou com as perspetivas de ${namesList}. O diálogo evoluiu de premissas epistemológicas para um debate rigoroso sobre as restrições bioéticas e materiais, onde a última intervenção de ${lastSpeaker.agentName} colocou em evidência a necessidade de confrontar a teoria com a realidade empírica.`,
+    consensus: [
+      `Concordância unânime entre os ${participants.length} oradores de que a questão de "${topic}" exige abordagem interdisciplinar estrita.`,
+      `Reconhecimento geral de que qualquer solução algorítmica tem de respeitar salvaguardas bioéticas e a dignidade ontológica da pessoa humana.`,
+      `Consenso emergente sobre a urgência de estabelecer critérios claros de governação e responsabilidade regulatória.`
+    ],
+    divergences: [
+      `Conflito dialético entre a postura cética clássica e as premissas materialistas e aceleracionistas.`,
+      `Tensão entre o pragmatismo computacional e a exigência de proteção fenomenológica da consciência subjetiva.`,
+      humanInterventions.length > 0
+        ? `A intervenção direta da Voz da Humanidade confrontou os modelos teóricos, exigindo a consideração dos custos sociais imediatos.`
+        : `A clivagem entre a aceleração tecnológica contínua e a prudência preventiva permanece sem resolução formal.`
+    ],
+    openQuestions: [
+      `Como articular a teleologia da inteligência sintética com a preservação axiológica da civilização humana?`,
+      `Qual a fronteira exata entre a representação funcional da inteligência e a emergência da agência consciente?`
+    ],
+    overallVerdict: `Com ${totalCount} contributos registados até às ${timestamp}, a assembleia conclui que o valor do debate reside na dialética contínua: a confrontação rigorosa entre perspetivas impede a cristalização de dogmas e consolida um discernimento lúcido e transformador.`,
     analyzedCount: totalCount,
     updatedAt: timestamp,
+    tone,
   };
 }

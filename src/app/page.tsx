@@ -10,6 +10,7 @@ import { TopicModal } from '@/components/TopicModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { SynthesisModal } from '@/components/SynthesisModal';
 import { HistoryModal } from '@/components/HistoryModal';
+import { EditorialReport } from '@/components/EditorialReport';
 
 export default function HomePage() {
   const {
@@ -27,6 +28,8 @@ export default function HomePage() {
     messages,
     apiKey,
     saveApiKey,
+    tone,
+    setTone,
     isGenerating,
     isSynthesizing,
     synthesisResult,
@@ -66,10 +69,14 @@ export default function HomePage() {
     }
   };
 
+  const handleToggleTone = () => {
+    const nextTone = tone === 'simples' ? 'academico' : 'simples';
+    setTone(nextTone);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#050814] text-slate-100 relative">
-      {/* Barra de Navegação com Controlos de Áudio e Histórico */}
+      {/* Barra de Navegação com Controlos de Áudio, Tom e Histórico */}
       <Navbar
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         onOpenTopics={() => setIsTopicModalOpen(true)}
@@ -78,6 +85,8 @@ export default function HomePage() {
         isAudioEnabled={isAudioEnabled}
         isSpeakingAudio={isSpeakingAudio}
         onToggleAudio={toggleAudio}
+        tone={tone}
+        onToggleTone={handleToggleTone}
         apiKey={apiKey}
         status={status}
         currentRound={currentRound}
@@ -147,6 +156,14 @@ export default function HomePage() {
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
         onLoadSession={loadSavedSession}
+      />
+
+      {/* Relatório com Design Editorial White Paper (ativo no modo de impressão/PDF) */}
+      <EditorialReport
+        topic={topic}
+        topicDescription={topicDescription}
+        synthesis={synthesisResult}
+        messages={messages}
       />
     </div>
   );

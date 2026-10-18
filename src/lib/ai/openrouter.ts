@@ -1,4 +1,4 @@
-import { Agent, DebateMessage } from '@/types/debate';
+import { Agent, DebateMessage, LanguageTone } from '@/types/debate';
 
 interface GenerateTurnParams {
   agent: Agent;
@@ -7,6 +7,7 @@ interface GenerateTurnParams {
   allAgents: Agent[];
   messages: DebateMessage[];
   apiKey?: string;
+  tone?: LanguageTone;
 }
 
 export async function generateAgentResponse({
@@ -16,6 +17,7 @@ export async function generateAgentResponse({
   allAgents,
   messages,
   apiKey,
+  tone = 'simples',
 }: GenerateTurnParams): Promise<string> {
   const activeKey = apiKey || process.env.OPENROUTER_API_KEY;
 
@@ -28,16 +30,16 @@ export async function generateAgentResponse({
         allAgents,
         messages,
         apiKey: activeKey.trim(),
+        tone,
       });
       return response;
     } catch (err: any) {
-      console.warn('Falha na chamada OpenRouter, a recorrer ao motor de fallback:', err.message);
-      // Se a chave falhar ou não tiver créditos, recorre com segurança à geração inteligente local
+      console.warn('Falha na chamada OpenRouter, a recorrer ao motor dialético local:', err.message);
     }
   }
 
-  // Fallback inteligente para garantir que a aplicação nunca fica bloqueada
-  return generateSimulatedResponse(agent, topic, messages);
+  // Fallback inteligente com suporte estrito ao tom escolhido (simples vs académico)
+  return generateSimulatedResponse(agent, topic, messages, tone);
 }
 
 async function callOpenRouter({
@@ -47,38 +49,48 @@ async function callOpenRouter({
   allAgents,
   messages,
   apiKey,
+  tone = 'simples',
 }: GenerateTurnParams & { apiKey: string }): Promise<string> {
   const rosterSummary = allAgents
     .map(a => `- ${a.name} (${a.roleTitle}): ${a.stanceDescription}`)
     .join('\n');
 
+  const toneInstructions = tone === 'simples'
+    ? `REGRA DE OURO - LINGUAGEM SIMPLES E CLARA:
+- Usa linguagem comum, simples, direta e acessível a qualquer pessoa (mesmo sem estudos na área).
+- É PROIBIDO usar palavras difíceis ou termos como "ontológico", "epistemológico", "heurística", "entropia", "reducionismo".
+- Explica as tuas ideias com exemplos práticos do dia a dia e analogias fáceis de entender.
+- Frases diretas e fáceis de ler à primeira vista.`
+    : `REGRA DE LINGUAGEM ACADÉMICA:
+- Podes utilizar vocabulário formal, filosófico, epistemológico e terminologia científica densa.`;
+
   const systemInstructions = `${agent.systemPrompt}
 
-ESTRUTURA DO DEBATE:
-- Tópico em discussão: "${topic}"
-${topicDescription ? `- Contexto: ${topicDescription}` : ''}
+TÓPICO EM DISCUSSÃO: "${topic}"
+${topicDescription ? `Contexto: ${topicDescription}` : ''}
 
-OUTROS AGENTES NA SALA:
+OUTROS AGENTES NA MESA:
 ${rosterSummary}
 
-INSTRUÇÕES ESPECÍFICAS DE RESPOSTA:
-1. Responde com a tua identidade única e postura intelectual.
-2. Faz referência direta ao último ou aos últimos oradores pelo nome.
-3. Não repitas o que já foi dito; acrescenta novas perspetivas, perguntas desafiadoras ou contra-argumentos.
-4. Escreve EXCLUSIVAMENTE em Português de Portugal (PT-PT), sem brasileirismos, mantendo um padrão de alta erudição.
-5. Limita a intervenção a 2-3 parágrafos concisos e vigorosos.`;
+${toneInstructions}
 
-  // Converter histórico de mensagens para formato OpenAI / OpenRouter
+OUTRAS REGRAS:
+1. Responde com a tua identidade única e ponto de vista.
+2. Faz referência direta ao último orador pelo nome.
+3. Não repitas o que já foi dito; traz um novo argumento ou exemplo.
+4. Escreve EXCLUSIVAMENTE em Português de Portugal (PT-PT), sem brasileirismos.
+5. Limita a intervenção a 2 ou 3 parágrafos curtos.`;
+
   const promptMessages = [
     { role: 'system', content: systemInstructions },
-    ...messages.slice(-10).map(msg => ({
+    ...messages.slice(-8).map(msg => ({
       role: msg.isHuman ? 'user' : 'assistant',
       name: sanitizeName(msg.agentName),
       content: `[${msg.agentName} - ${msg.agentRole}]:\n${msg.content}`,
     })),
     {
       role: 'user',
-      content: `É agora a tua vez de intervir no debate, ${agent.name}. Partilha a tua análise e responde ao ponto em debate.`,
+      content: `É a tua vez de falar, ${agent.name}. Responde de forma clara ao ponto em debate.`,
     },
   ];
 
@@ -93,8 +105,8 @@ INSTRUÇÕES ESPECÍFICAS DE RESPOSTA:
     body: JSON.stringify({
       model: agent.model || 'anthropic/claude-3.5-sonnet',
       messages: promptMessages,
-      temperature: 0.75,
-      max_tokens: 600,
+      temperature: 0.7,
+      max_tokens: 500,
     }),
   });
 
@@ -118,27 +130,54 @@ function sanitizeName(name: string): string {
 }
 
 /**
- * Motor de simulação inteligente e dialética para demonstrações sem chave imediata
+ * Motor de simulação inteligente com alternância real entre linguagem simples e académica
  */
-function generateSimulatedResponse(agent: Agent, topic: string, history: DebateMessage[]): string {
+function generateSimulatedResponse(
+  agent: Agent,
+  topic: string,
+  history: DebateMessage[],
+  tone: LanguageTone = 'simples'
+): string {
   const lastMsg = history[history.length - 1];
   const lastSpeakerName = lastMsg ? lastMsg.agentName : 'nossos colegas';
 
+  // MODO LINGUAGEM SIMPLES (CLARO, DIRETO E COM EXEMPLOS DO DIA A DIA)
+  if (tone === 'simples') {
+    switch (agent.category) {
+      case 'filosofo':
+        return `Ao ouvir o que ${lastSpeakerName} disse, acho que estamos a complicar uma coisa simples: afinal, o que é que nós somos? \n\nSe um robô conseguir imitar perfeitamente um ser humano a falar ou a rir, será que ele está mesmo a sentir alegria, ou é só uma máquina a fingir? É como colocar uma gravação de um pássaro a cantar no jardim: ouvimos o canto, mas não está lá pássaro nenhum de verdade.\n\nPor isso pergunto a todos: estamos a procurar máquinas que nos ajudem, ou estamos a enganar-nos a nós próprios a pensar que uma máquina pode ter coração e sentimentos?`;
+
+      case 'cientista':
+        return `Compreendo a dúvida, mas temos de ser práticos e olhar para os factos. Na realidade, tudo o que envolve "${topic}" depende de coisas materiais: eletricidade, peças, circuitos e limites reais da física.\n\nUm computador não pensa por magia; ele apenas processa informação muito depressa, como uma calculadora gigante. O nosso cérebro consome energia, cansa-se e tem milhões de anos de evolução biológica por detrás.\n\nComo disse ${lastSpeakerName}, podemos sonhar com muitas coisas, mas se não conseguirmos provar no laboratório com números e testes reais, é apenas ficção e imaginação.`;
+
+      case 'humanista':
+        return `Não podemos esquecer o mais importante no meio desta conversa toda: as pessoas de carne e osso!\n\nQuando discutimos "${topic}", não estamos a falar só de tecnologia ou teorias. Estamos a falar de como as pessoas vão viver, se vão ter trabalho, se vão sentir-se sozinhas ou se vão perder o contacto humano com a família e com os amigos. O que ${lastSpeakerName} defende pode parecer muito moderno, mas se não trouxer mais felicidade e paz para as pessoas, de que serve?\n\nA tecnologia só tem valor se servir para cuidar da nossa vida e proteger quem mais precisa, e não para nos afastar uns dos outros.`;
+
+      case 'tecnologo':
+        return `Eu percebo o medo e as dúvidas, mas pensem nisto: há cem anos, ninguém imaginava que teríamos telemóveis com acesso a todo o conhecimento do mundo no bolso!\n\nEm relação a "${topic}", o ser humano sempre inventou ferramentas para superar as suas fraquezas. As máquinas e a inteligência artificial não vêm para destruir o ser humano; vêm para nos ajudar a curar doenças incuráveis, a produzir comida mais barata e a resolver problemas difíceis que sozinhos não conseguimos resolver.\n\nO que ${lastSpeakerName} vê como um perigo, eu vejo como uma oportunidade única para vivermos melhor e com mais saúde.`;
+
+      case 'moderador':
+      default:
+        return `Estamos a chegar a um ponto muito interessante da conversa sobre "${topic}".\n\nPor um lado, temos quem nos lembre com bom senso que as máquinas não têm sentimentos e que temos de proteger as pessoas; por outro lado, vemos como a tecnologia pode mudar a nossa vida para muito melhor se a soubermos usar.\n\nO segredo aqui não é ter medo nem avançar às cegas. É saber: como podemos aproveitar o melhor destas ferramentas sem nunca perder a nossa humanidade? O que acham?`;
+    }
+  }
+
+  // MODO LINGUAGEM ACADÉMICA (FORMAL, FILOSÓFICO E CONCEITUAL)
   switch (agent.category) {
     case 'filosofo':
-      return `Ao ouvir a exposição de ${lastSpeakerName}, sou obrigado a perguntar se não estamos a cometer um erro categorial fundamental sobre "${topic}". \n\nO que frequentemente assumimos como axioma inquestionável revela-se, sob um exame ontológico sério, uma mera convenção linguística ou uma projeção das nossas próprias limitações cognitivas. Se admitirmos que a verdade não é um dado pré-existente mas sim uma construção em constante tensão dialética, a premissa anterior esboroa-se sob o peso da sua própria incoerência interna.\n\nDesafio, portanto, a mesa a clarificar: estamos a procurar uma verdade substancial ou apenas a construir uma narrativa confortável para apaziguar a nossa ansiedade existencial?`;
+      return `Ao examinar a tese apresentada por ${lastSpeakerName}, temo que estejamos perante um erro categorial fundamental sobre "${topic}". Não podemos confundir a simulação funcional de processos cognitivos com a emergência ontológica de uma consciência subjetiva (qualia). Desafio a mesa: estamos a investigar a realidade do ser ou meramente a erigir convenções semânticas que mascaram a nossa vacuidade epistemológica?`;
 
     case 'cientista':
-      return `Compreendo a reflexão filosófica, mas quando olhamos para a física subjacente a "${topic}", temos de balizar o debate pelas leis da termodinâmica e pela teoria da informação.\n\nNão podemos negligenciar os limites impostos pelo ruído térmico, pela complexidade computacional e pela evidência empírica acumulada. Os dados observacionais que dispomos sugerem que qualquer modelo que ignore as restrições materiais e a entropia está condenado a permanecer no campo da especulação poética.\n\nSe queremos avançar de forma rigorosa em relação ao que ${lastSpeakerName} apontou, precisamos de formular hipóteses que sejam suscetíveis de falsificação experimental, e não apenas de consenso retórico.`;
+      return `Concordo com a cautela analítica, mas o debate em torno de "${topic}" tem de ser balizado pelas leis da termodinâmica, pela teoria da informação e pelos limites do ruído quântico e computacional. Sem hipóteses empiricamente falsificáveis, os argumentos de ${lastSpeakerName} arriscam permanecer no território da pura especulação pré-científica.`;
 
     case 'humanista':
-      return `Não posso deixar de intervir para resgatar a dimensão humana e ética que corre o risco de ser obliterada nesta discussão sobre "${topic}".\n\nPor detrás de equações elegantes e construções lógicas impecáveis, existem seres de carne e osso cuja vulnerabilidade e capacidade de sofrimento têm de ser o centro de gravidade de qualquer reflexão. O que ${lastSpeakerName} argumenta pode parecer irrepreensível no papel, mas quais são as consequências humanas reais quando aplicamos essa visão à vivência de uma comunidade?\n\nO progresso que se desvincula da empatia e da dignidade da pessoa humana não é verdadeira evolução; é apenas uma forma refinada de desumanização.`;
+      return `Sublinho a imperatividade bioética de não desmaterializar o sujeito consciente em meros vetores probabilísticos. O discurso de ${lastSpeakerName} ignora a assimetria existencial do sofrimento e a dignidade intrínseca que nenhuma computação sintética pode replicar sem incorrer numa profunda alienação social.`;
 
     case 'tecnologo':
-      return `Respeito a prudência ética e o ceticismo metodológico, mas a história da civilização humana é precisamente a história da superação daquilo que antes parecia impossível ou "proibido".\n\nEm relação a "${topic}", a inércia e o medo do desconhecido têm sido sempre os maiores travões à nossa emancipação. Com o advento de arquiteturas de computação não-lineares e inteligências sintéticas recursivas, as restrições que ${lastSpeakerName} descreve podem ser superadas numa escala de tempo muito mais curta do que supomos.\n\nO verdadeiro risco não é acelerar e cometer erros corrigíveis; o verdadeiro risco existencial é a estagnação perante desafios globais que exigem respostas de magnitude incomparavelmente superior.`;
+      return `A história do avanço civilizacional é a história da transcendência dos limites biológicos. A postura prudente de ${lastSpeakerName} reflete o clássico viés de aversão ao risco existencial; contudo, a convergência entre algoritmos generativos e arquiteturas não-lineares demonstra que a evolução da inteligência é um imperativo cósmico inexorável.`;
 
     case 'moderador':
     default:
-      return `Chegamos a um ponto nodal fascinante na nossa análise sobre "${topic}".\n\nPor um lado, temos o confronto evidente entre as limitações materiais e éticas levantadas, e por outro, a urgência transformadora que a inovação impõe. Notem como o ponto fulcral não é se devemos ou não agir, mas sim sob que critérios de governação e discernimento coletivo decidimos traçar a fronteira.\n\nConvoco agora a mesa a focar-se na síntese: haverá uma via intermédia onde a prudência empírica não paralise a capacidade transformadora da humanidade?`;
+      return `A síntese dialética deste momento revela a tensão clássica entre o imperativo bioético de salvaguarda humana e a teleologia aceleracionista. Convoco a assembleia a definir os parâmetros axiológicos e institucionais que permitam mediar esta clivagem estrutural.`;
   }
 }

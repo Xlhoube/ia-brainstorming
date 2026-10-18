@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Agent, DebateMessage, DebateState } from '@/types/debate';
+import { Agent, DebateMessage, DebateState, LanguageTone } from '@/types/debate';
 import { DEFAULT_AGENTS } from '@/lib/constants/agents';
 import { speechService } from '@/lib/speech/speechService';
 import { LocalDatabase, SavedDebateSession } from '@/lib/db/localDatabase';
 
 const STORAGE_KEY_API = 'ia_brainstorming_openrouter_key';
 const STORAGE_KEY_AGENTS = 'ia_brainstorming_selected_agents';
+const STORAGE_KEY_TONE = 'ia_brainstorming_tone';
 
 export function useDebate() {
   const [sessionId, setSessionId] = useState<string>('session-' + Date.now());
@@ -22,7 +23,7 @@ export function useDebate() {
 
   const [topic, setTopic] = useState<string>('A consciência humana pode ser transferida ou replicada por máquinas?');
   const [topicDescription, setTopicDescription] = useState<string>(
-    'Debate sobre o problema difícil da consciência, funcionalismo computacional, o quarto chinês e a continuidade da identidade subjetiva.'
+    'Debate sobre se um computador consegue sentir emoções ou se a mente humana é algo que nunca poderá ser copiado por máquinas.'
   );
 
   const [status, setStatus] = useState<DebateState['status']>('idle');
@@ -36,6 +37,9 @@ export function useDebate() {
   const [isSynthesizing, setIsSynthesizing] = useState<boolean>(false);
   const [synthesisResult, setSynthesisResult] = useState<any | null>(null);
 
+  // Tom de Linguagem: 'simples' por defeito para que todos percebam!
+  const [tone, setToneState] = useState<LanguageTone>('simples');
+
   // Estados de Áudio TTS
   const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(true);
   const [isSpeakingAudio, setIsSpeakingAudio] = useState<boolean>(false);
@@ -46,7 +50,7 @@ export function useDebate() {
   const currentSpeakerIndexRef = useRef(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Inicialização e subscrição de áudio
+  // Inicialização e preferências locais
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsAudioEnabled(speechService.getAudioEnabled());
@@ -57,6 +61,11 @@ export function useDebate() {
 
       const savedKey = localStorage.getItem(STORAGE_KEY_API);
       if (savedKey) setApiKey(savedKey);
+
+      const savedTone = localStorage.getItem(STORAGE_KEY_TONE) as LanguageTone;
+      if (savedTone === 'simples' || savedTone === 'academico') {
+        setToneState(savedTone);
+      }
 
       const savedAgents = localStorage.getItem(STORAGE_KEY_AGENTS);
       if (savedAgents) {
@@ -77,7 +86,7 @@ export function useDebate() {
     }
   }, []);
 
-  // Gravação automática em base de dados local sempre que há nova mensagem ou síntese
+  // Gravação automática em base de dados local
   useEffect(() => {
     if (messages.length > 0) {
       LocalDatabase.saveSession({
@@ -94,6 +103,13 @@ export function useDebate() {
       });
     }
   }, [messages, synthesisResult, sessionId, topic, topicDescription, selectedAgentIds, currentRound, maxRounds]);
+
+  const setTone = (newTone: LanguageTone) => {
+    setToneState(newTone);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_TONE, newTone);
+    }
+  };
 
   const toggleAudio = () => {
     const nextState = !isAudioEnabled;
@@ -153,6 +169,7 @@ export function useDebate() {
           allAgents: activeAgents,
           messages,
           apiKey,
+          tone,
         }),
       });
 
@@ -179,7 +196,7 @@ export function useDebate() {
       setIsGenerating(false);
       setActiveSpeakerId(null);
     }
-  }, [agents, selectedAgentIds, isGenerating, topic, topicDescription, messages, apiKey, maxRounds]);
+  }, [agents, selectedAgentIds, isGenerating, topic, topicDescription, messages, apiKey, tone, maxRounds]);
 
   // Ciclo automático
   useEffect(() => {
@@ -275,6 +292,7 @@ export function useDebate() {
           topic,
           messages,
           apiKey,
+          tone,
         }),
       });
 
@@ -308,6 +326,8 @@ export function useDebate() {
     messages,
     apiKey,
     saveApiKey,
+    tone,
+    setTone,
     isGenerating,
     isSynthesizing,
     synthesisResult,

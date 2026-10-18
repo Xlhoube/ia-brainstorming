@@ -57,3 +57,32 @@
 .active-speaker-glow {
   animation: activePulse 2.5s infinite ease-in-out;
 }
+
+/* Estilos de Impressão e Exportação em PDF Editorial */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm 20mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  header, footer, nav, button, .no-print {
+    display: none !important;
+  }
+
+  #editorial-report {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .break-before-page {
+    page-break-before: always;
+  }
+}

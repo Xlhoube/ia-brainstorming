@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAgentResponse } from '@/lib/ai/openrouter';
-import { Agent, DebateMessage } from '@/types/debate';
+import { Agent, DebateMessage, LanguageTone } from '@/types/debate';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { agent, topic, topicDescription, allAgents, messages, apiKey } = body as {
+    const { agent, topic, topicDescription, allAgents, messages, apiKey, tone } = body as {
       agent: Agent;
       topic: string;
       topicDescription?: string;
       allAgents: Agent[];
       messages: DebateMessage[];
       apiKey?: string;
+      tone?: LanguageTone;
     };
 
     if (!agent || !topic) {
@@ -28,6 +29,7 @@ export async function POST(req: NextRequest) {
       allAgents: allAgents || [],
       messages: messages || [],
       apiKey,
+      tone: tone || 'simples',
     });
 
     const newMessage: DebateMessage = {

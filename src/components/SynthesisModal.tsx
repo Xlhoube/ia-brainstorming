@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, FileText, CheckCircle2, AlertCircle, HelpCircle, Award, Copy, Check, RefreshCw, Sparkles } from 'lucide-react';
+import { X, FileText, CheckCircle2, AlertCircle, HelpCircle, Award, Copy, Check, RefreshCw, Sparkles, Printer } from 'lucide-react';
 
 interface SynthesisModalProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ interface SynthesisModalProps {
     overallVerdict: string;
     analyzedCount?: number;
     updatedAt?: string;
+    tone?: 'simples' | 'academico';
   } | null;
   currentMessagesCount: number;
   onRefreshSynthesis: () => void;
@@ -36,28 +37,30 @@ export const SynthesisModal: React.FC<SynthesisModalProps> = ({
 
   const analyzedCount = synthesis.analyzedCount || 0;
   const hasNewMessages = currentMessagesCount > analyzedCount;
+  const isSimple = synthesis.tone === 'simples';
 
   const handleCopyMarkdown = () => {
     const md = `# Relatório Executivo de Debate | IA Brain Storming
 **Tema:** ${topic}
+**Tom:** ${isSimple ? 'Linguagem Simples & Acessível' : 'Linguagem Académica'}
 **Intervenções Analisadas:** ${analyzedCount}
 **Última Atualização:** ${synthesis.updatedAt || new Date().toLocaleTimeString('pt-PT')}
 
 ---
 
-## 🏛️ Tese Central
+## 🏛️ Ideia Central
 ${synthesis.centralThesis}
 
-## ✅ Pontos de Consenso
+## ✅ Pontos em Que Concordam
 ${synthesis.consensus.map(c => `- ${c}`).join('\n')}
 
-## ⚡ Divergências Críticas
+## ⚡ Onde Discordam
 ${synthesis.divergences.map(d => `- ${d}`).join('\n')}
 
-## ❓ Questões em Aberto
+## ❓ Perguntas Para o Futuro
 ${synthesis.openQuestions.map(q => `- ${q}`).join('\n')}
 
-## 🏆 Veredito Final & Perspetiva Prospetiva
+## 🏆 Conclusão Final
 ${synthesis.overallVerdict}
 `;
 
@@ -66,8 +69,12 @@ ${synthesis.overallVerdict}
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handlePrintPDF = () => {
+    window.print();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in no-print">
       <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Cabeçalho */}
         <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
@@ -78,18 +85,31 @@ ${synthesis.overallVerdict}
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-white">
-                  Síntese Dialética & Relatório Final
+                  Síntese do Debate & Relatório
                 </h3>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-indigo-300 border border-slate-700">
-                  {analyzedCount} intervenções
+                  {analyzedCount} opiniões
+                </span>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${isSimple ? 'bg-amber-950/50 text-amber-300 border-amber-800/50' : 'bg-purple-950/50 text-purple-300 border-purple-800/50'}`}>
+                  {isSimple ? 'Linguagem Simples' : 'Académica'}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 truncate max-w-md">
-                Atualizada às {synthesis.updatedAt || 'tempo real'} • Tema: {topic}
+                Atualizada às {synthesis.updatedAt || 'tempo real'} • {topic}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Botão de Exportação em PDF com Design Editorial */}
+            <button
+              onClick={handlePrintPDF}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-md transition-all"
+              title="Exportar Relatório em PDF Editorial de Alta Fidelidade"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Exportar PDF</span>
+            </button>
+
             <button
               onClick={onRefreshSynthesis}
               disabled={isSynthesizing}
@@ -142,7 +162,7 @@ ${synthesis.overallVerdict}
           <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
             <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider">
               <Award className="w-4 h-4" />
-              <span>Tese Central do Debate (Evolutiva)</span>
+              <span>{isSimple ? 'A Ideia Principal Deste Debate' : 'Tese Central & Enquadramento'}</span>
             </div>
             <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
               {synthesis.centralThesis}
@@ -155,7 +175,7 @@ ${synthesis.overallVerdict}
             <div className="p-4 rounded-xl bg-emerald-950/15 border border-emerald-900/40 space-y-3">
               <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Pontos de Consenso</span>
+                <span>{isSimple ? 'Em Que Pontos Todos Concordam?' : 'Pontos de Consenso'}</span>
               </div>
               <ul className="space-y-2 text-xs text-slate-300">
                 {synthesis.consensus.map((item, idx) => (
@@ -171,7 +191,7 @@ ${synthesis.overallVerdict}
             <div className="p-4 rounded-xl bg-amber-950/15 border border-amber-900/40 space-y-3">
               <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
                 <AlertCircle className="w-4 h-4" />
-                <span>Divergências Críticas Entre Especialistas</span>
+                <span>{isSimple ? 'Onde É Que Eles Discordam?' : 'Divergências Críticas Entre Especialistas'}</span>
               </div>
               <ul className="space-y-2 text-xs text-slate-300">
                 {synthesis.divergences.map((item, idx) => (
@@ -188,7 +208,7 @@ ${synthesis.overallVerdict}
           <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
             <div className="flex items-center gap-2 text-blue-400 text-xs font-bold uppercase tracking-wider">
               <HelpCircle className="w-4 h-4" />
-              <span>Questões em Aberto para Reflexão Futura</span>
+              <span>{isSimple ? 'Perguntas Para Continuarmos a Pensar' : 'Questões em Aberto para Reflexão'}</span>
             </div>
             <ul className="space-y-2 text-xs text-slate-300">
               {synthesis.openQuestions.map((item, idx) => (
@@ -203,7 +223,7 @@ ${synthesis.overallVerdict}
           {/* Veredito Geral */}
           <div className="p-4 rounded-xl bg-indigo-950/20 border border-indigo-800/40 space-y-2">
             <span className="text-indigo-400 text-xs font-bold uppercase tracking-wider">
-              Veredito Final da Assembleia de IA
+              {isSimple ? 'Resumo Final em Português Claro' : 'Veredito Final da Assembleia de IA'}
             </span>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed italic">
               &ldquo;{synthesis.overallVerdict}&rdquo;
