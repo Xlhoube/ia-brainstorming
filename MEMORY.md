@@ -3,7 +3,7 @@
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
 - **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e soluções globais.
-- **Versão:** v0.10.0
+- **Versão:** v0.10.1
 - **Data da Última Atualização:** 2026-10-18
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
@@ -14,7 +14,7 @@
   - **Sistema de Memória Cognitiva Persistente & Aprendizagem dos Especialistas:** Cada pensador possui memória viva de longo prazo (`AgentMemory`), composta por: (1) Filosofia Nuclear Inegociável; (2) Perceção pessoal e relacional de cada colega de mesa; (3) Arquivo episódico de temas e posições já defendidas; (4) Aprendizagens e lições acumuladas (incluindo ensinamentos transmitidos diretamente pelo utilizador). Esta memória é injetada ativamente nos prompts do OpenRouter e arquivada automaticamente no fim de cada ronda.
   - **Motor de Diálogo Dialético Orgânico & Cascata:** Diálogos ágeis, curtos (50-90 palavras) e reativos. Fim dos monólogos e discursos académicos debitados. Sistema de escuta ativa que cita o orador anterior pelo nome, questiona diretamente os pressupostos e reage como numa conversa humana autêntica de mesa redonda. Cascata resiliente de modelos OpenRouter de alto desempenho gratuitos (`google/gemini-2.0-flash-exp:free`, `meta-llama/llama-3.3-70b-instruct:free`, `qwen/qwen-2.5-72b-instruct:free`, `mistralai/mistral-small-24b-instruct-2501:free`) para contornar restrições orçamentais e erros 402/404.
   - **Perfis Psicológicos & Evolução de Opinião:** Modelo de dados `AgentPersonality` atribuído aos 5 pensadores com temperamento, traços dominantes, gatilhos de reação emocional e dinâmica de amadurecimento ao longo das rondas.
-  - **Avatares Fotográficos & Painel Cinemático:** Integração completa dos 5 retratos fotográficos em alta definição dos especialistas (`/avatars/01_Dr_Marcus_Vance.png`, `02_Dra_Helena_Rostova.png`, `03_Aura_Chen.png`, `04_Kaelen_Voss.png`, `05_Sophia_Veris.png`) na barra fixa superior, nas mensagens da timeline e no relatório editorial. Inclui ainda o banner cinemático de equipa (`/avatars/painel_especialistas.png`) tanto no ecrã de boas-vindas como num modal dedicado de alta resolução.
+  - **Avatares Fotográficos com Enquadramento Facial Perfeito & Painel Panorâmico:** Recorte e centralização biométrica dos 5 especialistas (`*_face.png`) garantindo que as faces ficam sempre visíveis em qualquer ecrã ou proporção sem corte de cabeças ou queixos. Banner panorâmico cinemático (`painel_especialistas_banner.png`) calibrado na proporção 16:6 com todos os pensadores visíveis simultaneamente.
   - **Entrada & Diálogo Direto com a Sala:** O utilizador pode falar diretamente para a sala em qualquer momento (ex.: dizer *"Boa noite a todos"* ou colocar uma questão imediata), despoletando a resposta audível e acolhedora em tempo real dos especialistas presentes.
   - **Motor Anti-Repetição por Fases:** Progressão estruturada de argumentos (Abertura -> Confronto Direto -> Casos Práticos -> Convergência e Síntese) que elimina qualquer duplicação de frases ou ideias nas rondas subsequentes.
   - **Controlo de Linguagem & Tom:** Alternador dinâmico entre **Linguagem Simples & Acessível** (sem jargão técnico, com analogias do dia a dia) e **Linguagem Académica** (formal, rigorosa e filosófica).
@@ -40,11 +40,14 @@
 - **[2026-10-18] ADR-013:** Integração Appwrite Cloud (Project ID: `6ad53e750013ac9f2271`): Arquitetura híbrida de persistência onde cada intervenção e debate é guardado instantaneamente no cliente e sincronizado com o Appwrite Cloud.
 - **[2026-10-18] ADR-014:** Motor Dialético Orgânico e Cascata Resiliente de Modelos Livres: Fim do débito de textos mecânicos e teses académicas. Intervenções limitadas a réplicas afiadas de 50-90 palavras com interpelação direta pelo nome e confronto das premissas precedentes.
 - **[2026-10-18] ADR-015:** Adaptação Responsiva Multi-Ecrã e Otimização para Dispositivos Móveis: Viewport dinâmico com `100dvh` prevenindo corte por barras de navegação em browsers mobile; transição do painel de agentes para carrossel horizontal suave com snap em ecrãs móveis (preservando o espaço vertical da conversa); botões compactos e interações táteis nativas.
-- **[2026-10-18] ADR-016:** Sistema de Memória Cognitiva Persistente dos Pensadores (`AgentMemory`): Cada especialista mantém: (1) Filosofia Nuclear Inegociável; (2) Perceção pessoal dos colegas de mesa; (3) Histórico episódico de debates anteriores e teses defendidas; (4) Aprendizagens acumuladas. A memória é persistida no `LocalDatabase`, sincronizada com o Appwrite, injetada dinamicamente nos prompts dos LLMs OpenRouter e pode ser consultada e enriquecida interativamente pelo utilizador através da aba "🧠 Memória Cognitiva" no modal dos pensadores.
+- **[2026-10-18] ADR-016:** Sistema de Memória Cognitiva Persistente dos Pensadores (`AgentMemory`): Cada especialista mantém filosofia inegociável, perceção dos colegas, arquivo de debates passados e aprendizagens acumuladas.
+- **[2026-10-18] ADR-017:** Centralização e Enquadramento Facial dos Avatares: Como os ficheiros originais dos avatares eram verticais (proporção 1:3.2 com o rosto situado apenas nos 25% superiores), a utilização de `object-cover` centrado cortava as cabeças dos pensadores. Foi gerado um conjunto de recortes faciais biométricos de alta fidelidade 1:1 (`*_face.png`) e um banner panorâmico 16:6 (`painel_especialistas_banner.png`), eliminando qualquer corte indesejado e garantindo centralização em toda a aplicação.
 
 ---
 
-## ✅ O Que Já Funciona (v0.10.0)
+## ✅ O Que Já Funciona (v0.10.1)
+- [x] Avatares individuais com rostos perfeitamente centralizados em todos os cartões, barras de navegação, timeline de mensagens e modais.
+- [x] Banner do Conselho de Especialistas panorâmico com enquadramento integral das cabeças dos 5 pensadores no acolhimento e no modal cinemático.
 - [x] Memória Cognitiva dos Pensadores: Arquitetura completa de memória de longo prazo com persistência local e na cloud.
 - [x] Injeção de memória episódica no prompt de sistema OpenRouter: os agentes invocam posições passadas, mantêm consistência ideológica e usam a sua perceção pessoal dos colegas durante as réplicas.
 - [x] Arquivo automático de memórias de debate: no final de cada ronda, os resumos dos tópicos e posições são registados na memória dos agentes ativos.

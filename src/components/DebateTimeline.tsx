@@ -76,9 +76,9 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
           <div className="text-center py-4 sm:py-8 px-2 sm:px-4 space-y-4 sm:space-y-6">
             {/* Banner Cinemático do Painel de Especialistas */}
             <div className="relative max-w-2xl mx-auto rounded-xl sm:rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 group">
-              <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full overflow-hidden">
+              <div className="relative aspect-[16/6] w-full overflow-hidden">
                 <img
-                  src="/avatars/painel_especialistas.png"
+                  src="/avatars/painel_especialistas_banner.png"
                   alt="Painel de Especialistas da Mesa Redonda"
                   className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 brightness-95"
                 />

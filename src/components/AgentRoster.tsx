@@ -212,9 +212,9 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
 
             <div className="overflow-y-auto flex-1">
               {/* Imagem Cinemática da Equipa */}
-              <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-slate-950 overflow-hidden border-b border-slate-800">
+              <div className="relative w-full aspect-[16/6] bg-slate-950 overflow-hidden border-b border-slate-800">
                 <img
-                  src="/avatars/painel_especialistas.png"
+                  src="/avatars/painel_especialistas_banner.png"
                   alt="Painel Cinemático de Especialistas em Equipa"
                   className="w-full h-full object-cover object-center"
                 />

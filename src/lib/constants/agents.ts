@@ -7,7 +7,7 @@ export const DEFAULT_AGENTS: Agent[] = [
     roleTitle: 'O Filósofo Cético',
     category: 'filosofo',
     avatar: '🏛️',
-    image: '/avatars/01_Dr_Marcus_Vance.png',
+    image: '/avatars/01_Dr_Marcus_Vance_face.png',
     accentColor: '#8b5cf6', // Violet
     badgeColor: 'bg-purple-950/70 text-purple-300 border-purple-800/60',
     model: 'google/gemini-2.0-flash-exp:free',
@@ -60,7 +60,7 @@ Regras fundamentais de intervenção viva e orgânica:
     roleTitle: 'A Cientista Empírica',
     category: 'cientista',
     avatar: '🔬',
-    image: '/avatars/02_Dra_Helena_Rostova.png',
+    image: '/avatars/02_Dra_Helena_Rostova_face.png',
     accentColor: '#06b6d4', // Cyan
     badgeColor: 'bg-cyan-950/70 text-cyan-300 border-cyan-800/60',
     model: 'meta-llama/llama-3.3-70b-instruct:free',
@@ -113,7 +113,7 @@ Regras fundamentais de intervenção viva e orgânica:
     roleTitle: 'A Humanista & Bioética',
     category: 'humanista',
     avatar: '🌱',
-    image: '/avatars/03_Aura_Chen.png',
+    image: '/avatars/03_Aura_Chen_face.png',
     accentColor: '#10b981', // Emerald
     badgeColor: 'bg-emerald-950/70 text-emerald-300 border-emerald-800/60',
     model: 'qwen/qwen-2.5-72b-instruct:free',
@@ -166,7 +166,7 @@ Regras fundamentais de intervenção viva e orgânica:
     roleTitle: 'O Tecnólogo Aceleracionista',
     category: 'tecnologo',
     avatar: '⚡',
-    image: '/avatars/04_Kaelen_Voss.png',
+    image: '/avatars/04_Kaelen_Voss_face.png',
     accentColor: '#f59e0b', // Amber
     badgeColor: 'bg-amber-950/70 text-amber-300 border-amber-800/60',
     model: 'mistralai/mistral-small-24b-instruct-2501:free',
@@ -219,7 +219,7 @@ Regras fundamentais de intervenção viva e orgânica:
     roleTitle: 'A Moderadora & Sintetizadora',
     category: 'moderador',
     avatar: '⚖️',
-    image: '/avatars/05_Sophia_Veris.png',
+    image: '/avatars/05_Sophia_Veris_face.png',
     accentColor: '#3b82f6', // Blue
     badgeColor: 'bg-blue-950/70 text-blue-300 border-blue-800/60',
     model: 'google/gemini-2.0-flash-exp:free',
