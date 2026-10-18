@@ -2,8 +2,7 @@
 
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
-- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e soluções globais.
-- **Versão:** v0.11.0
+- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e soluções- **Versão:** v0.12.0
 - **Data da Última Atualização:** 2026-10-19
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
@@ -11,6 +10,8 @@
 - **Stack:**
   - **Frontend / Fullstack:** Next.js 16 (App Router, Turbopack, TypeScript, React 19) + Tailwind CSS v4.
   - **Backend & Cloud Database:** Appwrite Cloud (Projeto `6ad53e750013ac9f2271`, Endpoint `https://fra.cloud.appwrite.io/v1`) via SDK oficial `appwrite` com arquitetura resiliente híbrida *Local-First + Cloud Sync*.
+  - **Bíblia Canónica de Personagens & Loader Tipado:** Fonte de verdade única em `the_five_biblia_personagens_v1.json`, consumida por `src/lib/agents/bibliaLoader.ts`. Disponibiliza os cinco pensadores (`dr-marcus-vance`, `dra-helena-rostova`, `aura-chen`, `kaelen-voss`, `sophia-veris`) com tipagem TypeScript estrita, eliminando duplicações estáticas de código em `src/lib/constants/agents.ts`.
+  - **Injeção de Prompts Cognitivamente Distintos (Fase C):** Cada agente recebe instruções individuais baseadas na sua psicologia, critérios de análise, primeiras perguntas, regra de decisão inegociável, pontos cegos, estilo verbal e normas epistemológicas partilhadas (proibição absoluta de inventar factos ou estudos; distinção entre facto, hipótese e valor; proibição de consenso forçado).
   - **Dialética Livre Sem Limite de Turnos & Conclusão Emergente dos Especialistas:** Fim da limitação artificial por número de rondas. O debate decorre com total autonomia enquanto existirem contradições, teses e paradoxos vivos. Os próprios pensadores avaliam a maturidade dialética da discussão e declaram autonomamente o encerramento da mesa através de três desfechos epistemológicos: (1) Síntese Dialética; (2) Consenso Emergente; ou (3) Aporia / Divergência Irreconciliável.
   - **Sistema de Memória Cognitiva Persistente & Aprendizagem dos Especialistas:** Cada pensador possui memória viva de longo prazo (`AgentMemory`), composta por: (1) Filosofia Nuclear Inegociável; (2) Perceção pessoal e relacional de cada colega de mesa; (3) Arquivo episódico de temas e posições já defendidas; (4) Aprendizagens e lições acumuladas (incluindo ensinamentos transmitidos diretamente pelo utilizador). Esta memória é injetada ativamente nos prompts do OpenRouter e arquivada automaticamente no fim de cada debate.
   - **Motor de Diálogo Dialético Orgânico & Cascata:** Diálogos ágeis, curtos (50-90 palavras) e reativos. Fim dos monólogos e discursos académicos debitados. Sistema de escuta ativa que cita o orador anterior pelo nome, questiona diretamente os pressupostos e reage como numa conversa humana autêntica de mesa redonda. Cascata resiliente de modelos OpenRouter de alto desempenho gratuitos (`google/gemini-2.0-flash-exp:free`, `meta-llama/llama-3.3-70b-instruct:free`, `qwen/qwen-2.5-72b-instruct:free`, `mistralai/mistral-small-24b-instruct-2501:free`).
@@ -45,13 +46,19 @@
 - **[2026-10-18] ADR-015:** Adaptação Responsiva Multi-Ecrã e Otimização para Dispositivos Móveis: Viewport dinâmico com `100dvh` prevenindo corte por barras de navegação em browsers mobile; transição do painel de agentes para carrossel horizontal suave com snap em ecrãs móveis (preservando o espaço vertical da conversa); botões compactos e interações táteis nativas.
 - **[2026-10-18] ADR-016:** Sistema de Memória Cognitiva Persistente dos Pensadores (`AgentMemory`): Cada especialista mantém filosofia inegociável, perceção dos colegas, arquivo de debates passados e aprendizagens acumuladas.
 - **[2026-10-18] ADR-017:** Centralização e Enquadramento Facial dos Avatares: Recorte biométrico 1:1 e novo banner panorâmico 16:6.
-- **[2026-10-18] ADR-018:** Higienização de Prefixos Teatrais e Interpelação Direta nas Mensagens: Remoção de tags redundantes de identificação de autor.
 - **[2026-10-18] ADR-019:** Remoção de Legendas e Enquadramento Integral do Painel de Especialistas: Remoção da badge sobreposta no topo esquerdo do banner e ajuste de auto-scroll inicial no hook de debate, permitindo a visualização 100% integral dos 5 pensadores e das citações sem cortes e com centralização harmónica.
 - **[2026-10-19] ADR-020:** Dialética Livre Sem Limites de Turnos & Conclusão Emergente Autonoma pelo Conselho de Especialistas: Remoção de qualquer teto rígido ou forçado de rondas (como "Ronda 1/4"). O debate progride livremente pelo tempo necessário com contador de ciclos dinâmico (`Dialética Livre • Ciclo X`). Os especialistas têm autoridade para avaliar a maturidade da discussão e declarar autonomamente a conclusão da mesa por Síntese, Consenso ou Aporia, despoletando instantaneamente o distintivo editorial na mensagem, o arquivo de memória e a síntese final do Conselho.
+- **[2026-10-19] ADR-021:** Integração da Bíblia Canónica (The Five) e Injeção Cognitiva de Prompts (Fases B e C): Integração de `the_five_biblia_personagens_v1.json` como fonte canónica única e `bibliaLoader.ts` para validação tipada e construção de prompts individuais sem duplicação de definições. Remoção cirúrgica do círculo verde com visto em `AgentRoster.tsx`. Os agentes recebem instruções cognitivas profundas (critérios de raciocínio, primeiras perguntas, regra de decisão inabalável, pontos cegos e regras epistemológicas da Bíblia) com extensão controlada (~700 tokens), preservando a compatibilidade total com os IDs operacionais, avatares e sessões do Appwrite.
 
 ---
 
-## ✅ O Que Já Funciona (v0.11.0)
+## ✅ O Que Já Funciona (v0.12.0)
+- [x] **Bíblia Canónica Integrada (Fase B):** Ficheiro `the_five_biblia_personagens_v1.json` ativo na raiz com especificações completas das 5 personagens, sem resumos ou omissões.
+- [x] **Carregador e Validador Tipado (`bibliaLoader.ts`):** Validação estrutural de esquema no arranque e mapeamento seguro para identificadores operacionais (`dr-marcus-vance`, `dra-helena-rostova`, `aura-chen`, `kaelen-voss`, `sophia-veris`).
+- [x] **Eliminação de Código Duplicado:** `src/lib/constants/agents.ts` agora exporta `DEFAULT_AGENTS` derivado diretamente do `bibliaLoader`, removendo mais de 260 linhas de dados estáticos redundantes.
+- [x] **Injeção de Prompts Cognitivamente Distintos (Fase C):** Cada pensador recebe nos seus prompts a missão, valores, primeiras perguntas, critérios de análise, regra de decisão e regras epistemológicas partilhadas (proibição de inventar fontes; distinção de factos vs valores; proibição de consenso forçado).
+- [x] **Remoção do Visto Verde de Seleção:** Elemento gráfico de círculo verde com visto removido cirurgicamente dos cartões em `AgentRoster.tsx`, mantendo a lógica de seleção e o realce visual intactos.
+- [x] **Bateria de Testes Automatizados da Fase C (`scripts/test-phase-c.mjs`):** Validação dos 6 critérios (prompts não vazios, instruções canónicas presentes, diferenciação mútua, mapeamento de IDs, tratamento de erros da Bíblia e funcionamento de cascata/fallback).
 - [x] Dialética livre sem teto fixo de rondas: o debate corre sem interrupção forçada aos 4 turnos, avançando por ciclos orgânicos enquanto os agentes tiverem argumentos vivos.
 - [x] Conclusão emergente e autónoma pelos pensadores: agentes declaram conclusão (Síntese, Consenso ou Aporia) com badge visual destacado na linha temporal.
 - [x] Atualização da Navbar para `Dialética Livre • Ciclo X` durante o debate e `⚖️ Conclusão da Mesa` quando o conselho delibera o encerramento.
@@ -95,11 +102,12 @@
 - [x] Síntese evolutiva com recálculo automático e botão manual de atualização.
 - [x] Síntese de voz TTS com perfis distintos por agente e controlo de mudo.
 - [x] Base de dados local com histórico de debates gravados.
-
 - [x] Conectado e sincronizado com o repositório remoto do GitHub: https://github.com/Xlhoube/ia-brainstorming.
 
 ---
 
 ## ⏳ Open Issues / Próximos Passos
+- [ ] **Fase D — Orquestração do Debate:** Implementar a progressão em 5 etapas canónicas (Compreender -> Análise independente -> Confronto de argumentos -> Verificação -> Síntese) em `src/hooks/useDebate.ts`.
+- [ ] **Fase E — Memória Estruturada:** Evolução do armazenamento de memória persistente conforme as diretrizes canónicas da Bíblia.
 - [ ] Implementar exportação direta de áudio ou podcast dos debates gerados.
 - [ ] Explorar novos temas dialéticos de fronteira científica.
