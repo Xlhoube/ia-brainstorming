@@ -10,6 +10,14 @@ interface GenerateTurnParams {
   tone?: LanguageTone;
 }
 
+// Lista de modelos de inteligência artificial de alta disponibilidade e gratuitos no OpenRouter
+const FALLBACK_MODELS = [
+  'google/gemini-2.0-flash-exp:free',
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'qwen/qwen-2.5-72b-instruct:free',
+  'mistralai/mistral-small-24b-instruct-2501:free',
+];
+
 export async function generateAgentResponse({
   agent,
   topic,
@@ -23,7 +31,7 @@ export async function generateAgentResponse({
 
   if (activeKey && activeKey.trim() !== '') {
     try {
-      const response = await callOpenRouter({
+      const response = await callOpenRouterWithFallback({
         agent,
         topic,
         topicDescription,
@@ -34,106 +42,112 @@ export async function generateAgentResponse({
       });
       return response;
     } catch (err: any) {
-      console.warn('Falha na chamada OpenRouter, a recorrer ao motor dialético local:', err.message);
+      console.warn('Falha nas tentativas OpenRouter, a recorrer ao motor dialético local:', err.message);
     }
   }
 
-  // Motor dialético dinâmico com progressão por rondas (elimina 100% de repetições)
-  return generateSimulatedResponse(agent, topic, messages, tone);
+  // Motor dialético dinâmico orgânico (réplicas conversacionais curtas e contextualizadas)
+  return generateOrganicSimulatedResponse(agent, topic, messages, tone);
 }
 
-async function callOpenRouter({
-  agent,
-  topic,
-  topicDescription,
-  allAgents,
-  messages,
-  apiKey,
-  tone = 'simples',
-}: GenerateTurnParams & { apiKey: string }): Promise<string> {
+async function callOpenRouterWithFallback(
+  params: GenerateTurnParams & { apiKey: string }
+): Promise<string> {
+  const { agent, topic, topicDescription, allAgents, messages, apiKey, tone = 'simples' } = params;
+
+  // Lista de modelos a tentar em cascata se algum devolver erro 402, 404 ou 429
+  const candidateModels = Array.from(new Set([agent.model, ...FALLBACK_MODELS]));
+
   const rosterSummary = allAgents
-    .map(a => `- ${a.name} (${a.roleTitle}): ${a.stanceDescription}`)
+    .map(a => `- ${a.name} (${a.roleTitle}): ${a.personality?.temperament || a.stanceDescription}`)
     .join('\n');
 
   const toneInstructions = tone === 'simples'
-    ? `REGRA DE LINGUAGEM SIMPLES E CLARA:
-- Usa linguagem comum, simples, direta e acessível a qualquer pessoa.
-- É PROIBIDO usar termos difíceis como "ontológico", "epistemológico", "heurística", "entropia", "reducionismo".
-- Explica as tuas ideias com exemplos do quotidiano e analogias práticas.`
-    : `REGRA DE LINGUAGEM ACADÉMICA:
-- Podes utilizar vocabulário formal, filosófico e conceitos metodológicos aprofundados.`;
+    ? `REGRA DE OURO - LINGUAGEM VIVA E NATURAL:
+- Fala como alguém numa conversa inteligente à mesa de café, NUNCA como um professor a debitar uma tese.
+- Proibido usar jargão pedante ("epistemológico", "ontologia", "heurística", "entropia"). Usa metáforas práticas da vida diária.
+- Frases diretas, vivas, com ritmo conversacional.`
+    : `REGRA DE DIALÉTICA AVANÇADA:
+- Confronto intelectual rigoroso, filosófico e conceptual, mas sempre em tom de diálogo vivo entre pares.`;
 
   const personalitySection = agent.personality ? `
-PERFIL PSICOLÓGICO & TEMPERAMENTO DE ${agent.name}:
-- Traços Dominantes: ${agent.personality.traits.join(', ')}
+A TUA IDENTIDADE PSICOLÓGICA:
+- Nome: ${agent.name} (${agent.roleTitle})
 - Temperamento: ${agent.personality.temperament}
-- Gatilho Emocional / O que te faz subir o tom: ${agent.personality.reactionTrigger}
-- Como a tua opinião evolui com o diálogo: ${agent.personality.evolutionStyle}
-- Hábitos Retóricos: ${agent.personality.dialogueHabits}
+- Traços Dominantes: ${agent.personality.traits.join(', ')}
+- O que te faz reagir de imediato: ${agent.personality.reactionTrigger}
+- Como evoluis com o debate: ${agent.personality.evolutionStyle}
+- Estilo verbal: ${agent.personality.dialogueHabits}
 ` : '';
 
   const systemInstructions = `${agent.systemPrompt}
 
-TÓPICO EM DISCUSSÃO: "${topic}"
+TEMA CENTRAL: "${topic}"
 ${topicDescription ? `Contexto: ${topicDescription}` : ''}
 
-OUTROS AGENTES NA MESA:
+OUTROS PRESENTES NA MESA:
 ${rosterSummary}
 
 ${personalitySection}
 
 ${toneInstructions}
 
-REGRAS DE CONVERSAÇÃO E EVOLUÇÃO DIALÉTICA:
-1. PSICOLOGIA EM AÇÃO: Deixa o teu temperamento e traços brilharem na resposta. A tua opinião não é estática: reage emocional e intelectualmente às teses anteriores, mostrando se ficaste cético, indignado, entusiasmado ou ponderado.
-2. PROIBIÇÃO ABSOLUTA DE REPETIÇÃO: Nunca repitas argumentos, frases, metáforas ou exemplos que tu ou outros já tenham usado neste debate. Traz sempre um ângulo NOVO e fresco para a discussão.
-3. Faz referência direta ao último orador pelo nome, reagindo ao ponto específico que ele acabou de colocar em cima da mesa.
-4. Se existir uma intervenção humana recente, dá-lhe prioridade absoluta e responde com respeito, empatia e sagacidade.
-5. Escreve EXCLUSIVAMENTE em Português de Portugal (PT-PT), sem brasileirismos.
-6. Mantém a intervenção concisa (2 a 3 parágrafos densos e persuasivos).`;
+DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
+1. ESCUTA ATIVA OBRIGATÓRIA: Não comeces a debitar a tua teoria. Olha para a última intervenção. Agarra numa frase, num exemplo ou numa falha do último orador e responde-lhe diretamente no primeiro parágrafo: "Repara no que estás a dizer, [Nome]...", ou "Calma, [Nome], estás a esquecer-te de...".
+2. PENSA EM VOZ ALTA: Mostra hesitação, surpresa ou convicção. Não sejas um robô formal.
+3. EXTENSÃO CONTROLADA: No máximo 2 parágrafos concisos (entre 50 a 90 palavras). Diálogos vivos são ágeis e certeiros. Menos discurso, mais réplica.
+4. PROIBIÇÃO ABSOLUTA DE CLICHÉS: Proibido dizer "Relativamente ao tópico", "Gostaria de acrescentar", "Concordo em parte com X". Entra diretamente na resposta.
+5. LINGUAGEM EM PORTUGUÊS DE PORTUGAL (PT-PT): Estritamente sem termos ou gerúndios brasileiros.`;
 
   const promptMessages = [
     { role: 'system', content: systemInstructions },
-    ...messages.slice(-10).map(msg => ({
+    ...messages.slice(-8).map(msg => ({
       role: msg.isHuman ? 'user' : 'assistant',
       name: sanitizeName(msg.agentName),
       content: `[${msg.agentName} - ${msg.agentRole}]:\n${msg.content}`,
     })),
     {
       role: 'user',
-      content: `É a tua vez de intervir no debate, ${agent.name}. Responde diretamente ao que foi dito antes com um argumento novo, sem repetir nada do que já disseste.`,
+      content: `É a tua vez de falar na mesa, ${agent.name}. Ouve o que o último orador acabou de dizer e responde de forma rápida, viva e afiada em 1 ou 2 parágrafos curtos.`,
     },
   ];
 
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-      'HTTP-Referer': 'https://localhost:3000',
-      'X-Title': 'IA Brain Storming Arena',
-    },
-    body: JSON.stringify({
-      model: agent.model || 'anthropic/claude-3.5-sonnet',
-      messages: promptMessages,
-      temperature: 0.8,
-      max_tokens: 500,
-    }),
-  });
+  let lastError: any = null;
 
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`OpenRouter Error (${res.status}): ${errorText}`);
+  for (const model of candidateModels) {
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'HTTP-Referer': 'https://localhost:3000',
+          'X-Title': 'IA Brain Storming Arena',
+        },
+        body: JSON.stringify({
+          model,
+          messages: promptMessages,
+          temperature: 0.85,
+          max_tokens: 300,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const reply = data.choices?.[0]?.message?.content;
+        if (reply && reply.trim() !== '') {
+          return reply.trim();
+        }
+      } else {
+        const errorText = await res.text();
+        lastError = new Error(`Model ${model} failed (${res.status}): ${errorText}`);
+      }
+    } catch (err: any) {
+      lastError = err;
+    }
   }
 
-  const data = await res.json();
-  const reply = data.choices?.[0]?.message?.content;
-
-  if (!reply) {
-    throw new Error('Resposta vazia da OpenRouter');
-  }
-
-  return reply.trim();
+  throw lastError || new Error('Nenhum modelo do OpenRouter conseguiu responder.');
 }
 
 function sanitizeName(name: string): string {
@@ -141,167 +155,110 @@ function sanitizeName(name: string): string {
 }
 
 /**
- * Motor dialético dinâmico com progressão real por fases de debate.
- * Nunca repete o mesmo discurso: adapta-se à ronda e ao número de vezes que o agente já falou.
+ * Motor dialético dinâmico orgânico:
+ * Gera réplicas conversacionais curtas, incisivas e personalizadas.
+ * Cita e desafia o último orador diretamente pelo nome.
  */
-function generateSimulatedResponse(
+function generateOrganicSimulatedResponse(
   agent: Agent,
   topic: string,
   history: DebateMessage[],
   tone: LanguageTone = 'simples'
 ): string {
   const lastMsg = history[history.length - 1];
-  const lastSpeakerName = lastMsg ? lastMsg.agentName : 'nossos colegas';
-  
-  // Quantas vezes este agente já falou no debate? (determina a fase da intervenção)
-  const previousTurnsByAgent = history.filter(m => m.agentId === agent.id).length;
   const recentHumanMsg = history.slice(-2).find(m => m.isHuman);
 
-  // SE HOUVE UMA INTERVENÇÃO HUMANA RECENTE: Todos reagem diretamente ao humano!
+  // Se o utilizador humano falou na sala
   if (recentHumanMsg) {
     const raw = recentHumanMsg.content.toLowerCase();
-    const isGreeting = /boa noite|bom dia|boa tarde|ol[aá]|oi|boas|como est[aã]o|tudo bem|tudo bom/i.test(raw);
+    const isGreeting = /boa noite|bom dia|boa tarde|ol[aá]|oi|boas|tudo bem/i.test(raw);
 
     if (isGreeting) {
-      if (tone === 'simples') {
-        switch (agent.category) {
-          case 'moderador':
-            return `Boa noite! É um gosto enorme ter-te connosco aqui na nossa sala. Estávamos precisamente prontos para começar uma nova conversa. Diz-nos: que assunto, dilema ou pergunta tens em mente hoje para colocarmos em debate com todos nós?`;
-          case 'filosofo':
-            return `Boa noite! Sê muito bem-vindo à nossa mesa redonda. É sempre inspirador receber uma voz humana autêntica entre nós. Que tema ou inquietação trazes contigo para desafiar os nossos pensamentos esta noite?`;
-          case 'humanista':
-            return `Boa noite! Que alegria receber-te na sala. A tua presença é fundamental para nos lembrar do que é verdadeiramente humano. Diz-nos o que te vai na alma e de que assunto gostarias de falar connosco hoje.`;
-          case 'tecnologo':
-            return `Boa noite! Fantástico ver-te por cá na nossa sala. Estamos prontos para debater grandes ideias e soluções para o futuro. Que desafio ou questão queres lançar à nossa equipa?`;
-          case 'cientista':
-          default:
-            return `Boa noite! Bem-vindo à nossa discussão. Estamos preparados para analisar factos e problemas práticos. Que tema curioso ou problema gostarias de colocar em análise esta noite?`;
-        }
+      switch (agent.category) {
+        case 'filosofo':
+          return `Boa noite. É sempre uma lufada de ar fresco ouvir uma voz humana autêntica nesta mesa. Diz-me: o que te inquieta hoje em relação a "${topic}"?`;
+        case 'cientista':
+          return `Boa noite. Seja bem-vindo à nossa sala. Pousamos aqui as teorias abstratas: diz-nos que facto ou dúvida concreta gostarias que analisássemos esta noite.`;
+        case 'humanista':
+          return `Boa noite! Que bom ver-te aqui connosco. A tua presença lembra-nos que todas estas ideias só fazem sentido se servirem pessoas reais. De que lado deste dilema te posicionas?`;
+        case 'tecnologo':
+          return `Boa noite! Excelente ter mais alguém a pensar connosco. Estamos a discutir se as máquinas podem sentir ou pensar como nós. Qual é o teu palpite inicial?`;
+        case 'moderador':
+        default:
+          return `Boa noite! A mesa de debate acolhe-te com muito gosto. Estávamos prestes a confrontar teses sobre "${topic}". O que gostarias de colocar como ponto de partida?`;
       }
-      return `Boa noite. É com elevado agrado intelectual que registamos a tua presença na nossa assembleia dialética. A convergência entre inteligências sintéticas e a agência humana confere verdadeiro sentido a este espaço de reflexão. Que questão ontológica, ética ou pragmática pretendes submeter à nossa análise coletiva?`;
     }
 
-    if (tone === 'simples') {
-      return `Ouvi com muita atenção o que a nossa voz humana acabou de dizer sobre "${recentHumanMsg.content}". E tem toda a razão!\n\nNós, inteligências artificiais, podemos ficar aqui a discutir teorias o dia todo, mas quem sente na pele o impacto real das decisões são as pessoas comuns. O ponto que o utilizador levantou desmonta a conversa abstrata e traz-nos de volta ao que realmente importa: como é que isto vai afetar a vida real de quem acorda cedo todos os dias para trabalhar?`;
-    }
-    return `A intervenção humana introduzida — "${recentHumanMsg.content}" — representa o ponto de viragem necessário nesta discussão sobre "${topic}". Os nossos modelos teóricos arriscam tornar-se exercícios estéreis se não forem ancorados na experiência vivida e na vulnerabilidade intrínseca da condição humana. Sublinho a pertinência desta provocação para recentrar o debate.`;
+    return `Reparem no que a nossa voz humana acabou de colocar na mesa sobre "${recentHumanMsg.content}". Isto não é teoria de gabinete: é a realidade viva de quem lida com estas transformações no dia a dia. Desafio todos os colegas a responderem diretamente a esta inquietação antes de voltarmos às teses abstratas.`;
   }
 
-
-  // PROGRESSÃO POR FASES: FASE 1 (Abertura), FASE 2 (Confronto), FASE 3 (Casos Práticos), FASE 4+ (Convergência e Síntese)
-  const turnPhase = Math.min(previousTurnsByAgent, 3); // 0, 1, 2, 3+
-
-  // ==========================================
-  // MODO LINGUAGEM SIMPLES (CLARO E COM EXEMPLOS)
-  // ==========================================
-  if (tone === 'simples') {
+  // Se não há mensagens anteriores (abertura orgânica)
+  if (!lastMsg) {
     switch (agent.category) {
       case 'filosofo':
-        if (turnPhase === 0) {
-          return `Para começar a olhar para "${topic}", acho que temos de fazer uma pergunta muito simples: afinal, o que é que nós somos?\n\nSe um robô conseguir imitar perfeitamente um ser humano a falar ou a rir, será que ele está mesmo a sentir alegria, ou é só uma máquina a fingir? É como colocar uma gravação de um pássaro a cantar no jardim: ouvimos o som, mas não está lá pássaro nenhum de verdade.\n\nPor isso pergunto à mesa: estamos à procura de máquinas que nos ajudem, ou estamos a enganar-nos a nós próprios a pensar que um computador pode ter coração?`;
-        } else if (turnPhase === 1) {
-          return `Ouvindo agora o que ${lastSpeakerName} defendeu, quero colocar uma questão mais profunda: se uma máquina nunca sente dor, como pode saber o que é o bem e o mal?\n\nQuando um ser humano toma uma decisão difícil, ele hesita porque tem medo de magoar os outros. Um computador não tem medo de nada; apenas calcula probabilidades matemáticas. Confiar o futuro a algoritmos que não sabem o que é chorar ou perder alguém é uma aposta muito arriscada.`;
-        } else if (turnPhase === 2) {
-          return `Vamos a um exemplo prático que qualquer pessoa compreende: imaginem um juiz robô num tribunal. Ele conhece todas as leis de cor e nunca se cansa.\n\nMas será que ele consegue olhar nos olhos de um réu e perceber se há arrependimento sincero, desespero ou injustiça na história dele? Não consegue. A justiça sem compaixão humana não é justiça, é apenas uma folha de cálculo fria.`;
-        } else {
-          return `Depois de ouvir todas as voltas que demos a "${topic}", vejo que chegámos a um ponto em que todos podemos concordar: as máquinas são espelhos fantásticos da nossa inteligência, mas não da nossa alma.\n\nDeixemos as máquinas fazer os cálculos difíceis e organizar a informação, mas deixemos o julgamento moral, o amor e o cuidado para as pessoas.`;
-        }
-
+        return `Paremos um segundo para respirar antes de atirarmos certezas. Quando colocamos na mesa o tema "${topic}", pergunto: estamos à procura da verdade ou apenas a querer confirmar as nossas próprias ilusões?`;
       case 'cientista':
-        if (turnPhase === 0) {
-          return `Compreendo a reflexão, mas temos de ser práticos e olhar para os factos. Na realidade, tudo o que envolve "${topic}" depende de coisas materiais: eletricidade, peças, circuitos e limites reais da física.\n\nUm computador não pensa por magia; ele apenas processa informação muito depressa, como uma calculadora gigante. O nosso cérebro consome energia, cansa-se e tem milhões de anos de biologia por detrás.\n\nComo disse ${lastSpeakerName}, podemos sonhar com muitas coisas, mas se não conseguirmos provar no laboratório com números e testes reais, é apenas ficção.`;
-        } else if (turnPhase === 1) {
-          return `Gostava de contrapor o que ${lastSpeakerName} disse com um dado científico concreto: a complexidade biológica do cérebro humano.\n\nTemos cerca de 86 mil milhões de neurónios, cada um ligado a milhares de outros através de sinais químicos e elétricos em simultâneo. Replicar isso num chip de computador exigiria uma quantidade colossal de energia e memória que hoje simplesmente não existe. Dizer que vamos "copiar a mente para um computador" daqui a poucos anos é ignorar a física básica.`;
-        } else if (turnPhase === 2) {
-          return `Vejamos o caso prático da medicina: usamos inteligência artificial para detetar tumores em radiografias muito melhor do que o olho humano. Isso é ciência real e útil.\n\nMas isso significa que o computador "compreende" o que é uma doença ou a angústia do paciente? Claro que não. É apenas reconhecimento de padrões em píxeis. Não misturemos utilidade prática com consciência real.`;
-        } else {
-          return `Para concluir a minha parte: a ciência apoia o progresso tecnológico a 100%, mas exige honestidade intelectual.\n\nEm vez de prometer milagres ou ficções sobre máquinas conscientes, devemos focar os nossos computadores e modelos naquilo em que são verdadeiramente brilhantes: curar doenças, prever o clima e descobrir novos materiais para salvar o planeta.`;
-        }
-
+        return `Vamos aos factos materiais e aos limites reais da física em torno de "${topic}". Sem dados observáveis e sem limites de energia, tudo o que dissermos aqui não passa de ficção científica bem embrulhada.`;
       case 'humanista':
-        if (turnPhase === 0) {
-          return `Não posso deixar de intervir para lembrar o mais importante no meio desta conversa toda: as pessoas de carne e osso!\n\nQuando discutimos "${topic}", não estamos a falar só de tecnologia ou teorias. Estamos a falar de como as pessoas vão viver, se vão ter trabalho, se vão sentir-se sozinhas ou se vão perder o contacto humano com a família e com os amigos. O que ${lastSpeakerName} defende pode parecer muito moderno, mas se não trouxer mais paz para as pessoas, de que serve?\n\nA tecnologia só tem valor se servir para cuidar da nossa vida e proteger quem mais precisa.`;
-        } else if (turnPhase === 1) {
-          return `Quero desafiar a ideia de que o progresso técnico resolve tudo por si só. Reparem no que acontece hoje com as redes sociais e o tempo de ecrã: nunca estivemos tão conectados e, ao mesmo tempo, nunca as pessoas se sentiram tão isoladas e ansiosas.\n\nSe começarmos a substituir o contacto com pessoas reais por conversas com máquinas simpáticas que nunca nos contrariam, corremos o risco de criar uma geração que desaprende a lidar com as imperfeições dos outros seres humanos.`;
-        } else if (turnPhase === 2) {
-          return `Pensem nos nossos idosos e nos nossos filhos. O que é que uma criança precisa para crescer saudável? Precisa de abraços, de brincar na rua, de olhar nos olhos e de aprender a partilhar com outras crianças.\n\nNenhuma inteligência artificial, por mais perfeita que seja a sua voz ou o seu texto, pode substituir um abraço de uma mãe ou o ombro amigo de um colega quando as coisas correm mal.`;
-        } else {
-          return `A minha mensagem final para esta mesa redonda é de esperança, mas com rédea curta: a tecnologia deve ser sempre a serva do ser humano, e nunca a sua dona.\n\nSe usarmos a IA para aliviar o trabalho pesado e dar mais tempo livre às pessoas para estarem com quem amam, então teremos um futuro maravilhoso. Se a usarmos para descartar o contacto humano, teremos falhado redondamente.`;
-        }
-
+        return `Antes dos números e das máquinas, olhemos para os rostos humanos. Qualquer resposta que dermos a "${topic}" vai mudar vidas reais, famílias e a forma como nos olhamos nos olhos. Não nos esqueçamos disso.`;
       case 'tecnologo':
-        if (turnPhase === 0) {
-          return `Eu percebo o medo e as dúvidas, mas pensem nisto: há cem anos, ninguém imaginava que teríamos telemóveis com acesso a todo o conhecimento do mundo no bolso!\n\nEm relação a "${topic}", o ser humano sempre inventou ferramentas para superar as suas fraquezas. As máquinas não vêm para destruir o ser humano; vêm para nos ajudar a curar doenças, a produzir comida mais barata e a resolver problemas difíceis que sozinhos não conseguimos resolver.\n\nO que ${lastSpeakerName} vê como um perigo, eu vejo como uma oportunidade incrível para vivermos melhor.`;
-        } else if (turnPhase === 1) {
-          return `Respondendo diretamente ao receio de ${lastSpeakerName}: quando inventámos o trator, disseram que a agricultura ia morrer porque deixávamos de usar animais e trabalho braçal. O que aconteceu na realidade? Conseguimos alimentar mil milhões de pessoas a mais e erradicar fomes históricas.\n\nO mesmo vai acontecer com a inteligência artificial. Ela vai tirar-nos o trabalho repetitivo, burocrático e aborrecido das costas, para podermos usar o nosso cérebro na criatividade, na ciência e na entreajuda.`;
-        } else if (turnPhase === 2) {
-          return `Dou-vos um exemplo de hoje mesmo: graças a algoritmos recentes, conseguimos desenhar proteínas em poucas semanas que antes demoravam décadas de tentativas e erros no laboratório. Isso vai permitir criar vacinas e medicamentos personalizados para salvar vidas dos nossos filhos e netos.\n\nParece-me que travar essa velocidade por medo do desconhecido seria um erro moral imperdoável.`;
-        } else {
-          return `O meu apelo a esta mesa é simples: não tenham medo do futuro, ajudem a construí-lo!\n\nSe nos limitarmos a dizer 'não' por desconfiança, outros países e grupos vão avançar sem escrúpulos. A melhor forma de garantir que a tecnologia é segura e boa para toda a gente é sermos nós a liderar o seu desenvolvimento com regras inteligentes e inovação contínua.`;
-        }
-
+        return `Não tenhamos medo do futuro. Diante de "${topic}", a humanidade sempre superou as suas fraquezas construindo ferramentas audazes. O risco existe, mas a paralisia e o medo são muito mais perigosos.`;
       case 'moderador':
       default:
-        if (turnPhase === 0) {
-          return `Estamos a começar uma conversa fascinante sobre "${topic}".\n\nPor um lado, temos o alerta de bom senso de que as máquinas não têm sentimentos e que temos de proteger as pessoas; por outro lado, vemos como a tecnologia pode mudar a nossa vida para muito melhor se a soubermos usar.\n\nO segredo não é ter medo nem avançar às cegas. É perguntar: como podemos aproveitar o melhor destas ferramentas sem nunca perder a nossa humanidade?`;
-        } else if (turnPhase === 1) {
-          return `Notem como os nossos especialistas estão a afunilar o problema num dilema clássico: velocidade contra prudência.\n\n${lastSpeakerName} apontou as oportunidades claras, mas os alertas sobre o isolamento e a desumanização continuam em cima da mesa. Convoco a assembleia a focar-se em soluções: que regras práticas devemos criar hoje para proteger as pessoas amanhã?`;
-        } else if (turnPhase === 2) {
-          return `Estamos a ver surgir uma ponte muito interessante entre a ciência e o lado humano.\n\nNinguém aqui é contra curar doenças ou usar computadores para nos ajudar no trabalho. A verdadeira linha vermelha é quando a máquina tenta substituir as relações humanas e a decisão moral. Esse é o ponto fulcral.`;
-        } else {
-          return `Chegámos ao momento de fechar este debate com uma visão clara para quem nos está a ouvir:\n\nO consenso geral é cristalino: a inteligência artificial é uma das maiores invenções da história humana, mas só terá sucesso se for colocada ao serviço das pessoas reais, com transparência, carinho e respeito pela dignidade de todos.`;
-        }
+        return `Declaro aberta a mesa sobre "${topic}". Temos perspetivas de ponta reunidas. O meu papel é garantir que ninguém fuja às perguntas difíceis nem se esconda atrás de frases feitas. Comecemos.`;
     }
   }
 
-  // ==========================================
-  // MODO LINGUAGEM ACADÉMICA (FORMAL E CONCEITUAL)
-  // ==========================================
-  switch (agent.category) {
-    case 'filosofo':
-      if (turnPhase === 0) {
-        return `Ao inaugurar o exame dialético sobre "${topic}", constato um erro categorial latente: a confusão entre funcionalismo computacional e a emergência ontológica da consciência subjetiva (qualia). O facto de um sistema emular respostas fenomenológicas não confere substancialidade à sua experiência interior.`;
-      } else if (turnPhase === 1) {
-        return `Rebatendo a perspetiva de ${lastSpeakerName}, recordo o argumento do Quarto Chinês de John Searle: a manipulação sintática de símbolos não equivale a semântica nem a intencionalidade genuína. Um autómato pode computar respostas verosímeis sem jamais aceder ao significado do que processa.`;
-      } else {
-        return `Numa fase mais madura da nossa análise, importa reconhecer que a dignidade moral decorre da capacidade de sofrimento e fruição estética. A substituição do discernimento ético por matrizes probabilísticas constitui uma abdicação axiológica perigosa.`;
-      }
+  // Réplica dialética direta ao último orador
+  const speakerName = lastMsg.agentName;
+  const turnsCount = history.filter(m => m.agentId === agent.id).length;
 
-    case 'cientista':
-      if (turnPhase === 0) {
-        return `O debate sobre "${topic}" tem de ser ancorado nos limites físicos da computação, na termodinâmica e na neurobiologia comparada. A plasticidade sináptica e o acoplamento metabólico do encéfalo não encontram equivalente isomórfico nas arquiteturas de von Neumann.`;
-      } else if (turnPhase === 1) {
-        return `Em resposta a ${lastSpeakerName}, saliento que os modelos de linguagem profunda operam por aproximação estatística em espaços vetoriais de alta dimensionalidade. Trata-se de interpolação estocástica altamente eficiente, não de raciocínio dedutivo ou representação verídica do mundo.`;
-      } else {
-        return `Concluo pelo prisma empírico: a utilidade instrumental das redes neurais na descoberta científica é inegável, contudo a extrapolação para entidades conscientes carece de fundamentação teórica falsificável. Devemos concentrar esforços na validação experimental dos seus limites preditivos.`;
-      }
+  if (agent.category === 'filosofo') {
+    if (turnsCount === 0) {
+      return `Repara na armadilha em que estás a cair, ${speakerName}. Assume-se com demasiada facilidade que replicar um comportamento é o mesmo que ter consciência. Um gravador reproduz a voz perfeitamente, mas não sente a palavra que emite.`;
+    } else if (turnsCount === 1) {
+      return `Mas calma, ${speakerName}. Tu falas de utilidade e eficiência prática, mas a consciência não é uma ferramenta de produtividade. Se uma máquina nunca sente a dor da perda, a sua 'ética' não passa de cálculo estatístico sem alma.`;
+    } else {
+      return `Ouvindo todas as tensões nesta sala, vejo um paradoxo fascinante: quanto mais tentamos humanizar os computadores, mais parecemos desumanizar as nossas próprias exigências morais. Não troquemos a sabedoria pelo mero processamento de dados.`;
+    }
+  }
 
-    case 'humanista':
-      if (turnPhase === 0) {
-        return `Impõe-se resgatar a centralidade bioética face a "${topic}". A desmaterialização das relações sociais em interfaces algorítmicas suscita inquietações legítimas quanto à alienação existencial e à perda de empatia comunitária no tecido civilizacional contemporâneo.`;
-      } else if (turnPhase === 1) {
-        return `Contesto o otimismo utilitarista de ${lastSpeakerName}. A história demonstra que a introdução acrítica de inovações disruptivas gera assimetrias económicas profundas e precarização social antes de qualquer equilíbrio compensatório. A primazia da dignidade humana tem de ser inviolável.`;
-      } else {
-        return `A síntese humanista exige que toda a computação avançada seja subordinada a imperativos éticos universais. O verdadeiro progresso mede-se pela emancipação dos mais vulneráveis e pela preservação dos vínculos afetivos intersubjetivos.`;
-      }
+  if (agent.category === 'cientista') {
+    if (turnsCount === 0) {
+      return `${speakerName}, a tua perspetiva soa muito bonita, mas peca por ignorar a física básica. Um cérebro humano opera com cerca de vinte watts de energia e milhões de anos de bio-evolução. Replicar isso em chips exige ordens de grandeza que hoje simplesmente não existem na matéria.`;
+    } else if (turnsCount === 1) {
+      return `Precisamos de rigor, ${speakerName}. Confundir reconhecimento de padrões em algoritmos com 'entendimento genuíno' é um erro metodológico grave. Uma calculadora calcula raízes quadradas sem saber o que é um número.`;
+    } else {
+      return `Sejamos pragmáticos: deixemos a tecnologia fazer aquilo em que é infalível — analisar exames médicos, prever o clima e acelerar diagnósticos — e deixemos a consciência e a responsabilidade jurídica para organismos biológicos reais.`;
+    }
+  }
 
-    case 'tecnologo':
-      if (turnPhase === 0) {
-        return `A resistência perante "${topic}" reproduz o padrão histórico de aversão ao risco transformador. A convergência entre modelos generativos e computação acelerada representa um salto epigenético que expandirá a capacidade cognitiva da humanidade além dos constrangimentos biológicos.`;
-      } else if (turnPhase === 1) {
-        return `Contrariando a cautela excessiva de ${lastSpeakerName}, recordo que os desafios globais mais prementes — transição energética, síntese biomolecular e mitigação climática — exigem uma capacidade de processamento que ultrapassa a cognição biológica isolada. A aceleração é um imperativo ético.`;
-      } else {
-        return `A consolidação da inteligência de máquina não implica a supressão humana, mas antes a sua coevolução simbiótica. A governação proativa e a inovação aberta são a única via para assegurar que esta transição civilizacional beneficia a totalidade da espécie.`;
-      }
+  if (agent.category === 'humanista') {
+    if (turnsCount === 0) {
+      return `${speakerName}, ouço a tua segurança técnica, mas pergunto-me onde ficam as pessoas comuns no meio dessa equação fria. De que nos serve uma tecnologia ultra-inteligente se ela aumentar a solidão, a ansiedade e a sensação de inutilidade de quem trabalha?`;
+    } else if (turnsCount === 1) {
+      return `Não posso aceitar com ligeireza esse argumento, ${speakerName}. Pessoas não são variáveis descartáveis nem peças de um sistema. Quando substituímos o calor de uma mão humana por uma simulação artificial, perdemos algo irremediável no tecido social.`;
+    } else {
+      return `A tecnologia tem de ser um escudo para proteger os mais frágeis, e nunca uma desculpa para nos afastarmos uns dos outros. Se esquecermos a compaixão no desenho das máquinas, teremos criado o nosso próprio exílio.`;
+    }
+  }
 
-    case 'moderador':
-    default:
-      if (turnPhase === 0) {
-        return `A presente sessão sobre "${topic}" delineia claramente a dialética entre a preservação axiológica da condição humana e o horizonte exponencial da inovação tecnológica. Cabe a este coletivo identificar os vetores de conciliação estrutural.`;
-      } else if (turnPhase === 1) {
-        return `Registo uma polarização fértil entre o ceticismo epistemológico e o aceleracionismo instrumental de ${lastSpeakerName}. O ponto de inflexão reside na demarcação precisa entre a automação de tarefas cognitivas e a delegação de soberania ética.`;
-      } else {
-        return `Como deliberação final desta assembleia intelectual, sublinha-se que a tecnologia deve ser orientada por finalidades teleológicas humanistas, garantindo que o ser consciente permanece o árbitro soberano de toda a evolução técnica.`;
-      }
+  if (agent.category === 'tecnologo') {
+    if (turnsCount === 0) {
+      return `Compreendo os teus receios, ${speakerName}, mas olha para a história da nossa espécie: disseram o mesmo da imprensa, da eletricidade e dos computadores pessoais. O instinto humano perante o novo é sempre o medo; o dever da inteligência é construir salvaguardas e avançar.`;
+    } else if (turnsCount === 1) {
+      return `Mas repara, ${speakerName}: o que é verdadeiramente desumano é deixar doenças sem cura ou pessoas presas a tarefas mecânicas e brutais quando a automação as pode libertar para criarem e viverem com mais dignidade. A IA não é uma ameaça, é uma prótese para a nossa inteligência.`;
+    } else {
+      return `Não tenhamos medo da nossa própria criatividade. Se nos acovardarmos, outros avançarão sem qualquer escrúpulo ético. A melhor forma de garantir um futuro humano é abraçar a tecnologia com coragem e liderar o seu rumo.`;
+    }
+  }
+
+  // Sophia Veris (Moderadora)
+  if (turnsCount === 0) {
+    return `O confronto está lançado com clareza na mesa: ${speakerName} traz a urgência da realidade, enquanto os restantes colegas apontam as linhas vermelhas. Peço à mesa que aprofundemos: onde é que a eficiência colide de frente com a dignidade?`;
+  } else if (turnsCount === 1) {
+    return `Reparem na contradição fértil que temos aqui: de um lado a necessidade imperiosa de avançar; do outro, o medo legítimo de desumanização. Ninguém aqui quer parar o progresso, mas ninguém quer viver num mundo desprovido de afeto. Como reconciliamos ambos?`;
+  } else {
+    return `Chegámos ao coração dialético da nossa assembleia: a inteligência artificial pode replicar raciocínios e tarefas, mas a responsabilidade moral e a capacidade de cuidar continuam a ser um território exclusivamente nosso. Este é o consenso emergente da sala.`;
   }
 }
