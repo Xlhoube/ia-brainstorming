@@ -71,21 +71,33 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
 
         {/* Mensagens do Debate */}
         {messages.length === 0 ? (
-          <div className="text-center py-16 px-4 space-y-4">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-indigo-950/40 border border-indigo-800/40 flex items-center justify-center text-2xl text-indigo-400 shadow-lg">
-              <Brain className="w-8 h-8 animate-pulse text-indigo-400" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-base font-semibold text-slate-200">
-                A Mesa de Debate está Pronta
-              </h3>
-              <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
-                Fala diretamente para a sala através do campo inferior ou clica numa saudação rápida para os especialistas te acolherem e responderem em tempo real:
-              </p>
+          <div className="text-center py-8 px-4 space-y-6">
+            {/* Banner Cinemático do Painel de Especialistas */}
+            <div className="relative max-w-2xl mx-auto rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 group">
+              <div className="relative aspect-[21/9] w-full overflow-hidden">
+                <img
+                  src="/avatars/painel_especialistas.png"
+                  alt="Painel de Especialistas da Mesa Redonda"
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 brightness-95"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-950/80 border border-slate-700/60 text-[10px] text-indigo-300 font-semibold backdrop-blur-sm">
+                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  <span>Painel de Especialistas Convocado</span>
+                </div>
+              </div>
+              <div className="p-4 bg-slate-950/90 text-left border-t border-slate-800/80">
+                <h3 className="text-sm font-bold text-white tracking-tight">
+                  Mesa Redonda Pronta para Diálogo
+                </h3>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  Os 5 especialistas aguardam a tua questão ou uma saudação direta. Podes falar pelo campo inferior ou usar uma das saudações abaixo:
+                </p>
+              </div>
             </div>
 
             {onQuickSpeak && (
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                 <button
                   onClick={() => onQuickSpeak('Boa noite a todos!')}
                   className="px-3.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-indigo-950/60 border border-slate-700/70 hover:border-indigo-500/60 text-xs text-indigo-300 font-medium transition-all shadow-sm hover:scale-[1.03]"
@@ -125,13 +137,27 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-md border"
+                        className="relative w-11 h-11 rounded-xl flex items-center justify-center text-xl shadow-md border overflow-hidden flex-shrink-0"
                         style={{
                           backgroundColor: isHuman ? '#1e3a8a' : '#0f172a',
                           borderColor: msg.accentColor || '#3b82f6',
                         }}
                       >
-                        {isHuman ? <User className="w-5 h-5 text-blue-200" /> : msg.avatar}
+                        {isHuman ? (
+                          <User className="w-5 h-5 text-blue-200" />
+                        ) : msg.image ? (
+                          <img
+                            src={msg.image}
+                            alt={msg.agentName}
+                            className="w-full h-full object-cover"
+                            onError={e => {
+                              // Se falhar o carregamento, oculta a imagem e deixa o avatar de fallback
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <span>{msg.avatar}</span>
+                        )}
                       </div>
 
                       <div>

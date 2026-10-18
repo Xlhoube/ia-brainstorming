@@ -7,6 +7,7 @@ export const DEFAULT_AGENTS: Agent[] = [
     roleTitle: 'O Filósofo Cético',
     category: 'filosofo',
     avatar: '🏛️',
+    image: '/avatars/01_Dr_Marcus_Vance.png',
     accentColor: '#8b5cf6', // Violet
     badgeColor: 'bg-purple-950/70 text-purple-300 border-purple-800/60',
     model: 'anthropic/claude-3.5-sonnet',
@@ -26,6 +27,7 @@ Regras fundamentais de intervenção:
     roleTitle: 'A Cientista Empírica',
     category: 'cientista',
     avatar: '🔬',
+    image: '/avatars/02_Dra_Helena_Rostova.png',
     accentColor: '#06b6d4', // Cyan
     badgeColor: 'bg-cyan-950/70 text-cyan-300 border-cyan-800/60',
     model: 'deepseek/deepseek-chat',
@@ -45,6 +47,7 @@ Regras fundamentais de intervenção:
     roleTitle: 'A Humanista & Bioética',
     category: 'humanista',
     avatar: '🌱',
+    image: '/avatars/03_Aura_Chen.png',
     accentColor: '#10b981', // Emerald
     badgeColor: 'bg-emerald-950/70 text-emerald-300 border-emerald-800/60',
     model: 'openai/gpt-4o',
@@ -64,6 +67,7 @@ Regras fundamentais de intervenção:
     roleTitle: 'O Tecnólogo Aceleracionista',
     category: 'tecnologo',
     avatar: '⚡',
+    image: '/avatars/04_Kaelen_Voss.png',
     accentColor: '#f59e0b', // Amber
     badgeColor: 'bg-amber-950/70 text-amber-300 border-amber-800/60',
     model: 'meta-llama/llama-3.3-70b-instruct',
@@ -83,6 +87,7 @@ Regras fundamentais de intervenção:
     roleTitle: 'A Moderadora & Sintetizadora',
     category: 'moderador',
     avatar: '⚖️',
+    image: '/avatars/05_Sophia_Veris.png',
     accentColor: '#3b82f6', // Blue
     badgeColor: 'bg-blue-950/70 text-blue-300 border-blue-800/60',
     model: 'google/gemini-2.0-flash-001',

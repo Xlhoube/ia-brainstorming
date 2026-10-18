@@ -16,6 +16,7 @@ export interface Agent {
   roleTitle: string;
   category: AgentRole;
   avatar: string;
+  image?: string;
   accentColor: string;
   badgeColor: string;
   systemPrompt: string;
@@ -30,6 +31,7 @@ export interface DebateMessage {
   agentName: string;
   agentRole: string;
   avatar: string;
+  image?: string;
   accentColor: string;
   content: string;
   round: number;

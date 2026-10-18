@@ -26,7 +26,21 @@ export const EditorialReport: React.FC<EditorialReportProps> = ({
 }) => {
   if (!synthesis) return null;
 
-  const participants = Array.from(new Set(messages.map(m => `${m.agentName} (${m.agentRole})`)));
+  const uniqueSpeakers = Array.from(
+    new Map(
+      messages.map(m => [
+        m.agentId,
+        {
+          name: m.agentName,
+          role: m.agentRole,
+          image: m.image,
+          avatar: m.avatar,
+          isHuman: m.isHuman,
+        },
+      ])
+    ).values()
+  );
+
   const currentDate = new Date().toLocaleDateString('pt-PT', {
     day: 'numeric',
     month: 'long',
@@ -57,21 +71,34 @@ export const EditorialReport: React.FC<EditorialReportProps> = ({
             <strong>Intervenções Analisadas:</strong> {messages.length}
           </div>
           <div>
-            <strong>Oradores Participantes:</strong> {participants.length}
+            <strong>Oradores Participantes:</strong> {uniqueSpeakers.length}
           </div>
         </div>
       </header>
 
       {/* Participantes na Assembleia */}
       <section className="mb-8 p-4 bg-slate-50 border border-slate-200 rounded-lg font-sans text-xs">
-        <h3 className="font-bold uppercase tracking-wider text-slate-800 mb-2">
-          Painel de Especialistas & Modelos de IA
+        <h3 className="font-bold uppercase tracking-wider text-slate-800 mb-3">
+          Painel de Especialistas & Intervenientes
         </h3>
-        <div className="grid grid-cols-2 gap-2 text-slate-700">
-          {participants.map((p, idx) => (
-            <div key={idx} className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-900" />
-              <span>{p}</span>
+        <div className="grid grid-cols-2 gap-3 text-slate-800">
+          {uniqueSpeakers.map((speaker, idx) => (
+            <div key={idx} className="flex items-center gap-2.5">
+              {speaker.image ? (
+                <img
+                  src={speaker.image}
+                  alt={speaker.name}
+                  className="w-7 h-7 rounded-full object-cover border border-slate-300"
+                />
+              ) : (
+                <span className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-700">
+                  {speaker.avatar || '👤'}
+                </span>
+              )}
+              <div>
+                <p className="font-bold text-slate-900">{speaker.name}</p>
+                <p className="text-[10px] text-slate-600">{speaker.role}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -169,7 +196,7 @@ export const EditorialReport: React.FC<EditorialReportProps> = ({
 
       {/* Rodapé Editorial */}
       <footer className="mt-12 pt-4 border-t border-slate-300 text-center text-[10px] font-sans text-slate-500 flex justify-between items-center">
-        <span>Produzido pelo sistema IA Brain Storming • Versão v0.4.0</span>
+        <span>Produzido pelo sistema IA Brain Storming • Versão v0.6.0</span>
         <span>Documento certificado para consulta e arquivo</span>
       </footer>
     </div>

@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
       agentName: agent.name,
       agentRole: agent.roleTitle,
       avatar: agent.avatar,
+      image: agent.image,
       accentColor: agent.accentColor,
       content,
       round: (messages && messages.length > 0 ? messages[messages.length - 1].round : 1),

@@ -75,7 +75,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#050814] text-slate-100 relative">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#050814] text-slate-100 relative">
       {/* Barra de Navegação com Controlos de Áudio, Tom e Histórico */}
       <Navbar
         onOpenSettings={() => setIsSettingsModalOpen(true)}

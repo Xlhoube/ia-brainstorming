@@ -3,13 +3,14 @@
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
 - **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e soluções globais.
-- **Versão:** v0.5.0
+- **Versão:** v0.6.0
 - **Data da Última Atualização:** 2026-10-18
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
 - **Ambiente de Execução e Deploy:** Web Browser (Desktop e Telemóvel responsivo) / Vercel
 - **Stack:**
   - **Frontend / Fullstack:** Next.js 16 (App Router, Turbopack, TypeScript, React 19) + Tailwind CSS v4.
+  - **Avatares Fotográficos & Painel Cinemático:** Integração completa dos 5 retratos fotográficos em alta definição dos especialistas (`/avatars/01_Dr_Marcus_Vance.png`, `02_Dra_Helena_Rostova.png`, `03_Aura_Chen.png`, `04_Kaelen_Voss.png`, `05_Sophia_Veris.png`) na barra fixa superior, nas mensagens da timeline e no relatório editorial. Inclui ainda o banner cinemático de equipa (`/avatars/painel_especialistas.png`) tanto no ecrã de boas-vindas como num modal dedicado de alta resolução.
   - **Camada de Inferência de IA:** OpenRouter API com suporte a múltiplos modelos (Claude 3.5 Sonnet, GPT-4o, DeepSeek V3, Llama 3.3 70B, Gemini 2.0 Flash) e motor dialético dinâmico sem repetições.
   - **Entrada & Diálogo Direto com a Sala:** O utilizador pode falar diretamente para a sala em qualquer momento (ex.: dizer *"Boa noite a todos"* ou colocar uma questão imediata), despoletando a resposta audível e acolhedora em tempo real dos especialistas presentes.
   - **Motor Anti-Repetição por Fases:** Progressão estruturada de argumentos (Abertura -> Confronto Direto -> Casos Práticos -> Convergência e Síntese) que elimina qualquer duplicação de frases ou ideias nas rondas subsequentes.
@@ -32,10 +33,17 @@
 - **[2026-10-18] ADR-008:** Layout editorial white-paper (`EditorialReport`) acoplado a `@media print` para exportação nativa em PDF com tipografia serifada, duas colunas e transcrição integral.
 - **[2026-10-18] ADR-009:** Motor Dialético Multi-Fase sem repetições.
 - **[2026-10-18] ADR-010:** Interação Direta Humana na Sala: Qualquer fala humana (incluindo cumprimentos como "Boa noite") ativa a sala e gera reação imediata e falada por parte dos agentes.
+- **[2026-10-18] ADR-011:** Avatares Fotográficos Realistas e Painel Cinemático: Otimização e carregamento dos retratos dos agentes e do retrato de equipa a partir de `public/avatars/`, com layout de ecrã fixo (`h-screen overflow-hidden`) para manter os rostos dos especialistas sempre em foco.
 
 ---
 
-## ✅ O Que Já Funciona (v0.5.0)
+## ✅ O Que Já Funciona (v0.6.0)
+- [x] Avatares fotográficos em alta definição integrados na barra superior de seleção de agentes.
+- [x] Modal cinemático expansível com a fotografia do Conselho de Especialistas e mini-perfis detalhados.
+- [x] Banner cinemático convocatório no ecrã de acolhimento inicial da sala.
+- [x] Retratos reais dos oradores nos cartões de cada mensagem do debate dialético.
+- [x] Inclusão das fotos dos intervenientes na secção de oradores do relatório editorial para PDF.
+- [x] Layout de ecrã fixo com scroll independente na timeline de mensagens.
 - [x] Diálogo direto na sala: dizer "Boa noite" ou colocar qualquer questão ativa de imediato a resposta falada da Moderadora e dos especialistas.
 - [x] Botões de arranque e saudação rápida na sala vazia ("Boa noite a todos!", "O que acham da IA?", etc.).
 - [x] Eliminação total de diálogo repetido com progressão de 4 fases por ronda.

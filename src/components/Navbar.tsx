@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               IA Brain Storming
             </h1>
             <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              Arena v0.4.0
+              Arena v0.6.0
             </span>
           </div>
           <p className="text-[11px] text-slate-400 hidden sm:block">
