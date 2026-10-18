@@ -3,11 +3,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Agent, DebateMessage, DebateState } from '@/types/debate';
 import { DEFAULT_AGENTS } from '@/lib/constants/agents';
+import { speechService } from '@/lib/speech/speechService';
+import { LocalDatabase, SavedDebateSession } from '@/lib/db/localDatabase';
 
 const STORAGE_KEY_API = 'ia_brainstorming_openrouter_key';
 const STORAGE_KEY_AGENTS = 'ia_brainstorming_selected_agents';
 
 export function useDebate() {
+  const [sessionId, setSessionId] = useState<string>('session-' + Date.now());
   const [agents, setAgents] = useState<Agent[]>(DEFAULT_AGENTS);
   const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([
     'dr-marcus-vance',
@@ -33,15 +36,25 @@ export function useDebate() {
   const [isSynthesizing, setIsSynthesizing] = useState<boolean>(false);
   const [synthesisResult, setSynthesisResult] = useState<any | null>(null);
 
+  // Estados de Áudio TTS
+  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(true);
+  const [isSpeakingAudio, setIsSpeakingAudio] = useState<boolean>(false);
+
   const statusRef = useRef(status);
   statusRef.current = status;
 
   const currentSpeakerIndexRef = useRef(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Carregar API Key e Agentes do LocalStorage
+  // Inicialização e subscrição de áudio
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setIsAudioEnabled(speechService.getAudioEnabled());
+
+      const unsubscribe = speechService.subscribe((speaking) => {
+        setIsSpeakingAudio(speaking);
+      });
+
       const savedKey = localStorage.getItem(STORAGE_KEY_API);
       if (savedKey) setApiKey(savedKey);
 
@@ -56,8 +69,41 @@ export function useDebate() {
           // Manter predefinições
         }
       }
+
+      return () => {
+        unsubscribe();
+        speechService.stop();
+      };
     }
   }, []);
+
+  // Gravação automática em base de dados local sempre que há nova mensagem ou síntese
+  useEffect(() => {
+    if (messages.length > 0) {
+      LocalDatabase.saveSession({
+        id: sessionId,
+        topic,
+        topicDescription,
+        messages,
+        selectedAgentIds,
+        currentRound,
+        maxRounds,
+        synthesisResult,
+        createdAt: parseInt(sessionId.replace('session-', '')) || Date.now(),
+        updatedAt: Date.now(),
+      });
+    }
+  }, [messages, synthesisResult, sessionId, topic, topicDescription, selectedAgentIds, currentRound, maxRounds]);
+
+  const toggleAudio = () => {
+    const nextState = !isAudioEnabled;
+    setIsAudioEnabled(nextState);
+    speechService.setAudioEnabled(nextState);
+  };
+
+  const speakSingleMessage = (agentId: string, text: string) => {
+    speechService.speak(agentId, text);
+  };
 
   const saveApiKey = (key: string) => {
     setApiKey(key);
@@ -71,7 +117,7 @@ export function useDebate() {
     setSelectedAgentIds(prev => {
       let updated: string[];
       if (prev.includes(agentId)) {
-        if (prev.length <= 2) return prev; // Mínimo 2 agentes para debate
+        if (prev.length <= 2) return prev;
         updated = prev.filter(id => id !== agentId);
       } else {
         updated = [...prev, agentId];
@@ -83,13 +129,12 @@ export function useDebate() {
     });
   };
 
-  // Função atómica para gerar o próximo turno
+  // Turno atómico
   const runNextTurn = useCallback(async () => {
     if (isGenerating) return;
     const activeAgents = agents.filter(a => selectedAgentIds.includes(a.id));
     if (activeAgents.length === 0) return;
 
-    // Determinar próximo orador
     const nextAgentIndex = currentSpeakerIndexRef.current % activeAgents.length;
     const currentAgent = activeAgents[nextAgentIndex];
     currentSpeakerIndexRef.current += 1;
@@ -115,7 +160,9 @@ export function useDebate() {
       if (data.success && data.message) {
         setMessages(prev => [...prev, data.message]);
 
-        // Verificar se completou uma ronda inteira
+        // Falar a mensagem sintetizada através do Web Speech Synthesis
+        speechService.speak(currentAgent.id, data.message.content);
+
         if (currentSpeakerIndexRef.current % activeAgents.length === 0) {
           setCurrentRound(r => {
             const nextR = r + 1;
@@ -134,7 +181,7 @@ export function useDebate() {
     }
   }, [agents, selectedAgentIds, isGenerating, topic, topicDescription, messages, apiKey, maxRounds]);
 
-  // Loop automático quando o estado está 'running'
+  // Ciclo automático
   useEffect(() => {
     if (status === 'running' && !isGenerating && !activeSpeakerId) {
       timeoutRef.current = setTimeout(() => {
@@ -152,6 +199,8 @@ export function useDebate() {
   const startDebate = (newTopic?: string, newDescription?: string) => {
     if (newTopic) setTopic(newTopic);
     if (newDescription) setTopicDescription(newDescription);
+    const newId = 'session-' + Date.now();
+    setSessionId(newId);
     setMessages([]);
     setCurrentRound(1);
     currentSpeakerIndexRef.current = 0;
@@ -161,6 +210,7 @@ export function useDebate() {
 
   const pauseDebate = () => {
     setStatus('paused');
+    speechService.stop();
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
   };
 
@@ -170,12 +220,28 @@ export function useDebate() {
 
   const resetDebate = () => {
     setStatus('idle');
+    setSessionId('session-' + Date.now());
     setMessages([]);
     setCurrentRound(1);
     currentSpeakerIndexRef.current = 0;
     setActiveSpeakerId(null);
     setSynthesisResult(null);
+    speechService.stop();
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  };
+
+  const loadSavedSession = (saved: SavedDebateSession) => {
+    speechService.stop();
+    setStatus('paused');
+    setSessionId(saved.id);
+    setTopic(saved.topic);
+    setTopicDescription(saved.topicDescription || '');
+    setMessages(saved.messages || []);
+    setSelectedAgentIds(saved.selectedAgentIds || selectedAgentIds);
+    setCurrentRound(saved.currentRound || 1);
+    setMaxRounds(saved.maxRounds || 4);
+    setSynthesisResult(saved.synthesisResult || null);
+    currentSpeakerIndexRef.current = (saved.messages || []).length;
   };
 
   const injectHumanIntervention = (content: string) => {
@@ -224,6 +290,7 @@ export function useDebate() {
   };
 
   return {
+    sessionId,
     agents,
     selectedAgentIds,
     toggleAgent,
@@ -245,10 +312,15 @@ export function useDebate() {
     isSynthesizing,
     synthesisResult,
     setSynthesisResult,
+    isAudioEnabled,
+    isSpeakingAudio,
+    toggleAudio,
+    speakSingleMessage,
     startDebate,
     pauseDebate,
     resumeDebate,
     resetDebate,
+    loadSavedSession,
     runNextTurn,
     injectHumanIntervention,
     synthesizeDebate,

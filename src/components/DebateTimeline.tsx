@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { DebateMessage } from '@/types/debate';
-import { Copy, Check, MessageSquareQuote, Sparkles, User, Brain } from 'lucide-react';
+import { Copy, Check, Volume2, User, Brain, Sparkles } from 'lucide-react';
 
 interface DebateTimelineProps {
   messages: DebateMessage[];
@@ -11,6 +11,7 @@ interface DebateTimelineProps {
   isGenerating: boolean;
   activeSpeakerName?: string;
   onOpenTopics: () => void;
+  onSpeakMessage?: (agentId: string, text: string) => void;
 }
 
 export const DebateTimeline: React.FC<DebateTimelineProps> = ({
@@ -20,6 +21,7 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
   isGenerating,
   activeSpeakerName,
   onOpenTopics,
+  onSpeakMessage,
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
@@ -76,7 +78,7 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                 A Mesa de Debate está Pronta
               </h3>
               <p className="text-xs text-slate-400 max-w-md mx-auto">
-                Clica em <strong className="text-indigo-300 font-semibold">Iniciar Debate</strong> na barra inferior para os agentes começarem a confrontar ideias e argumentos.
+                Clica em <strong className="text-indigo-300 font-semibold">Iniciar Debate</strong> na barra inferior para os agentes começarem a confrontar ideias com voz sintetizada.
               </p>
             </div>
           </div>
@@ -129,17 +131,29 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => handleCopy(msg.id, msg.content)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
-                      title="Copiar citação"
-                    >
-                      {copiedId === msg.id ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
+                    <div className="flex items-center gap-1">
+                      {onSpeakMessage && !isHuman && (
+                        <button
+                          onClick={() => onSpeakMessage(msg.agentId, msg.content)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-slate-400 hover:text-indigo-300 hover:bg-slate-800"
+                          title="Ouvir novamente esta intervenção"
+                        >
+                          <Volume2 className="w-3.5 h-3.5" />
+                        </button>
                       )}
-                    </button>
+
+                      <button
+                        onClick={() => handleCopy(msg.id, msg.content)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                        title="Copiar citação"
+                      >
+                        {copiedId === msg.id ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Conteúdo com Formatação Limpa de Parágrafos */}

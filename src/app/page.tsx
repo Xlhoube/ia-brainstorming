@@ -9,6 +9,7 @@ import { ControlsBar } from '@/components/ControlsBar';
 import { TopicModal } from '@/components/TopicModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { SynthesisModal } from '@/components/SynthesisModal';
+import { HistoryModal } from '@/components/HistoryModal';
 
 export default function HomePage() {
   const {
@@ -29,10 +30,15 @@ export default function HomePage() {
     isGenerating,
     isSynthesizing,
     synthesisResult,
+    isAudioEnabled,
+    isSpeakingAudio,
+    toggleAudio,
+    speakSingleMessage,
     startDebate,
     pauseDebate,
     resumeDebate,
     resetDebate,
+    loadSavedSession,
     runNextTurn,
     injectHumanIntervention,
     synthesizeDebate,
@@ -41,6 +47,7 @@ export default function HomePage() {
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isSynthesisModalOpen, setIsSynthesisModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   // Agente ativo atual
   const activeAgent = agents.find(a => a.id === activeSpeakerId);
@@ -63,11 +70,15 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#050814] text-slate-100 relative">
-      {/* Barra de Navegação */}
+      {/* Barra de Navegação com Controlos de Áudio e Histórico */}
       <Navbar
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         onOpenTopics={() => setIsTopicModalOpen(true)}
+        onOpenHistory={() => setIsHistoryModalOpen(true)}
         onReset={resetDebate}
+        isAudioEnabled={isAudioEnabled}
+        isSpeakingAudio={isSpeakingAudio}
+        onToggleAudio={toggleAudio}
         apiKey={apiKey}
         status={status}
         currentRound={currentRound}
@@ -91,6 +102,7 @@ export default function HomePage() {
         isGenerating={isGenerating}
         activeSpeakerName={activeAgent?.name}
         onOpenTopics={() => setIsTopicModalOpen(true)}
+        onSpeakMessage={speakSingleMessage}
       />
 
       {/* Barra Inferior de Controlos e Intervenção Humana */}
@@ -127,6 +139,12 @@ export default function HomePage() {
         onClose={() => setIsSynthesisModalOpen(false)}
         topic={topic}
         synthesis={synthesisResult}
+      />
+
+      <HistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        onLoadSession={loadSavedSession}
       />
     </div>
   );

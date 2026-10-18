@@ -1,12 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, Key, BookOpen, RotateCcw, BrainCircuit } from 'lucide-react';
+import { Volume2, VolumeX, History, Key, BookOpen, RotateCcw, BrainCircuit } from 'lucide-react';
 
 interface NavbarProps {
   onOpenSettings: () => void;
   onOpenTopics: () => void;
+  onOpenHistory: () => void;
   onReset: () => void;
+  isAudioEnabled: boolean;
+  isSpeakingAudio: boolean;
+  onToggleAudio: () => void;
   apiKey: string;
   status: string;
   currentRound: number;
@@ -16,7 +20,11 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenSettings,
   onOpenTopics,
+  onOpenHistory,
   onReset,
+  isAudioEnabled,
+  isSpeakingAudio,
+  onToggleAudio,
   apiKey,
   status,
   currentRound,
@@ -41,17 +49,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               IA Brain Storming
             </h1>
             <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              Arena v0.1.0
+              Arena v0.3.0
             </span>
           </div>
           <p className="text-[11px] text-slate-400 hidden sm:block">
-            Diálogo Dialético Multi-Agente & Síntese de Consciência
+            Voz TTS Nativa • Base de Dados Local • Multi-Agentes
           </p>
         </div>
       </div>
 
-      {/* Indicadores Centrais */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      {/* Indicadores Centrais & Ações */}
+      <div className="flex items-center gap-2 sm:gap-2.5">
         {status !== 'idle' && (
           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 text-xs">
             <span className="text-slate-400">Ronda</span>
@@ -63,6 +71,39 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         )}
 
+        {/* Controlo de Áudio TTS */}
+        <button
+          onClick={onToggleAudio}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+            isAudioEnabled
+              ? isSpeakingAudio
+                ? 'bg-indigo-900/40 border-indigo-500 text-indigo-300 ring-2 ring-indigo-500/40 animate-pulse'
+                : 'bg-slate-900/80 border-slate-700/60 text-slate-200 hover:text-white hover:bg-slate-800'
+              : 'bg-slate-950/60 border-slate-800 text-slate-500 hover:text-slate-400'
+          }`}
+          title={isAudioEnabled ? (isSpeakingAudio ? 'A falar... Clica para silenciar' : 'Voz Ativa (Clica para silenciar)') : 'Voz Desativada (Clica para ativar)'}
+        >
+          {isAudioEnabled ? (
+            <Volume2 className={`w-3.5 h-3.5 ${isSpeakingAudio ? 'text-indigo-400 animate-bounce' : 'text-blue-400'}`} />
+          ) : (
+            <VolumeX className="w-3.5 h-3.5 text-slate-500" />
+          )}
+          <span className="hidden md:inline">
+            {isAudioEnabled ? (isSpeakingAudio ? 'A Falar...' : 'Voz Ligada') : 'Mudo'}
+          </span>
+        </button>
+
+        {/* Histórico Local */}
+        <button
+          onClick={onOpenHistory}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/60 transition-all text-xs font-medium shadow-sm"
+          title="Ver Debates Guardados na Base de Dados Local"
+        >
+          <History className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="hidden sm:inline">Histórico</span>
+        </button>
+
+        {/* Temas */}
         <button
           onClick={onOpenTopics}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/60 transition-all text-xs font-medium shadow-sm"
@@ -72,17 +113,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="hidden sm:inline">Temas</span>
         </button>
 
+        {/* Definições de API */}
         <button
           onClick={onOpenSettings}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all shadow-sm ${
             apiKey
               ? 'bg-emerald-950/30 border-emerald-800/60 text-emerald-300 hover:bg-emerald-950/50'
-              : 'bg-indigo-950/40 border-indigo-700/50 text-indigo-300 hover:bg-indigo-900/40 animate-pulse'
+              : 'bg-indigo-950/40 border-indigo-700/50 text-indigo-300 hover:bg-indigo-900/40'
           }`}
           title="Configuração de Motores & OpenRouter"
         >
           <Key className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">
+          <span className="hidden lg:inline">
             {apiKey ? 'API Conectada' : 'Ligar OpenRouter'}
           </span>
         </button>
