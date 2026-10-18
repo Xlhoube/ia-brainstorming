@@ -31,33 +31,33 @@ export const TopicModal: React.FC<TopicModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] max-h-[90dvh]">
         {/* Cabeçalho */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-800/60 flex items-center justify-center text-indigo-400">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-800/60 flex items-center justify-center text-indigo-400 flex-shrink-0">
               <BookOpen className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-base font-bold text-white">
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-bold text-white truncate">
                 Temas & Dilemas de Brainstorming
               </h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[10px] sm:text-[11px] text-slate-400 truncate">
                 Seleciona uma questão existencial ou cria o teu próprio tema
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors flex-shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Conteúdo com Scroll */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* Criar Tópico Personalizado */}
           <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-3">
             <div className="flex items-center gap-2">

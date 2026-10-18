@@ -32,33 +32,33 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] max-h-[90dvh]">
         {/* Cabeçalho */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-950/80 border border-blue-800/60 flex items-center justify-center text-blue-400">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-blue-950/80 border border-blue-800/60 flex items-center justify-center text-blue-400 flex-shrink-0">
               <Key className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-base font-bold text-white">
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-bold text-white truncate">
                 Configuração de Motores de IA
               </h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[10px] sm:text-[11px] text-slate-400 truncate">
                 OpenRouter API & Privacidade Local-First
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors flex-shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Corpo */}
-        <form onSubmit={handleSave} className="p-6 space-y-5">
+        <form onSubmit={handleSave} className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-200 flex items-center justify-between">
               <span>Chave de API OpenRouter</span>

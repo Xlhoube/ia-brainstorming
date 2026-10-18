@@ -74,46 +74,46 @@ ${synthesis.overallVerdict}
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in no-print">
-      <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Cabeçalho */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-950/80 border border-emerald-800/60 flex items-center justify-center text-emerald-400">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in no-print">
+      <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] max-h-[90dvh]">
+        {/* Cabeçalho Responsivo */}
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/60">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-emerald-950/80 border border-emerald-800/60 flex items-center justify-center text-emerald-400 flex-shrink-0">
               <FileText className="w-4 h-4" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h3 className="text-sm sm:text-base font-bold text-white truncate">
                   Síntese do Debate & Relatório
                 </h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-indigo-300 border border-slate-700">
+                <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded-full bg-slate-800 text-indigo-300 border border-slate-700">
                   {analyzedCount} opiniões
                 </span>
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${isSimple ? 'bg-amber-950/50 text-amber-300 border-amber-800/50' : 'bg-purple-950/50 text-purple-300 border-purple-800/50'}`}>
+                <span className={`text-[9px] sm:text-[10px] font-semibold px-1.5 sm:px-2 py-0.5 rounded-full border ${isSimple ? 'bg-amber-950/50 text-amber-300 border-amber-800/50' : 'bg-purple-950/50 text-purple-300 border-purple-800/50'}`}>
                   {isSimple ? 'Linguagem Simples' : 'Académica'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 truncate max-w-md">
+              <p className="text-[10px] sm:text-[11px] text-slate-400 truncate max-w-md">
                 Atualizada às {synthesis.updatedAt || 'tempo real'} • {topic}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end flex-shrink-0">
             {/* Botão de Exportação em PDF com Design Editorial */}
             <button
               onClick={handlePrintPDF}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-md transition-all"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-[11px] sm:text-xs font-semibold shadow-md transition-all"
               title="Exportar Relatório em PDF Editorial de Alta Fidelidade"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Exportar PDF</span>
+              <span>PDF</span>
             </button>
 
             <button
               onClick={onRefreshSynthesis}
               disabled={isSynthesizing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/50 hover:bg-indigo-900/50 border border-indigo-700/50 text-indigo-300 text-xs font-semibold transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-indigo-950/50 hover:bg-indigo-900/50 border border-indigo-700/50 text-indigo-300 text-[11px] sm:text-xs font-semibold transition-all shadow-sm"
               title="Recalcular síntese com as últimas mensagens do debate"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSynthesizing ? 'animate-spin' : ''}`} />
@@ -122,7 +122,7 @@ ${synthesis.overallVerdict}
 
             <button
               onClick={handleCopyMarkdown}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] sm:text-xs font-medium transition-colors"
               title="Copiar em Markdown"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}

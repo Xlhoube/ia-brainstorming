@@ -3,11 +3,11 @@
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
 - **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e soluções globais.
-- **Versão:** v0.9.0
+- **Versão:** v0.9.1
 - **Data da Última Atualização:** 2026-10-18
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
-- **Ambiente de Execução e Deploy:** Web Browser (Desktop e Telemóvel responsivo) / Vercel
+- **Ambiente de Execução e Deploy:** Web Browser (Desktop, Tablet e Telemóvel com layout responsivo 100dvh) / Vercel
 - **Stack:**
   - **Frontend / Fullstack:** Next.js 16 (App Router, Turbopack, TypeScript, React 19) + Tailwind CSS v4.
   - **Backend & Cloud Database:** Appwrite Cloud (Projeto `6ad53e750013ac9f2271`, Endpoint `https://fra.cloud.appwrite.io/v1`) via SDK oficial `appwrite` com arquitetura resiliente híbrida *Local-First + Cloud Sync*.
@@ -38,10 +38,17 @@
 - **[2026-10-18] ADR-012:** Psiques e Personalidades Dialéticas: Atribuição de temperamento, traços dominantes e gatilhos emocionais aos especialistas.
 - **[2026-10-18] ADR-013:** Integração Appwrite Cloud (Project ID: `6ad53e750013ac9f2271`): Arquitetura híbrida de persistência onde cada intervenção e debate é guardado instantaneamente no cliente e sincronizado com o Appwrite Cloud.
 - **[2026-10-18] ADR-014:** Motor Dialético Orgânico e Cascata Resiliente de Modelos Livres: Fim do débito de textos mecânicos e teses académicas. Intervenções limitadas a réplicas afiadas de 50-90 palavras com interpelação direta pelo nome e confronto das premissas precedentes.
+- **[2026-10-18] ADR-015:** Adaptação Responsiva Multi-Ecrã e Otimização para Dispositivos Móveis: Viewport dinâmico com `100dvh` prevenindo corte por barras de navegação em browsers mobile; transição do painel de agentes para carrossel horizontal suave com snap em ecrãs móveis (preservando o espaço vertical da conversa); botões compactos e interações táteis nativas.
 
 ---
 
-## ✅ O Que Já Funciona (v0.9.0)
+## ✅ O Que Já Funciona (v0.9.1)
+- [x] Adaptação de ecrã integral: suporte perfeito a Mobile (375px+), Tablet (768px+) e Desktop/Ultra-wide (1536px+).
+- [x] Painel de especialistas móvel em carrossel horizontal com snap e ocupação vertical reduzida.
+- [x] Navbar e Controlos inferiores responsivos com ícones e textos adaptativos para evitar quebras ou sobreposições.
+- [x] Visibilidade tátil dos botões de áudio e cópia nos cartões de debate (visíveis por defeito em ecrãs móveis e via hover em desktop).
+- [x] Suporte a `100dvh` para prevenir corte das barras de controlo por menus de navegadores de telemóvel.
+- [x] Modais responsivos (`SynthesisModal`, `TopicModal`, `HistoryModal`, `SettingsModal`, `EditorialReport`) com scroll vertical independente e cabeçalhos flexíveis.
 - [x] Motor de diálogo dialético orgânico: intervenções ágeis (50-90 palavras) em formato de réplica viva, sem palestras ou discursos estáticos.
 - [x] Escuta ativa nos agentes: cada orador responde especificamente ao que o orador anterior acabou de defender, citando o nome e desmontando o argumento.
 - [x] Cascata inteligente de modelos OpenRouter com fallback automático para modelos topo de gama gratuitos quando há restrição de saldo ou erro 402/404.

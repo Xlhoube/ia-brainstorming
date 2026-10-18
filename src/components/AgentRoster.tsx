@@ -28,11 +28,11 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
 
   return (
     <>
-      <div className="w-full bg-slate-950/70 border-y border-slate-800/60 py-3 px-4 lg:px-8 backdrop-blur-md">
+      <div className="w-full bg-slate-950/70 border-y border-slate-800/60 py-2 sm:py-3 px-3 sm:px-6 lg:px-8 backdrop-blur-md">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center justify-between mb-2 sm:mb-2.5">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-300">
+              <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-300">
                 Mesa Redonda ({selectedIds.length}/{agents.length} ativos)
               </span>
               <span className="text-[10px] text-slate-500 hidden md:inline">
@@ -43,17 +43,18 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
             {/* Botão de Destaque: Painel de Especialistas */}
             <button
               onClick={() => setShowTeamModal(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-950/40 hover:bg-indigo-900/50 border border-indigo-700/40 hover:border-indigo-500/60 text-[11px] text-indigo-300 font-medium transition-all duration-200 shadow-sm hover:scale-[1.02]"
+              className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg bg-indigo-950/40 hover:bg-indigo-900/50 border border-indigo-700/40 hover:border-indigo-500/60 text-[10px] sm:text-[11px] text-indigo-300 font-medium transition-all duration-200 shadow-sm hover:scale-[1.02]"
               title="Ver o retrato cinemático da equipa reunida"
             >
               <Users className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Painel de Especialistas</span>
+              <span className="hidden xs:inline">Painel de Especialistas</span>
+              <span className="inline xs:hidden">Painel</span>
               <Sparkles className="w-3 h-3 text-amber-400" />
             </button>
           </div>
 
-          {/* Grelha / Lista de Agentes */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+          {/* Grelha / Lista de Agentes: Carrossel Horizontal em Mobile e Grelha em Tablet/Desktop */}
+          <div className="flex overflow-x-auto pb-1 sm:pb-0 sm:grid sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-2.5 scrollbar-none snap-x">
             {agents.map(agent => {
               const isSelected = selectedIds.includes(agent.id);
               const isSpeaking = activeSpeakerId === agent.id;
@@ -64,7 +65,7 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                   key={agent.id}
                   onClick={() => onToggleAgent(agent.id)}
                   disabled={isDebating}
-                  className={`group relative flex items-center gap-3 p-2 rounded-xl border text-left transition-all duration-300 ${
+                  className={`group relative flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 rounded-xl border text-left transition-all duration-300 flex-shrink-0 w-[170px] sm:w-auto snap-start ${
                     isSpeaking
                       ? 'bg-indigo-950/50 border-indigo-500 ring-2 ring-indigo-500/50 shadow-lg shadow-indigo-500/25 scale-[1.02]'
                       : isSelected
@@ -73,7 +74,7 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                   }`}
                 >
                   {/* Avatar com Imagem ou Fallback de Emoji */}
-                  <div className="relative flex-shrink-0 w-11 h-11 rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center border border-slate-700/60 shadow-md">
+                  <div className="relative flex-shrink-0 w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center border border-slate-700/60 shadow-md">
                     {hasImage ? (
                       /* Imagem fotográfica do Avatar */
                       <img
@@ -85,13 +86,13 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                         }`}
                       />
                     ) : (
-                      <span className="text-xl">{agent.avatar}</span>
+                      <span className="text-lg sm:text-xl">{agent.avatar}</span>
                     )}
 
                     {/* Indicador de Fala */}
                     {isSpeaking && (
-                      <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-white shadow-md ring-1 ring-white/20">
-                        <Volume2 className="w-2.5 h-2.5 animate-pulse" />
+                      <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 sm:h-4 sm:w-4 items-center justify-center rounded-full bg-indigo-600 text-white shadow-md ring-1 ring-white/20">
+                        <Volume2 className="w-2 sm:w-2.5 h-2 sm:h-2.5 animate-pulse" />
                       </span>
                     )}
 
@@ -105,10 +106,10 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
 
                   {/* Informações do Agente */}
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold text-slate-200 truncate">
+                    <p className="text-[11px] sm:text-xs font-semibold text-slate-200 truncate">
                       {agent.name}
                     </p>
-                    <p className="text-[10px] text-slate-400 truncate">
+                    <p className="text-[9px] sm:text-[10px] text-slate-400 truncate">
                       {agent.roleTitle}
                     </p>
                     {/* Badge de Temperamento */}
@@ -117,8 +118,8 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                         🎭 {agent.personality.traits[0]}
                       </p>
                     )}
-                    <div className="flex items-center gap-1 mt-1">
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800/80 text-slate-400 border border-slate-700/40 truncate max-w-[110px]">
+                    <div className="flex items-center gap-1 mt-0.5 sm:mt-1">
+                      <span className="text-[8px] sm:text-[9px] font-mono px-1 sm:px-1.5 py-0.2 rounded bg-slate-800/80 text-slate-400 border border-slate-700/40 truncate max-w-[110px]">
                         {agent.model.split('/')[1] || agent.model}
                       </span>
                     </div>
@@ -126,7 +127,7 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
 
                   {/* Animação de Onda Sonora quando está a falar */}
                   {isSpeaking && (
-                    <div className="absolute right-2 top-2 flex items-end gap-0.5 h-3">
+                    <div className="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 flex items-end gap-0.5 h-2.5 sm:h-3">
                       <span className="w-0.5 h-full bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
                       <span className="w-0.5 h-full bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
                       <span className="w-0.5 h-full bg-indigo-400 rounded-full animate-bounce" />

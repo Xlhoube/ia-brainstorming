@@ -45,39 +45,39 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] max-h-[85dvh]">
         {/* Cabeçalho */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-800/60 flex items-center justify-center text-indigo-400">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-800/60 flex items-center justify-center text-indigo-400 flex-shrink-0">
               <History className="w-4 h-4" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h3 className="text-sm sm:text-base font-bold text-white truncate">
                   Histórico de Debates Guardados
                 </h3>
-                <span className="flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 font-mono">
+                <span className="flex items-center gap-1 text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 font-mono">
                   <Cloud className="w-2.5 h-2.5" />
                   Appwrite Cloud Sync
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[10px] sm:text-[11px] text-slate-400 truncate">
                 Sincronização em tempo real • {sessions.length} debates registados {isLoadingCloud && '(a sincronizar...)'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors flex-shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Lista com Scroll */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-3">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3">
           {sessions.length === 0 ? (
             <div className="text-center py-12 space-y-3">
               <History className="w-10 h-10 mx-auto text-slate-600" />
