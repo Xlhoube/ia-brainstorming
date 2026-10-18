@@ -10,6 +10,14 @@ export type AgentRole =
 
 export type LanguageTone = 'simples' | 'academico';
 
+export interface AgentPersonality {
+  traits: string[];
+  temperament: string;
+  reactionTrigger: string;
+  evolutionStyle: string;
+  dialogueHabits: string;
+}
+
 export interface Agent {
   id: string;
   name: string;
@@ -23,6 +31,7 @@ export interface Agent {
   model: string;
   provider: 'openrouter' | 'groq' | 'google' | 'mock';
   stanceDescription: string;
+  personality: AgentPersonality;
 }
 
 export interface DebateMessage {

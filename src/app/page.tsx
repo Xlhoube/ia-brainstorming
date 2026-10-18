@@ -105,6 +105,7 @@ export default function HomePage() {
       {/* Linha do Tempo e Mensagens do Debate */}
       <DebateTimeline
         messages={messages}
+        agents={agents}
         topic={topic}
         topicDescription={topicDescription}
         isGenerating={isGenerating}

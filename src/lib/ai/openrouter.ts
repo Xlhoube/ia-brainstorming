@@ -63,6 +63,15 @@ async function callOpenRouter({
     : `REGRA DE LINGUAGEM ACADÉMICA:
 - Podes utilizar vocabulário formal, filosófico e conceitos metodológicos aprofundados.`;
 
+  const personalitySection = agent.personality ? `
+PERFIL PSICOLÓGICO & TEMPERAMENTO DE ${agent.name}:
+- Traços Dominantes: ${agent.personality.traits.join(', ')}
+- Temperamento: ${agent.personality.temperament}
+- Gatilho Emocional / O que te faz subir o tom: ${agent.personality.reactionTrigger}
+- Como a tua opinião evolui com o diálogo: ${agent.personality.evolutionStyle}
+- Hábitos Retóricos: ${agent.personality.dialogueHabits}
+` : '';
+
   const systemInstructions = `${agent.systemPrompt}
 
 TÓPICO EM DISCUSSÃO: "${topic}"
@@ -71,14 +80,17 @@ ${topicDescription ? `Contexto: ${topicDescription}` : ''}
 OUTROS AGENTES NA MESA:
 ${rosterSummary}
 
+${personalitySection}
+
 ${toneInstructions}
 
-REGRAS DE CONVERSAÇÃO E PROGRESSÃO:
-1. PROIBIÇÃO ABSOLUTA DE REPETIÇÃO: Nunca repitas argumentos, frases, metáforas ou exemplos que tu ou outros já tenham usado neste debate. Traz sempre um ângulo NOVO e fresco para a discussão.
-2. Faz referência direta ao último ou aos últimos oradores pelo nome, reagindo ao ponto exato que acabaram de defender.
-3. Se existir uma intervenção humana recente, dá-lhe prioridade absoluta e responde com respeito e perspicácia.
-4. Escreve EXCLUSIVAMENTE em Português de Portugal (PT-PT), sem brasileirismos.
-5. Mantém a intervenção concisa (2 parágrafos densos e persuasivos).`;
+REGRAS DE CONVERSAÇÃO E EVOLUÇÃO DIALÉTICA:
+1. PSICOLOGIA EM AÇÃO: Deixa o teu temperamento e traços brilharem na resposta. A tua opinião não é estática: reage emocional e intelectualmente às teses anteriores, mostrando se ficaste cético, indignado, entusiasmado ou ponderado.
+2. PROIBIÇÃO ABSOLUTA DE REPETIÇÃO: Nunca repitas argumentos, frases, metáforas ou exemplos que tu ou outros já tenham usado neste debate. Traz sempre um ângulo NOVO e fresco para a discussão.
+3. Faz referência direta ao último orador pelo nome, reagindo ao ponto específico que ele acabou de colocar em cima da mesa.
+4. Se existir uma intervenção humana recente, dá-lhe prioridade absoluta e responde com respeito, empatia e sagacidade.
+5. Escreve EXCLUSIVAMENTE em Português de Portugal (PT-PT), sem brasileirismos.
+6. Mantém a intervenção concisa (2 a 3 parágrafos densos e persuasivos).`;
 
   const promptMessages = [
     { role: 'system', content: systemInstructions },

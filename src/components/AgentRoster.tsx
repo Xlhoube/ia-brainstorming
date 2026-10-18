@@ -111,6 +111,12 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                     <p className="text-[10px] text-slate-400 truncate">
                       {agent.roleTitle}
                     </p>
+                    {/* Badge de Temperamento */}
+                    {agent.personality && (
+                      <p className="text-[9px] text-indigo-300/80 truncate mt-0.5">
+                        🎭 {agent.personality.traits[0]}
+                      </p>
+                    )}
                     <div className="flex items-center gap-1 mt-1">
                       <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800/80 text-slate-400 border border-slate-700/40 truncate max-w-[110px]">
                         {agent.model.split('/')[1] || agent.model}
@@ -133,17 +139,22 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
         </div>
       </div>
 
-      {/* Modal do Painel Cinemático de Especialistas */}
+      {/* Modal do Painel Cinemático de Especialistas com Personalidades */}
       {showTeamModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-5xl max-h-[92vh] bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
             {/* Cabeçalho do Modal */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/60">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/80 flex-shrink-0">
               <div className="flex items-center gap-2.5">
                 <Users className="w-5 h-5 text-indigo-400" />
-                <h3 className="text-base font-bold text-white tracking-tight">
-                  Painel de Especialistas • Mesa Dialética
-                </h3>
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-tight">
+                    Painel de Especialistas • Personalidades & Dinâmica Dialética
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    O temperamento e perfil psicológico de cada pensador influenciam a sua postura e evolução no debate
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setShowTeamModal(false)}
@@ -154,49 +165,96 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
               </button>
             </div>
 
-            {/* Imagem Cinemática da Equipa */}
-            <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-slate-950 overflow-hidden border-b border-slate-800">
-              <img
-                src="/avatars/painel_especialistas.png"
-                alt="Painel Cinemático de Especialistas em Equipa"
-                className="w-full h-full object-cover object-center"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
-              <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-slate-300">
-                <span className="bg-slate-900/80 px-2.5 py-1 rounded-md border border-slate-700/70 backdrop-blur-sm">
-                  Conselho Estratégico de Inteligência Artificial
-                </span>
-                <span className="text-[11px] text-slate-400">
-                  5 Perspetivas Complementares
-                </span>
-              </div>
-            </div>
-
-            {/* Mini-Perfis dos 5 Especialistas */}
-            <div className="p-4 grid grid-cols-1 sm:grid-cols-5 gap-3 bg-slate-950/40">
-              {agents.map(agent => (
-                <div
-                  key={agent.id}
-                  className="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800/80 flex items-center sm:flex-col sm:text-center gap-2.5"
-                >
-                  <img
-                    src={agent.image}
-                    alt={agent.name}
-                    className="w-10 h-10 sm:w-14 sm:h-14 rounded-full object-cover border border-slate-700 shadow"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-slate-200 truncate">
-                      {agent.name}
-                    </p>
-                    <p className="text-[10px] text-indigo-400 font-medium truncate">
-                      {agent.roleTitle}
-                    </p>
-                    <p className="text-[9px] text-slate-400 line-clamp-2 mt-1 hidden sm:block">
-                      {agent.stanceDescription}
-                    </p>
-                  </div>
+            <div className="overflow-y-auto flex-1">
+              {/* Imagem Cinemática da Equipa */}
+              <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-slate-950 overflow-hidden border-b border-slate-800">
+                <img
+                  src="/avatars/painel_especialistas.png"
+                  alt="Painel Cinemático de Especialistas em Equipa"
+                  className="w-full h-full object-cover object-center"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-85" />
+                <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-slate-300">
+                  <span className="bg-slate-900/80 px-2.5 py-1 rounded-md border border-slate-700/70 backdrop-blur-sm font-semibold">
+                    Conselho Estratégico de Inteligência Artificial
+                  </span>
+                  <span className="text-[11px] text-slate-400 bg-slate-950/70 px-2 py-0.5 rounded border border-slate-800">
+                    5 Psiques Dialéticas Complementares
+                  </span>
                 </div>
-              ))}
+              </div>
+
+              {/* Cartões Detalhados de Personalidade dos 5 Especialistas */}
+              <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-slate-950/60">
+                {agents.map(agent => (
+                  <div
+                    key={agent.id}
+                    className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between space-y-3 hover:border-slate-700 transition-colors"
+                  >
+                    <div>
+                      <div className="flex items-center gap-3 mb-2.5">
+                        <img
+                          src={agent.image}
+                          alt={agent.name}
+                          className="w-12 h-12 rounded-xl object-cover border border-slate-700 shadow-md flex-shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-white truncate">
+                            {agent.name}
+                          </p>
+                          <p className="text-xs text-indigo-400 font-medium">
+                            {agent.roleTitle}
+                          </p>
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700/50">
+                            {agent.model.split('/')[1] || agent.model}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Temperamento */}
+                      {agent.personality && (
+                        <div className="space-y-2 text-xs">
+                          <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-0.5">
+                              Temperamento Psicológico
+                            </span>
+                            <p className="text-slate-300 text-[11px] leading-relaxed">
+                              {agent.personality.temperament}
+                            </p>
+                          </div>
+
+                          {/* Traços */}
+                          <div>
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">
+                              Traços Dominantes
+                            </span>
+                            <div className="flex flex-wrap gap-1">
+                              {agent.personality.traits.map((t, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-950/50 text-indigo-300 border border-indigo-800/40 font-medium"
+                                >
+                                  {t}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Dinâmica de Evolução */}
+                          <div className="pt-1">
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400/90 block mb-0.5">
+                              Como a Opinião Evolui no Debate
+                            </span>
+                            <p className="text-slate-400 text-[11px] leading-normal italic">
+                              &ldquo;{agent.personality.evolutionStyle}&rdquo;
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

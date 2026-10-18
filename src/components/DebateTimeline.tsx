@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { DebateMessage } from '@/types/debate';
+import { Agent, DebateMessage } from '@/types/debate';
 import { Copy, Check, Volume2, User, Brain, Sparkles } from 'lucide-react';
 
 interface DebateTimelineProps {
   messages: DebateMessage[];
+  agents?: Agent[];
   topic: string;
   topicDescription: string;
   isGenerating: boolean;
@@ -17,6 +18,7 @@ interface DebateTimelineProps {
 
 export const DebateTimeline: React.FC<DebateTimelineProps> = ({
   messages,
+  agents,
   topic,
   topicDescription,
   isGenerating,
@@ -161,7 +163,7 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                       </div>
 
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="text-sm font-bold text-white tracking-tight">
                             {msg.agentName}
                           </h4>
@@ -175,6 +177,23 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                           >
                             {msg.agentRole}
                           </span>
+
+                          {/* Tag de Personalidade Psicológica do Especialista */}
+                          {!isHuman && (() => {
+                            const speakerAgent = agents?.find(
+                              a => a.id === msg.agentId || a.name.toLowerCase() === msg.agentName.toLowerCase()
+                            );
+                            if (!speakerAgent?.personality) return null;
+                            return (
+                              <span
+                                className="text-[9px] font-medium px-2 py-0.5 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/60 flex items-center gap-1 cursor-help hover:border-indigo-500/50 transition-colors"
+                                title={`Temperamento: ${speakerAgent.personality.temperament}\nComo evolui: ${speakerAgent.personality.evolutionStyle}`}
+                              >
+                                <span>🎭</span>
+                                <span>{speakerAgent.personality.traits[0]}</span>
+                              </span>
+                            );
+                          })()}
                         </div>
                         <p className="text-[11px] text-slate-500 mt-0.5">
                           {isHuman ? 'Intervenção Humana' : `Intervenção #${index + 1}`} • {msg.timestamp}
