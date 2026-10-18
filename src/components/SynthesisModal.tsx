@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, FileText, CheckCircle2, AlertCircle, HelpCircle, Award, Copy, Check, Download } from 'lucide-react';
+import { X, FileText, CheckCircle2, AlertCircle, HelpCircle, Award, Copy, Check, RefreshCw, Sparkles } from 'lucide-react';
 
 interface SynthesisModalProps {
   isOpen: boolean;
@@ -13,7 +13,12 @@ interface SynthesisModalProps {
     divergences: string[];
     openQuestions: string[];
     overallVerdict: string;
+    analyzedCount?: number;
+    updatedAt?: string;
   } | null;
+  currentMessagesCount: number;
+  onRefreshSynthesis: () => void;
+  isSynthesizing: boolean;
 }
 
 export const SynthesisModal: React.FC<SynthesisModalProps> = ({
@@ -21,15 +26,22 @@ export const SynthesisModal: React.FC<SynthesisModalProps> = ({
   onClose,
   topic,
   synthesis,
+  currentMessagesCount,
+  onRefreshSynthesis,
+  isSynthesizing,
 }) => {
   const [copied, setCopied] = useState(false);
 
   if (!isOpen || !synthesis) return null;
 
+  const analyzedCount = synthesis.analyzedCount || 0;
+  const hasNewMessages = currentMessagesCount > analyzedCount;
+
   const handleCopyMarkdown = () => {
     const md = `# Relatório Executivo de Debate | IA Brain Storming
 **Tema:** ${topic}
-**Data:** ${new Date().toLocaleDateString('pt-PT')}
+**Intervenções Analisadas:** ${analyzedCount}
+**Última Atualização:** ${synthesis.updatedAt || new Date().toLocaleTimeString('pt-PT')}
 
 ---
 
@@ -64,22 +76,37 @@ ${synthesis.overallVerdict}
               <FileText className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">
-                Síntese Dialética & Relatório Final
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-white">
+                  Síntese Dialética & Relatório Final
+                </h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-indigo-300 border border-slate-700">
+                  {analyzedCount} intervenções
+                </span>
+              </div>
               <p className="text-[11px] text-slate-400 truncate max-w-md">
-                Tema: {topic}
+                Atualizada às {synthesis.updatedAt || 'tempo real'} • Tema: {topic}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={onRefreshSynthesis}
+              disabled={isSynthesizing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/50 hover:bg-indigo-900/50 border border-indigo-700/50 text-indigo-300 text-xs font-semibold transition-all shadow-sm"
+              title="Recalcular síntese com as últimas mensagens do debate"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSynthesizing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{isSynthesizing ? 'A recalcular...' : 'Recalcular'}</span>
+            </button>
+
             <button
               onClick={handleCopyMarkdown}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors"
               title="Copiar em Markdown"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copied ? 'Copiado' : 'Copiar Markdown'}</span>
+              <span className="hidden sm:inline">{copied ? 'Copiado' : 'Copiar'}</span>
             </button>
             <button
               onClick={onClose}
@@ -90,13 +117,32 @@ ${synthesis.overallVerdict}
           </div>
         </div>
 
+        {/* Alerta de Novas Intervenções Disponíveis */}
+        {hasNewMessages && (
+          <div className="bg-amber-950/40 border-b border-amber-800/50 px-6 py-2.5 flex items-center justify-between gap-3 text-xs text-amber-200">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
+              <span>
+                Surgiram <strong>{currentMessagesCount - analyzedCount} novas opiniões</strong> no debate após esta síntese ter sido gerada.
+              </span>
+            </div>
+            <button
+              onClick={onRefreshSynthesis}
+              disabled={isSynthesizing}
+              className="px-3 py-1 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] transition-colors flex-shrink-0"
+            >
+              {isSynthesizing ? 'A atualizar...' : 'Atualizar Síntese'}
+            </button>
+          </div>
+        )}
+
         {/* Corpo com Scroll */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Tese Central */}
           <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
             <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider">
               <Award className="w-4 h-4" />
-              <span>Tese Central do Debate</span>
+              <span>Tese Central do Debate (Evolutiva)</span>
             </div>
             <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
               {synthesis.centralThesis}
@@ -125,7 +171,7 @@ ${synthesis.overallVerdict}
             <div className="p-4 rounded-xl bg-amber-950/15 border border-amber-900/40 space-y-3">
               <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
                 <AlertCircle className="w-4 h-4" />
-                <span>Divergências Críticas</span>
+                <span>Divergências Críticas Entre Especialistas</span>
               </div>
               <ul className="space-y-2 text-xs text-slate-300">
                 {synthesis.divergences.map((item, idx) => (

@@ -58,15 +58,14 @@ export default function HomePage() {
     resetDebate();
   };
 
-  const handleOpenSynthesis = () => {
-    if (synthesisResult) {
-      setIsSynthesisModalOpen(true);
-    } else {
-      synthesizeDebate().then(() => {
-        setIsSynthesisModalOpen(true);
-      });
+  const handleOpenSynthesis = async () => {
+    setIsSynthesisModalOpen(true);
+    // Se ainda não há síntese ou se novas mensagens foram adicionadas ao debate, recalcula imediatamente
+    if (!synthesisResult || (synthesisResult.analyzedCount && synthesisResult.analyzedCount < messages.length)) {
+      await synthesizeDebate();
     }
   };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-[#050814] text-slate-100 relative">
@@ -139,6 +138,9 @@ export default function HomePage() {
         onClose={() => setIsSynthesisModalOpen(false)}
         topic={topic}
         synthesis={synthesisResult}
+        currentMessagesCount={messages.length}
+        onRefreshSynthesis={synthesizeDebate}
+        isSynthesizing={isSynthesizing}
       />
 
       <HistoryModal
