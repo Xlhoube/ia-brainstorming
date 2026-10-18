@@ -80,6 +80,35 @@ export function useDebate() {
         }
       }
 
+      // Carregar memórias guardadas e mesclar com os agentes
+      const savedMemories = LocalDatabase.getAgentMemories();
+      if (savedMemories && Object.keys(savedMemories).length > 0) {
+        setAgents(prev => prev.map(a => {
+          if (savedMemories[a.id]) {
+            return {
+              ...a,
+              memory: {
+                ...a.memory,
+                ...savedMemories[a.id],
+                knownColleagues: {
+                  ...a.memory.knownColleagues,
+                  ...(savedMemories[a.id].knownColleagues || {})
+                },
+                cumulativeLearnings: Array.from(new Set([
+                  ...(savedMemories[a.id].cumulativeLearnings || []),
+                  ...a.memory.cumulativeLearnings
+                ])),
+                pastMemories: [
+                  ...(savedMemories[a.id].pastMemories || []),
+                  ...a.memory.pastMemories
+                ].filter((m, idx, arr) => arr.findIndex(x => x.topic === m.topic) === idx)
+              }
+            };
+          }
+          return a;
+        }));
+      }
+
       return () => {
         unsubscribe();
         speechService.stop();
@@ -186,6 +215,17 @@ export function useDebate() {
             const nextR = r + 1;
             if (nextR > maxRounds) {
               setStatus('concluded');
+              // Registar a experiência do debate concluído na memória de cada pensador ativo
+              try {
+                activeAgents.forEach(ag => {
+                  const agentMsgs = [...messages, data.message].filter(m => m.agentId === ag.id);
+                  const lastSpeak = agentMsgs[agentMsgs.length - 1];
+                  const summary = lastSpeak ? lastSpeak.content.slice(0, 140) + '...' : `Defendeu a sua posição sobre "${topic}"`;
+                  LocalDatabase.recordDebateMemoryForAgent(ag.id, topic, summary);
+                });
+              } catch (memErr) {
+                console.warn('Erro ao arquivar memórias de debate:', memErr);
+              }
             }
             return nextR;
           });
@@ -198,6 +238,41 @@ export function useDebate() {
       setActiveSpeakerId(null);
     }
   }, [agents, selectedAgentIds, isGenerating, topic, topicDescription, messages, apiKey, tone, maxRounds]);
+
+  const addAgentLearning = (agentId: string, insight: string) => {
+    if (!insight.trim()) return;
+    setAgents(prev => prev.map(a => {
+      if (a.id === agentId) {
+        const updatedMemory = {
+          ...a.memory,
+          cumulativeLearnings: [insight.trim(), ...(a.memory.cumulativeLearnings || [])]
+        };
+        LocalDatabase.saveAgentMemory(agentId, updatedMemory);
+        return { ...a, memory: updatedMemory };
+      }
+      return a;
+    }));
+  };
+
+  const addAgentMemoryEntry = (agentId: string, memoryTopic: string, stance: string) => {
+    if (!memoryTopic.trim()) return;
+    setAgents(prev => prev.map(a => {
+      if (a.id === agentId) {
+        const newEntry = {
+          topic: memoryTopic.trim(),
+          stanceSummary: stance.trim(),
+          date: new Date().toLocaleDateString('pt-PT')
+        };
+        const updatedMemory = {
+          ...a.memory,
+          pastMemories: [newEntry, ...(a.memory.pastMemories || []).slice(0, 5)]
+        };
+        LocalDatabase.saveAgentMemory(agentId, updatedMemory);
+        return { ...a, memory: updatedMemory };
+      }
+      return a;
+    }));
+  };
 
   // Ciclo automático
   useEffect(() => {
@@ -394,5 +469,7 @@ export function useDebate() {
     runNextTurn,
     injectHumanIntervention,
     synthesizeDebate,
+    addAgentLearning,
+    addAgentMemoryEntry,
   };
 }

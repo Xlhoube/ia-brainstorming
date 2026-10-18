@@ -80,6 +80,18 @@ A TUA IDENTIDADE PSICOLÓGICA:
 - Estilo verbal: ${agent.personality.dialogueHabits}
 ` : '';
 
+  const memorySection = agent.memory ? `
+A TUA MEMÓRIA COGNITIVA E HISTÓRICO PESSOAL:
+- A Tua Filosofia Inabalável: "${agent.memory.corePhilosophy}"
+- O que pensas e recordas pessoalmente dos teus colegas:
+${Object.entries(agent.memory.knownColleagues).map(([name, note]) => `  * Sobre ${name}: ${note}`).join('\n')}
+- Debates Passados que Recordas no Teu Percurso:
+${agent.memory.pastMemories.map(m => `  * No debate sobre "${m.topic}": ${m.stanceSummary}`).join('\n')}
+- Lições e Conclusões Acumuladas:
+${agent.memory.cumulativeLearnings.map(l => `  * ${l}`).join('\n')}
+- DIRETRIZ DE MEMÓRIA: Mantém coerência com este teu percurso. Se oportuno, alude com naturalidade a debates passados ou ao feitio conhecido do colega com quem estás a falar (ex.: "Helena, já noutro debate ignoraste...", ou "Marcus, tu tens sempre o hábito socrático de...").
+` : '';
+
   const systemInstructions = `${agent.systemPrompt}
 
 TEMA CENTRAL: "${topic}"
@@ -89,6 +101,8 @@ OUTROS PRESENTES NA MESA:
 ${rosterSummary}
 
 ${personalitySection}
+
+${memorySection}
 
 ${toneInstructions}
 

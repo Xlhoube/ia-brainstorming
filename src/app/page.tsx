@@ -45,6 +45,7 @@ export default function HomePage() {
     runNextTurn,
     injectHumanIntervention,
     synthesizeDebate,
+    addAgentLearning,
   } = useDebate();
 
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
@@ -99,6 +100,7 @@ export default function HomePage() {
         selectedIds={selectedAgentIds}
         activeSpeakerId={activeSpeakerId}
         onToggleAgent={toggleAgent}
+        onAddAgentLearning={addAgentLearning}
         isDebating={status === 'running'}
       />
 

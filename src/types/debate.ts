@@ -18,6 +18,19 @@ export interface AgentPersonality {
   dialogueHabits: string;
 }
 
+export interface AgentMemoryEntry {
+  topic: string;
+  stanceSummary: string;
+  date: string;
+}
+
+export interface AgentMemory {
+  corePhilosophy: string;
+  cumulativeLearnings: string[];
+  knownColleagues: Record<string, string>;
+  pastMemories: AgentMemoryEntry[];
+}
+
 export interface Agent {
   id: string;
   name: string;
@@ -32,6 +45,7 @@ export interface Agent {
   provider: 'openrouter' | 'groq' | 'google' | 'mock';
   stanceDescription: string;
   personality: AgentPersonality;
+  memory: AgentMemory;
 }
 
 export interface DebateMessage {

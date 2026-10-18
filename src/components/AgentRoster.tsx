@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Agent } from '@/types/debate';
-import { Check, Volume2, Users, X, Sparkles } from 'lucide-react';
+import { Check, Volume2, Users, X, Sparkles, Brain, Plus, BookmarkCheck } from 'lucide-react';
 
 interface AgentRosterProps {
   agents: Agent[];
@@ -10,6 +10,7 @@ interface AgentRosterProps {
   activeSpeakerId: string | null;
   onToggleAgent: (id: string) => void;
   isDebating: boolean;
+  onAddAgentLearning?: (agentId: string, insight: string) => void;
 }
 
 export const AgentRoster: React.FC<AgentRosterProps> = ({
@@ -18,12 +19,22 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
   activeSpeakerId,
   onToggleAgent,
   isDebating,
+  onAddAgentLearning,
 }) => {
   const [showTeamModal, setShowTeamModal] = useState(false);
+  const [activeModalTab, setActiveModalTab] = useState<'profile' | 'memory'>('profile');
+  const [newLearningInputs, setNewLearningInputs] = useState<Record<string, string>>({});
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   const handleImageError = (agentId: string) => {
     setFailedImages(prev => ({ ...prev, [agentId]: true }));
+  };
+
+  const handleAddLearning = (agentId: string) => {
+    const text = newLearningInputs[agentId]?.trim();
+    if (!text || !onAddAgentLearning) return;
+    onAddAgentLearning(agentId, text);
+    setNewLearningInputs(prev => ({ ...prev, [agentId]: '' }));
   };
 
   return (
@@ -44,10 +55,10 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
             <button
               onClick={() => setShowTeamModal(true)}
               className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg bg-indigo-950/40 hover:bg-indigo-900/50 border border-indigo-700/40 hover:border-indigo-500/60 text-[10px] sm:text-[11px] text-indigo-300 font-medium transition-all duration-200 shadow-sm hover:scale-[1.02]"
-              title="Ver o retrato cinemático da equipa reunida"
+              title="Ver o perfil psicológico e a memória dos pensadores"
             >
               <Users className="w-3.5 h-3.5 text-indigo-400" />
-              <span className="hidden xs:inline">Painel de Especialistas</span>
+              <span className="hidden xs:inline">Painel & Memória</span>
               <span className="inline xs:hidden">Painel</span>
               <Sparkles className="w-3 h-3 text-amber-400" />
             </button>
@@ -112,16 +123,21 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                     <p className="text-[9px] sm:text-[10px] text-slate-400 truncate">
                       {agent.roleTitle}
                     </p>
-                    {/* Badge de Temperamento */}
-                    {agent.personality && (
-                      <p className="text-[9px] text-indigo-300/80 truncate mt-0.5">
-                        🎭 {agent.personality.traits[0]}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-1 mt-0.5 sm:mt-1">
-                      <span className="text-[8px] sm:text-[9px] font-mono px-1 sm:px-1.5 py-0.2 rounded bg-slate-800/80 text-slate-400 border border-slate-700/40 truncate max-w-[110px]">
-                        {agent.model.split('/')[1] || agent.model}
-                      </span>
+                    {/* Badge de Temperamento & Memória */}
+                    <div className="mt-0.5 flex items-center gap-1 flex-wrap">
+                      {agent.personality && (
+                        <span className="text-[8px] sm:text-[9px] font-medium px-1 sm:px-1.5 py-0.2 rounded bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 truncate max-w-[95px]">
+                          🎭 {agent.personality.traits[0]}
+                        </span>
+                      )}
+                      {agent.memory && (
+                        <span
+                          className="text-[8px] sm:text-[9px] font-medium px-1 sm:px-1.5 py-0.2 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 flex items-center gap-0.5"
+                          title={`${agent.memory.pastMemories.length} debates passados arquivados`}
+                        >
+                          🧠 {agent.memory.pastMemories.length}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -140,30 +156,58 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
         </div>
       </div>
 
-      {/* Modal do Painel Cinemático de Especialistas com Personalidades */}
+      {/* Modal do Painel Cinemático de Especialistas com Personalidades e Memória */}
       {showTeamModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-5xl max-h-[92vh] bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-5xl max-h-[92vh] max-h-[92dvh] bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
             {/* Cabeçalho do Modal */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/80 flex-shrink-0">
-              <div className="flex items-center gap-2.5">
-                <Users className="w-5 h-5 text-indigo-400" />
-                <div>
-                  <h3 className="text-base font-bold text-white tracking-tight">
-                    Painel de Especialistas • Personalidades & Dinâmica Dialética
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950/80 gap-3 flex-shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Users className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="text-sm sm:text-base font-bold text-white tracking-tight truncate">
+                    Conselho de Pensadores • Psique & Memória Cognitiva
                   </h3>
-                  <p className="text-[11px] text-slate-400">
-                    O temperamento e perfil psicológico de cada pensador influenciam a sua postura e evolução no debate
+                  <p className="text-[10px] sm:text-[11px] text-slate-400 truncate">
+                    Perfis psicológicos, histórico acumulado de debates e evolução de opiniões
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowTeamModal(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-                title="Fechar"
-              >
-                <X className="w-5 h-5" />
-              </button>
+
+              {/* Seletor de Separador: Psique vs Memória */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center p-1 rounded-xl bg-slate-900 border border-slate-800">
+                  <button
+                    onClick={() => setActiveModalTab('profile')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                      activeModalTab === 'profile'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    🎭 Perfil & Psique
+                  </button>
+                  <button
+                    onClick={() => setActiveModalTab('memory')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                      activeModalTab === 'memory'
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Brain className="w-3.5 h-3.5" />
+                    <span>Memória Cognitiva</span>
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setShowTeamModal(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                  title="Fechar"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             <div className="overflow-y-auto flex-1">
@@ -176,86 +220,212 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-85" />
                 <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-slate-300">
-                  <span className="bg-slate-900/80 px-2.5 py-1 rounded-md border border-slate-700/70 backdrop-blur-sm font-semibold">
+                  <span className="bg-slate-900/80 px-2.5 py-1 rounded-md border border-slate-700/70 backdrop-blur-sm font-semibold text-[11px] sm:text-xs">
                     Conselho Estratégico de Inteligência Artificial
                   </span>
-                  <span className="text-[11px] text-slate-400 bg-slate-950/70 px-2 py-0.5 rounded border border-slate-800">
-                    5 Psiques Dialéticas Complementares
+                  <span className="text-[10px] sm:text-[11px] text-slate-400 bg-slate-950/70 px-2 py-0.5 rounded border border-slate-800 hidden xs:inline">
+                    {activeModalTab === 'profile' ? '5 Psiques Dialéticas Complementares' : 'Memória e Raciocínio Contínuo'}
                   </span>
                 </div>
               </div>
 
-              {/* Cartões Detalhados de Personalidade dos 5 Especialistas */}
-              <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-slate-950/60">
-                {agents.map(agent => (
-                  <div
-                    key={agent.id}
-                    className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between space-y-3 hover:border-slate-700 transition-colors"
-                  >
-                    <div>
-                      <div className="flex items-center gap-3 mb-2.5">
-                        <img
-                          src={agent.image}
-                          alt={agent.name}
-                          className="w-12 h-12 rounded-xl object-cover border border-slate-700 shadow-md flex-shrink-0"
-                        />
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-white truncate">
-                            {agent.name}
-                          </p>
-                          <p className="text-xs text-indigo-400 font-medium">
-                            {agent.roleTitle}
-                          </p>
-                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700/50">
-                            {agent.model.split('/')[1] || agent.model}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Temperamento */}
-                      {agent.personality && (
-                        <div className="space-y-2 text-xs">
-                          <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
-                            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-0.5">
-                              Temperamento Psicológico
-                            </span>
-                            <p className="text-slate-300 text-[11px] leading-relaxed">
-                              {agent.personality.temperament}
+              {/* Conteúdo do Separador Selecionado */}
+              {activeModalTab === 'profile' ? (
+                /* Cartões Detalhados de Personalidade dos 5 Especialistas */
+                <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-slate-950/60">
+                  {agents.map(agent => (
+                    <div
+                      key={agent.id}
+                      className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between space-y-3 hover:border-slate-700 transition-colors"
+                    >
+                      <div>
+                        <div className="flex items-center gap-3 mb-2.5">
+                          <img
+                            src={agent.image}
+                            alt={agent.name}
+                            className="w-12 h-12 rounded-xl object-cover border border-slate-700 shadow-md flex-shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-white truncate">
+                              {agent.name}
                             </p>
-                          </div>
-
-                          {/* Traços */}
-                          <div>
-                            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">
-                              Traços Dominantes
+                            <p className="text-xs text-indigo-400 font-medium">
+                              {agent.roleTitle}
+                            </p>
+                            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700/50">
+                              {agent.model.split('/')[1] || agent.model}
                             </span>
-                            <div className="flex flex-wrap gap-1">
-                              {agent.personality.traits.map((t, idx) => (
-                                <span
-                                  key={idx}
-                                  className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-950/50 text-indigo-300 border border-indigo-800/40 font-medium"
-                                >
-                                  {t}
-                                </span>
-                              ))}
+                          </div>
+                        </div>
+
+                        {/* Temperamento */}
+                        {agent.personality && (
+                          <div className="space-y-2 text-xs">
+                            <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
+                              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-0.5">
+                                Temperamento Psicológico
+                              </span>
+                              <p className="text-slate-300 text-[11px] leading-relaxed">
+                                {agent.personality.temperament}
+                              </p>
+                            </div>
+
+                            {/* Traços */}
+                            <div>
+                              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">
+                                Traços Dominantes
+                              </span>
+                              <div className="flex flex-wrap gap-1">
+                                {agent.personality.traits.map((t, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-950/50 text-indigo-300 border border-indigo-800/40 font-medium"
+                                  >
+                                    {t}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Dinâmica de Evolução */}
+                            <div className="pt-1">
+                              <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400/90 block mb-0.5">
+                                Como a Opinião Evolui no Debate
+                              </span>
+                              <p className="text-slate-400 text-[11px] leading-normal italic">
+                                &ldquo;{agent.personality.evolutionStyle}&rdquo;
+                              </p>
                             </div>
                           </div>
-
-                          {/* Dinâmica de Evolução */}
-                          <div className="pt-1">
-                            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400/90 block mb-0.5">
-                              Como a Opinião Evolui no Debate
-                            </span>
-                            <p className="text-slate-400 text-[11px] leading-normal italic">
-                              &ldquo;{agent.personality.evolutionStyle}&rdquo;
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* Cartões Detalhados de Memória Cognitiva & Histórico */
+                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950/60">
+                  {agents.map(agent => (
+                    <div
+                      key={agent.id}
+                      className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between space-y-4 hover:border-slate-700 transition-colors shadow-md"
+                    >
+                      <div className="space-y-3.5">
+                        {/* Cabeçalho do Agente */}
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={agent.image}
+                            alt={agent.name}
+                            className="w-11 h-11 rounded-xl object-cover border border-slate-700 shadow-md flex-shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-white truncate">
+                              {agent.name}
                             </p>
+                            <p className="text-xs text-emerald-400 font-medium">
+                              {agent.roleTitle}
+                            </p>
+                          </div>
+                        </div>
+
+                        {agent.memory && (
+                          <div className="space-y-3 text-xs">
+                            {/* Filosofia Nuclear */}
+                            <div className="p-2.5 rounded-xl bg-amber-950/20 border border-amber-800/40 text-amber-200">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-1">
+                                🏛️ Filosofia Nuclear Inegociável
+                              </span>
+                              <p className="text-[11px] leading-relaxed italic">
+                                &ldquo;{agent.memory.corePhilosophy}&rdquo;
+                              </p>
+                            </div>
+
+                            {/* O que pensa dos colegas */}
+                            <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-2">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block">
+                                👥 O que Pensa Pessoalmente dos Colegas
+                              </span>
+                              <div className="space-y-1.5">
+                                {Object.entries(agent.memory.knownColleagues).map(([colleague, opinion], oIdx) => (
+                                  <div key={oIdx} className="text-[11px] text-slate-300 pl-2 border-l-2 border-indigo-500/40">
+                                    <strong className="text-indigo-300">{colleague}:</strong> {opinion}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Debates Passados Recordados */}
+                            <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-2">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between">
+                                <span>📚 Debates Anteriores na Memória</span>
+                                <span className="text-emerald-400 font-mono text-[9px]">{agent.memory.pastMemories.length} registos</span>
+                              </span>
+                              <div className="space-y-1.5">
+                                {agent.memory.pastMemories.map((entry, eIdx) => (
+                                  <div key={eIdx} className="p-2 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px]">
+                                    <div className="flex items-center justify-between text-[10px] text-emerald-400 font-semibold mb-0.5">
+                                      <span>Tema: {entry.topic}</span>
+                                      <span className="text-slate-500 font-normal">{entry.date}</span>
+                                    </div>
+                                    <p className="text-slate-300 text-[11px]">{entry.stanceSummary}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Lições Acumuladas */}
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block">
+                                💡 Lições & Conclusões Acumuladas
+                              </span>
+                              <ul className="space-y-1">
+                                {agent.memory.cumulativeLearnings.map((learning, lIdx) => (
+                                  <li key={lIdx} className="flex items-start gap-1.5 text-[11px] text-slate-300">
+                                    <BookmarkCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                                    <span>{learning}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Formulário Interativo: Ensinar Nova Lição ao Especialista */}
+                      {onAddAgentLearning && (
+                        <div className="pt-2 border-t border-slate-800">
+                          <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                            Ensinar nova lição a {agent.name}:
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={newLearningInputs[agent.id] || ''}
+                              onChange={e => setNewLearningInputs({ ...newLearningInputs, [agent.id]: e.target.value })}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleAddLearning(agent.id);
+                                }
+                              }}
+                              placeholder="Ex: Não esquecer o impacto na saúde mental..."
+                              className="flex-1 h-8 px-2.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-emerald-500"
+                            />
+                            <button
+                              onClick={() => handleAddLearning(agent.id)}
+                              disabled={!newLearningInputs[agent.id]?.trim()}
+                              className="h-8 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-medium text-xs flex items-center gap-1 transition-all flex-shrink-0"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>Ensinar</span>
+                            </button>
                           </div>
                         </div>
                       )}
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
