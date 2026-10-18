@@ -111,6 +111,7 @@ export default function HomePage() {
         activeSpeakerName={activeAgent?.name}
         onOpenTopics={() => setIsTopicModalOpen(true)}
         onSpeakMessage={speakSingleMessage}
+        onQuickSpeak={injectHumanIntervention}
       />
 
       {/* Barra Inferior de Controlos e Intervenção Humana */}

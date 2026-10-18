@@ -12,6 +12,7 @@ interface DebateTimelineProps {
   activeSpeakerName?: string;
   onOpenTopics: () => void;
   onSpeakMessage?: (agentId: string, text: string) => void;
+  onQuickSpeak?: (text: string) => void;
 }
 
 export const DebateTimeline: React.FC<DebateTimelineProps> = ({
@@ -22,6 +23,7 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
   activeSpeakerName,
   onOpenTopics,
   onSpeakMessage,
+  onQuickSpeak,
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
@@ -77,10 +79,33 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
               <h3 className="text-base font-semibold text-slate-200">
                 A Mesa de Debate está Pronta
               </h3>
-              <p className="text-xs text-slate-400 max-w-md mx-auto">
-                Clica em <strong className="text-indigo-300 font-semibold">Iniciar Debate</strong> na barra inferior para os agentes começarem a confrontar ideias com voz sintetizada.
+              <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                Fala diretamente para a sala através do campo inferior ou clica numa saudação rápida para os especialistas te acolherem e responderem em tempo real:
               </p>
             </div>
+
+            {onQuickSpeak && (
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                <button
+                  onClick={() => onQuickSpeak('Boa noite a todos!')}
+                  className="px-3.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-indigo-950/60 border border-slate-700/70 hover:border-indigo-500/60 text-xs text-indigo-300 font-medium transition-all shadow-sm hover:scale-[1.03]"
+                >
+                  👋 &ldquo;Boa noite a todos!&rdquo;
+                </button>
+                <button
+                  onClick={() => onQuickSpeak('O que acham que vai acontecer com o futuro do trabalho e da inteligência artificial?')}
+                  className="px-3.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-indigo-950/60 border border-slate-700/70 hover:border-indigo-500/60 text-xs text-indigo-300 font-medium transition-all shadow-sm hover:scale-[1.03]"
+                >
+                  💬 &ldquo;O que acham do futuro do trabalho?&rdquo;
+                </button>
+                <button
+                  onClick={() => onQuickSpeak('Será que uma máquina consegue ter sentimentos reais e consciência?')}
+                  className="px-3.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-indigo-950/60 border border-slate-700/70 hover:border-indigo-500/60 text-xs text-indigo-300 font-medium transition-all shadow-sm hover:scale-[1.03]"
+                >
+                  🤖 &ldquo;As máquinas conseguem sentir?&rdquo;
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-4">

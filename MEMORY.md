@@ -3,7 +3,7 @@
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
 - **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e soluções globais.
-- **Versão:** v0.4.1
+- **Versão:** v0.5.0
 - **Data da Última Atualização:** 2026-10-18
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
@@ -11,6 +11,7 @@
 - **Stack:**
   - **Frontend / Fullstack:** Next.js 16 (App Router, Turbopack, TypeScript, React 19) + Tailwind CSS v4.
   - **Camada de Inferência de IA:** OpenRouter API com suporte a múltiplos modelos (Claude 3.5 Sonnet, GPT-4o, DeepSeek V3, Llama 3.3 70B, Gemini 2.0 Flash) e motor dialético dinâmico sem repetições.
+  - **Entrada & Diálogo Direto com a Sala:** O utilizador pode falar diretamente para a sala em qualquer momento (ex.: dizer *"Boa noite a todos"* ou colocar uma questão imediata), despoletando a resposta audível e acolhedora em tempo real dos especialistas presentes.
   - **Motor Anti-Repetição por Fases:** Progressão estruturada de argumentos (Abertura -> Confronto Direto -> Casos Práticos -> Convergência e Síntese) que elimina qualquer duplicação de frases ou ideias nas rondas subsequentes.
   - **Controlo de Linguagem & Tom:** Alternador dinâmico entre **Linguagem Simples & Acessível** (sem jargão técnico, com analogias do dia a dia) e **Linguagem Académica** (formal, rigorosa e filosófica).
   - **Exportação Editorial em PDF:** Módulo `EditorialReport` com design *white paper* / *think-tank*, otimizado para gravação em PDF e impressão A4 (`@media print`).
@@ -29,24 +30,23 @@
 - **[2026-10-18] ADR-006:** Síntese Dinâmica e Evolutiva que recalcula e atualiza com cada nova intervenção.
 - **[2026-10-18] ADR-007:** Seletor de Linguagem Simples vs. Académica na Navbar para democratizar o acesso e compreensão das discussões por qualquer pessoa.
 - **[2026-10-18] ADR-008:** Layout editorial white-paper (`EditorialReport`) acoplado a `@media print` para exportação nativa em PDF com tipografia serifada, duas colunas e transcrição integral.
-- **[2026-10-18] ADR-009:** Motor Dialético Multi-Fase: Introdução de controlo de turnos passados por agente (`previousTurnsByAgent`) com argumentos distintos para cada fase do debate, eliminando duplicações entre rondas.
+- **[2026-10-18] ADR-009:** Motor Dialético Multi-Fase sem repetições.
+- **[2026-10-18] ADR-010:** Interação Direta Humana na Sala: Qualquer fala humana (incluindo cumprimentos como "Boa noite") ativa a sala e gera reação imediata e falada por parte dos agentes.
 
 ---
 
-## ✅ O Que Já Funciona (v0.4.1)
-- [x] Resolução completa do diálogo repetido: cada especialista agora progride através de 4 fases argumentativas distintas com exemplos novos em cada ronda.
-- [x] Reação imediata e contextual a intervenções humanas: se o utilizador intervir, o orador seguinte reage diretamente ao que o utilizador escreveu.
+## ✅ O Que Já Funciona (v0.5.0)
+- [x] Diálogo direto na sala: dizer "Boa noite" ou colocar qualquer questão ativa de imediato a resposta falada da Moderadora e dos especialistas.
+- [x] Botões de arranque e saudação rápida na sala vazia ("Boa noite a todos!", "O que acham da IA?", etc.).
+- [x] Eliminação total de diálogo repetido com progressão de 4 fases por ronda.
 - [x] Seletor de tom na Navbar: "Linguagem Simples" (comum, direta, analógica) vs "Linguagem Académica" (técnica e filosófica).
-- [x] Motor de geração ajustado ao tom: agentes explicam ideias sem termos difíceis no modo simples.
-- [x] Síntese adaptada ao tom: títulos claros ("A Ideia Principal", "Em Que Pontos Todos Concordam?", "Onde É Que Eles Discordam?").
 - [x] Botão "Exportar PDF" no modal de síntese acoplado ao layout editorial `EditorialReport`.
 - [x] Síntese evolutiva com recálculo automático e botão manual de atualização.
 - [x] Síntese de voz TTS com perfis distintos por agente e controlo de mudo.
 - [x] Base de dados local com histórico de debates gravados.
-- [x] Validação automática com gravação em browser subagent (`no_repetition_demo`).
 
 ---
 
 ## ⏳ Open Issues / Próximos Passos
+- [ ] Conectar ao repositório remoto do GitHub quando o utilizador criar o repositório em https://github.com/new.
 - [ ] Conector opcional com Appwrite Cloud para sincronização em múltiplos dispositivos.
-- [ ] Criação e edição personalizada de novos avatares e personalidades de agentes pelo utilizador.

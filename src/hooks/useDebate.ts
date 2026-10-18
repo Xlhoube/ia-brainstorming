@@ -261,24 +261,73 @@ export function useDebate() {
     currentSpeakerIndexRef.current = (saved.messages || []).length;
   };
 
-  const injectHumanIntervention = (content: string) => {
+  const injectHumanIntervention = async (content: string) => {
     if (!content.trim()) return;
+
+    const raw = content.trim();
+    const isGreeting = /boa noite|bom dia|boa tarde|ol[aá]|oi|boas|como est[aã]o|tudo bem/i.test(raw);
 
     const humanMsg: DebateMessage = {
       id: 'human-' + Date.now(),
       agentId: 'human',
-      agentName: 'Tu (Intervenção Humana)',
+      agentName: 'Tu (Humano na Sala)',
       agentRole: 'Voz da Humanidade',
       avatar: '👤',
       accentColor: '#3b82f6',
-      content: content.trim(),
+      content: raw,
       round: currentRound,
       timestamp: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
       isHuman: true,
     };
 
-    setMessages(prev => [...prev, humanMsg]);
+    const nextMessages = [...messages, humanMsg];
+    setMessages(nextMessages);
+    setStatus('running');
+
+    // Despoletar reação imediata e audível de um dos especialistas na sala
+    const activeAgents = agents.filter(a => selectedAgentIds.includes(a.id));
+    if (activeAgents.length === 0) return;
+
+    let respondingAgent = activeAgents[currentSpeakerIndexRef.current % activeAgents.length];
+    if (isGreeting) {
+      const moderator = activeAgents.find(a => a.category === 'moderador');
+      if (moderator) {
+        respondingAgent = moderator;
+      }
+    }
+    currentSpeakerIndexRef.current += 1;
+
+    setActiveSpeakerId(respondingAgent.id);
+    setIsGenerating(true);
+
+    try {
+      const res = await fetch('/api/debate/next-turn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agent: respondingAgent,
+          topic,
+          topicDescription,
+          allAgents: activeAgents,
+          messages: nextMessages,
+          apiKey,
+          tone,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.message) {
+        setMessages(prev => [...prev, data.message]);
+        speechService.speak(respondingAgent.id, data.message.content);
+      }
+    } catch (err) {
+      console.error('Erro ao responder à fala humana na sala:', err);
+    } finally {
+      setIsGenerating(false);
+      setActiveSpeakerId(null);
+    }
   };
+
 
   const synthesizeDebate = async () => {
     if (messages.length === 0) return;

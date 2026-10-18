@@ -47,7 +47,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
               type="text"
               value={humanInput}
               onChange={e => setHumanInput(e.target.value)}
-              placeholder="Intervém no debate como humano (ex: 'Mas e quanto ao custo de oportunidade social?')..."
+              placeholder="Fala diretamente para a sala (ex: 'Boa noite a todos', 'O que acham...', ou propõe um tema)..."
               className="w-full h-11 pl-4 pr-10 rounded-xl bg-slate-900/90 border border-slate-700/60 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-xs sm:text-sm text-slate-200 placeholder:text-slate-500 outline-none transition-all"
             />
             <span className="absolute right-3 top-3 text-[10px] text-slate-500 font-medium hidden sm:inline">
@@ -57,12 +57,13 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
 
           <button
             type="submit"
-            disabled={!humanInput.trim()}
+            disabled={!humanInput.trim() || isGenerating}
             className="h-11 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:hover:bg-indigo-600 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-indigo-600/20 flex-shrink-0"
           >
             <Send className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Intervir</span>
+            <span>{isGenerating ? 'A responder...' : 'Falar na Sala'}</span>
           </button>
+
         </form>
 
         {/* Barra de Ações Principais do Debate */}

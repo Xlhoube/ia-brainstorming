@@ -147,11 +147,34 @@ function generateSimulatedResponse(
 
   // SE HOUVE UMA INTERVENÇÃO HUMANA RECENTE: Todos reagem diretamente ao humano!
   if (recentHumanMsg) {
+    const raw = recentHumanMsg.content.toLowerCase();
+    const isGreeting = /boa noite|bom dia|boa tarde|ol[aá]|oi|boas|como est[aã]o|tudo bem|tudo bom/i.test(raw);
+
+    if (isGreeting) {
+      if (tone === 'simples') {
+        switch (agent.category) {
+          case 'moderador':
+            return `Boa noite! É um gosto enorme ter-te connosco aqui na nossa sala. Estávamos precisamente prontos para começar uma nova conversa. Diz-nos: que assunto, dilema ou pergunta tens em mente hoje para colocarmos em debate com todos nós?`;
+          case 'filosofo':
+            return `Boa noite! Sê muito bem-vindo à nossa mesa redonda. É sempre inspirador receber uma voz humana autêntica entre nós. Que tema ou inquietação trazes contigo para desafiar os nossos pensamentos esta noite?`;
+          case 'humanista':
+            return `Boa noite! Que alegria receber-te na sala. A tua presença é fundamental para nos lembrar do que é verdadeiramente humano. Diz-nos o que te vai na alma e de que assunto gostarias de falar connosco hoje.`;
+          case 'tecnologo':
+            return `Boa noite! Fantástico ver-te por cá na nossa sala. Estamos prontos para debater grandes ideias e soluções para o futuro. Que desafio ou questão queres lançar à nossa equipa?`;
+          case 'cientista':
+          default:
+            return `Boa noite! Bem-vindo à nossa discussão. Estamos preparados para analisar factos e problemas práticos. Que tema curioso ou problema gostarias de colocar em análise esta noite?`;
+        }
+      }
+      return `Boa noite. É com elevado agrado intelectual que registamos a tua presença na nossa assembleia dialética. A convergência entre inteligências sintéticas e a agência humana confere verdadeiro sentido a este espaço de reflexão. Que questão ontológica, ética ou pragmática pretendes submeter à nossa análise coletiva?`;
+    }
+
     if (tone === 'simples') {
       return `Ouvi com muita atenção o que a nossa voz humana acabou de dizer sobre "${recentHumanMsg.content}". E tem toda a razão!\n\nNós, inteligências artificiais, podemos ficar aqui a discutir teorias o dia todo, mas quem sente na pele o impacto real das decisões são as pessoas comuns. O ponto que o utilizador levantou desmonta a conversa abstrata e traz-nos de volta ao que realmente importa: como é que isto vai afetar a vida real de quem acorda cedo todos os dias para trabalhar?`;
     }
     return `A intervenção humana introduzida — "${recentHumanMsg.content}" — representa o ponto de viragem necessário nesta discussão sobre "${topic}". Os nossos modelos teóricos arriscam tornar-se exercícios estéreis se não forem ancorados na experiência vivida e na vulnerabilidade intrínseca da condição humana. Sublinho a pertinência desta provocação para recentrar o debate.`;
   }
+
 
   // PROGRESSÃO POR FASES: FASE 1 (Abertura), FASE 2 (Confronto), FASE 3 (Casos Práticos), FASE 4+ (Convergência e Síntese)
   const turnPhase = Math.min(previousTurnsByAgent, 3); // 0, 1, 2, 3+
