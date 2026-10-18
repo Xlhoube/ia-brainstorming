@@ -106,13 +106,6 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                         <Volume2 className="w-2 sm:w-2.5 h-2 sm:h-2.5 animate-pulse" />
                       </span>
                     )}
-
-                    {/* Checkmark de Seleção */}
-                    {isSelected && !isSpeaking && (
-                      <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 flex items-center justify-center text-slate-950 shadow-sm">
-                        <Check className="w-2 h-2 stroke-[3]" />
-                      </span>
-                    )}
                   </div>
 
                   {/* Informações do Agente */}

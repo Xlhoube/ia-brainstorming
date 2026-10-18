@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, Pause, FastForward, FileText, Send, Sparkles } from 'lucide-react';
+import { Play, Pause, FastForward, FileText, Send, Sparkles, BookOpen } from 'lucide-react';
+import { DebatePacing } from '@/types/debate';
 
 interface ControlsBarProps {
   status: 'idle' | 'running' | 'paused' | 'concluded';
@@ -14,6 +15,10 @@ interface ControlsBarProps {
   isGenerating: boolean;
   isSynthesizing: boolean;
   messagesCount: number;
+  pacing?: DebatePacing;
+  onPacingChange?: (pacing: DebatePacing) => void;
+  readingCountdown?: number | null;
+  isWaitingForNextTurn?: boolean;
 }
 
 export const ControlsBar: React.FC<ControlsBarProps> = ({
@@ -27,6 +32,10 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   isGenerating,
   isSynthesizing,
   messagesCount,
+  pacing = 'calmo',
+  onPacingChange,
+  readingCountdown = null,
+  isWaitingForNextTurn = false,
 }) => {
   const [humanInput, setHumanInput] = useState('');
 
@@ -38,8 +47,42 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   };
 
   return (
-    <footer className="sticky bottom-0 z-40 border-t border-slate-800/80 bg-[#050814]/90 backdrop-blur-md px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 space-y-2.5 sm:space-y-3">
-      <div className="max-w-4xl mx-auto space-y-2.5 sm:space-y-3">
+    <footer className="sticky bottom-0 z-40 border-t border-slate-800/80 bg-[#050814]/90 backdrop-blur-md px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 space-y-2 sm:space-y-2.5">
+      <div className="max-w-4xl mx-auto space-y-2 sm:space-y-2.5">
+        {/* Aviso de Pausa para Leitura Confortável */}
+        {readingCountdown !== null && (
+          <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-amber-950/40 border border-amber-600/40 text-amber-200 text-[11px] sm:text-xs animate-fade-in shadow-sm">
+            <div className="flex items-center gap-2 min-w-0 truncate">
+              <span className="font-mono font-bold px-1.5 py-0.5 rounded bg-amber-900/70 text-amber-300 border border-amber-700/60 flex-shrink-0">
+                {readingCountdown}s
+              </span>
+              <span className="truncate">Pausa para leitura tranquila. Podes ler ao teu ritmo...</span>
+            </div>
+            <button
+              onClick={onNextTurn}
+              className="text-[11px] font-semibold text-amber-300 hover:text-white bg-amber-900/60 hover:bg-amber-800/80 px-2.5 py-1 rounded-lg border border-amber-600/50 transition-colors flex-shrink-0 ml-2"
+            >
+              Avançar Já ⏭️
+            </button>
+          </div>
+        )}
+
+        {/* Aviso do Modo Passo a Passo */}
+        {pacing === 'manual' && isWaitingForNextTurn && status !== 'idle' && (
+          <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-indigo-950/40 border border-indigo-600/40 text-indigo-200 text-[11px] sm:text-xs animate-fade-in shadow-sm">
+            <div className="flex items-center gap-2 min-w-0 truncate">
+              <BookOpen className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+              <span className="truncate">Modo Passo a Passo: lê com calma. Clica em &ldquo;Próximo Turno&rdquo; quando quiseres continuar.</span>
+            </div>
+            <button
+              onClick={onNextTurn}
+              disabled={isGenerating}
+              className="text-[11px] font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded-lg shadow-sm shadow-indigo-500/20 transition-colors flex-shrink-0 ml-2"
+            >
+              Próximo Turno ↵
+            </button>
+          </div>
+        )}
         {/* Formulário de Intervenção Humana */}
         <form onSubmit={handleSubmitHuman} className="flex items-center gap-2">
           <div className="relative flex-1">
@@ -100,12 +143,71 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
                 onClick={onNextTurn}
                 disabled={isGenerating}
                 className="h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700/60 disabled:opacity-40 text-slate-300 font-medium text-xs flex items-center gap-1 sm:gap-1.5 transition-all"
-                title="Acelerar para a intervenção do próximo agente"
+                title="Avançar imediatamente para a intervenção do próximo agente"
               >
                 <FastForward className="w-3.5 h-3.5 text-blue-400" />
                 <span className="hidden sm:inline">Próximo Turno</span>
                 <span className="inline sm:hidden">Avançar</span>
               </button>
+            )}
+
+            {/* Seletor de Ritmo & Cadência de Leitura */}
+            {onPacingChange && (
+              <div className="flex items-center p-0.5 rounded-xl bg-slate-900 border border-slate-700/60 text-[11px] flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => onPacingChange('manual')}
+                  className={`px-2 py-1 rounded-lg transition-all font-medium flex items-center gap-1 ${
+                    pacing === 'manual'
+                      ? 'bg-indigo-600 text-white font-semibold shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                  title="Modo Passo a Passo: o debate avança apenas quando clicares em Próximo Turno"
+                >
+                  <span>📖</span>
+                  <span className="hidden sm:inline">Passo a Passo</span>
+                  <span className="inline sm:hidden">Manual</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onPacingChange('calmo')}
+                  className={`px-2 py-1 rounded-lg transition-all font-medium flex items-center gap-1 ${
+                    pacing === 'calmo'
+                      ? 'bg-amber-600/80 text-white font-semibold shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                  title="Modo Calmo: dá tempo confortável para ler e escutar sem pressa"
+                >
+                  <span>🧘</span>
+                  <span>Calmo</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onPacingChange('normal')}
+                  className={`px-2 py-1 rounded-lg transition-all font-medium hidden sm:inline-flex items-center gap-1 ${
+                    pacing === 'normal'
+                      ? 'bg-slate-700 text-white font-semibold shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                  title="Modo Normal: ritmo equilibrado"
+                >
+                  <span>⏱️</span>
+                  <span>Normal</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onPacingChange('rapido')}
+                  className={`px-2 py-1 rounded-lg transition-all font-medium hidden md:inline-flex items-center gap-1 ${
+                    pacing === 'rapido'
+                      ? 'bg-slate-700 text-white font-semibold shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                  title="Modo Rápido: transições aceleradas"
+                >
+                  <span>⚡</span>
+                  <span>Rápido</span>
+                </button>
+              </div>
             )}
           </div>
 

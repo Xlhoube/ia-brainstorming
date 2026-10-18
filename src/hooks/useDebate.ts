@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Agent, DebateMessage, DebateState, LanguageTone } from '@/types/debate';
+import { Agent, DebateMessage, DebateState, LanguageTone, DebatePacing } from '@/types/debate';
 import { DEFAULT_AGENTS } from '@/lib/constants/agents';
 import { speechService } from '@/lib/speech/speechService';
 import { LocalDatabase, SavedDebateSession } from '@/lib/db/localDatabase';
@@ -10,6 +10,7 @@ import { AppwriteDatabaseService } from '@/lib/appwrite/databaseService';
 const STORAGE_KEY_API = 'ia_brainstorming_openrouter_key';
 const STORAGE_KEY_AGENTS = 'ia_brainstorming_selected_agents';
 const STORAGE_KEY_TONE = 'ia_brainstorming_tone';
+const STORAGE_KEY_PACING = 'ia_brainstorming_pacing_v1';
 
 export function useDebate() {
   const [sessionId, setSessionId] = useState<string>('session-' + Date.now());
@@ -37,6 +38,17 @@ export function useDebate() {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isSynthesizing, setIsSynthesizing] = useState<boolean>(false);
   const [synthesisResult, setSynthesisResult] = useState<any | null>(null);
+
+  // Cadência e Ritmo de Leitura (calmo por defeito para leitura humana sem sobressaltos)
+  const [pacing, setPacingState] = useState<DebatePacing>('calmo');
+  const [readingCountdown, setReadingCountdown] = useState<number | null>(null);
+  const [isWaitingForNextTurn, setIsWaitingForNextTurn] = useState<boolean>(false);
+
+  const pacingRef = useRef<DebatePacing>('calmo');
+  pacingRef.current = pacing;
+
+  const readingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Tom de Linguagem: 'simples' por defeito para que todos percebam!
   const [tone, setToneState] = useState<LanguageTone>('simples');
@@ -66,6 +78,12 @@ export function useDebate() {
       const savedTone = localStorage.getItem(STORAGE_KEY_TONE) as LanguageTone;
       if (savedTone === 'simples' || savedTone === 'academico') {
         setToneState(savedTone);
+      }
+
+      const savedPacing = localStorage.getItem(STORAGE_KEY_PACING) as DebatePacing;
+      if (savedPacing && ['manual', 'calmo', 'normal', 'rapido'].includes(savedPacing)) {
+        setPacingState(savedPacing);
+        pacingRef.current = savedPacing;
       }
 
       const savedAgents = localStorage.getItem(STORAGE_KEY_AGENTS);
@@ -141,6 +159,14 @@ export function useDebate() {
     }
   };
 
+  const setPacing = (newPacing: DebatePacing) => {
+    setPacingState(newPacing);
+    pacingRef.current = newPacing;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_PACING, newPacing);
+    }
+  };
+
   const toggleAudio = () => {
     const nextState = !isAudioEnabled;
     setIsAudioEnabled(nextState);
@@ -175,9 +201,17 @@ export function useDebate() {
     });
   };
 
-  // Turno atómico
+  // Turno atómico com gestão humana de cadência e leitura
   const runNextTurn = useCallback(async () => {
     if (isGenerating) return;
+
+    // Cancela quaisquer contagens ou temporizadores de leitura pendentes
+    if (readingTimerRef.current) clearTimeout(readingTimerRef.current);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    setReadingCountdown(null);
+    setIsWaitingForNextTurn(false);
+    speechService.stop();
+
     const activeAgents = agents.filter(a => selectedAgentIds.includes(a.id));
     if (activeAgents.length === 0) return;
 
@@ -207,9 +241,6 @@ export function useDebate() {
       if (data.success && data.message) {
         setMessages(prev => [...prev, data.message]);
 
-        // Falar a mensagem sintetizada através do Web Speech Synthesis
-        speechService.speak(currentAgent.id, data.message.content);
-
         if (currentSpeakerIndexRef.current % activeAgents.length === 0) {
           setCurrentRound(r => r + 1);
         }
@@ -218,6 +249,9 @@ export function useDebate() {
         const conclusion = data.message.dialecticalConclusion || data.dialecticalConclusion;
         if (conclusion) {
           setStatus('concluded');
+          setActiveSpeakerId(null);
+          setIsWaitingForNextTurn(false);
+          setReadingCountdown(null);
           try {
             activeAgents.forEach(ag => {
               const agentMsgs = [...messages, data.message].filter(m => m.agentId === ag.id);
@@ -229,17 +263,74 @@ export function useDebate() {
             console.warn('Erro ao arquivar memórias de debate:', memErr);
           }
 
-          // Despoleta automaticamente a síntese editorial do Conselho
+          speechService.speak(currentAgent.id, data.message.content);
           setTimeout(() => {
             synthesizeDebate();
           }, 1200);
+          return;
         }
+
+        // Caso normal de debate contínuo:
+        // Executado logo após a voz do agente terminar (ou logo a seguir se áudio desativado)
+        const onSpeechDone = () => {
+          // Se estiver em modo manual / passo a passo: pára e aguarda que o utilizador avance
+          if (pacingRef.current === 'manual') {
+            setIsWaitingForNextTurn(true);
+            setReadingCountdown(null);
+            return;
+          }
+
+          const wordCount = (data.message.content || '').split(/\s+/).length;
+          let delayMs = 4500; // Calmo com áudio ativo: 4.5s de reflexão pós-voz
+
+          if (pacingRef.current === 'normal') delayMs = 2500;
+          if (pacingRef.current === 'rapido') delayMs = 1200;
+
+          // Se o áudio estiver desligado, dar tempo suficiente para leitura tranquila
+          if (!speechService.getAudioEnabled()) {
+            if (pacingRef.current === 'calmo') {
+              delayMs = Math.max(9000, Math.min(22000, wordCount * 220));
+            } else if (pacingRef.current === 'normal') {
+              delayMs = Math.max(5000, Math.min(13000, wordCount * 140));
+            } else {
+              delayMs = 2500;
+            }
+          }
+
+          setIsWaitingForNextTurn(true);
+          let secondsLeft = Math.ceil(delayMs / 1000);
+          setReadingCountdown(secondsLeft);
+
+          if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+          countdownIntervalRef.current = setInterval(() => {
+            secondsLeft -= 1;
+            if (secondsLeft <= 0) {
+              if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+              setReadingCountdown(null);
+            } else {
+              setReadingCountdown(secondsLeft);
+            }
+          }, 1000);
+
+          if (readingTimerRef.current) clearTimeout(readingTimerRef.current);
+          readingTimerRef.current = setTimeout(() => {
+            setIsWaitingForNextTurn(false);
+            setReadingCountdown(null);
+            setActiveSpeakerId(null);
+            if (statusRef.current === 'running') {
+              runNextTurn();
+            }
+          }, delayMs);
+        };
+
+        // Falar mensagem audível e despoletar transição após conclusão
+        speechService.speak(currentAgent.id, data.message.content, onSpeechDone);
       }
     } catch (err) {
       console.error('Erro ao gerar turno do agente:', err);
+      setActiveSpeakerId(null);
     } finally {
       setIsGenerating(false);
-      setActiveSpeakerId(null);
     }
   }, [agents, selectedAgentIds, isGenerating, topic, topicDescription, messages, apiKey, tone]);
 
@@ -278,21 +369,6 @@ export function useDebate() {
     }));
   };
 
-  // Ciclo automático
-  useEffect(() => {
-    if (status === 'running' && !isGenerating && !activeSpeakerId) {
-      timeoutRef.current = setTimeout(() => {
-        if (statusRef.current === 'running') {
-          runNextTurn();
-        }
-      }, speedDelayMs);
-    }
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [status, isGenerating, activeSpeakerId, runNextTurn, speedDelayMs]);
-
   const startDebate = (newTopic?: string, newDescription?: string) => {
     if (newTopic) setTopic(newTopic);
     if (newDescription) setTopicDescription(newDescription);
@@ -303,16 +379,32 @@ export function useDebate() {
     currentSpeakerIndexRef.current = 0;
     setSynthesisResult(null);
     setStatus('running');
+    setIsWaitingForNextTurn(false);
+    setReadingCountdown(null);
+    if (readingTimerRef.current) clearTimeout(readingTimerRef.current);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+
+    // Dispara a intervenção de abertura da mesa redonda
+    setTimeout(() => {
+      runNextTurn();
+    }, 200);
   };
 
   const pauseDebate = () => {
     setStatus('paused');
     speechService.stop();
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (readingTimerRef.current) clearTimeout(readingTimerRef.current);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    setReadingCountdown(null);
+    setIsWaitingForNextTurn(false);
   };
 
   const resumeDebate = () => {
     setStatus('running');
+    // Se não estiver já a gerar nem em contagem ativa, retoma o próximo turno
+    if (!isGenerating && !isSpeakingAudio && !readingCountdown) {
+      runNextTurn();
+    }
   };
 
   const resetDebate = () => {
@@ -324,7 +416,10 @@ export function useDebate() {
     setActiveSpeakerId(null);
     setSynthesisResult(null);
     speechService.stop();
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (readingTimerRef.current) clearTimeout(readingTimerRef.current);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    setReadingCountdown(null);
+    setIsWaitingForNextTurn(false);
   };
 
   const loadSavedSession = (saved: SavedDebateSession) => {
@@ -364,6 +459,13 @@ export function useDebate() {
     setMessages(nextMessages);
     setStatus('running');
 
+    // Cancela contagens anteriores
+    if (readingTimerRef.current) clearTimeout(readingTimerRef.current);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    setReadingCountdown(null);
+    setIsWaitingForNextTurn(false);
+    speechService.stop();
+
     // Despoletar reação imediata e audível de um dos especialistas na sala
     const activeAgents = agents.filter(a => selectedAgentIds.includes(a.id));
     if (activeAgents.length === 0) return;
@@ -398,11 +500,13 @@ export function useDebate() {
       const data = await res.json();
       if (data.success && data.message) {
         setMessages(prev => [...prev, data.message]);
-        speechService.speak(respondingAgent.id, data.message.content);
 
         const conclusion = data.message.dialecticalConclusion || data.dialecticalConclusion;
         if (conclusion) {
           setStatus('concluded');
+          setActiveSpeakerId(null);
+          setIsWaitingForNextTurn(false);
+          setReadingCountdown(null);
           try {
             activeAgents.forEach(ag => {
               const agentMsgs = [...nextMessages, data.message].filter(m => m.agentId === ag.id);
@@ -413,16 +517,68 @@ export function useDebate() {
           } catch (memErr) {
             console.warn('Erro ao arquivar memórias de debate:', memErr);
           }
+          speechService.speak(respondingAgent.id, data.message.content);
           setTimeout(() => {
             synthesizeDebate();
           }, 1200);
+          return;
         }
+
+        const onSpeechDone = () => {
+          if (pacingRef.current === 'manual') {
+            setIsWaitingForNextTurn(true);
+            setReadingCountdown(null);
+            return;
+          }
+
+          const wordCount = (data.message.content || '').split(/\s+/).length;
+          let delayMs = 4500;
+          if (pacingRef.current === 'normal') delayMs = 2500;
+          if (pacingRef.current === 'rapido') delayMs = 1200;
+
+          if (!speechService.getAudioEnabled()) {
+            if (pacingRef.current === 'calmo') {
+              delayMs = Math.max(9000, Math.min(22000, wordCount * 220));
+            } else if (pacingRef.current === 'normal') {
+              delayMs = Math.max(5000, Math.min(13000, wordCount * 140));
+            } else {
+              delayMs = 2500;
+            }
+          }
+
+          setIsWaitingForNextTurn(true);
+          let secondsLeft = Math.ceil(delayMs / 1000);
+          setReadingCountdown(secondsLeft);
+
+          if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+          countdownIntervalRef.current = setInterval(() => {
+            secondsLeft -= 1;
+            if (secondsLeft <= 0) {
+              if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+              setReadingCountdown(null);
+            } else {
+              setReadingCountdown(secondsLeft);
+            }
+          }, 1000);
+
+          if (readingTimerRef.current) clearTimeout(readingTimerRef.current);
+          readingTimerRef.current = setTimeout(() => {
+            setIsWaitingForNextTurn(false);
+            setReadingCountdown(null);
+            setActiveSpeakerId(null);
+            if (statusRef.current === 'running') {
+              runNextTurn();
+            }
+          }, delayMs);
+        };
+
+        speechService.speak(respondingAgent.id, data.message.content, onSpeechDone);
       }
     } catch (err) {
       console.error('Erro ao responder à fala humana na sala:', err);
+      setActiveSpeakerId(null);
     } finally {
       setIsGenerating(false);
-      setActiveSpeakerId(null);
     }
   };
 
@@ -470,6 +626,10 @@ export function useDebate() {
     activeSpeakerId,
     speedDelayMs,
     setSpeedDelayMs,
+    pacing,
+    setPacing,
+    readingCountdown,
+    isWaitingForNextTurn,
     messages,
     apiKey,
     saveApiKey,

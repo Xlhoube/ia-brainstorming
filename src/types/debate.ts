@@ -9,6 +9,7 @@ export type AgentRole =
   | 'personalizado';
 
 export type LanguageTone = 'simples' | 'academico';
+export type DebatePacing = 'manual' | 'calmo' | 'normal' | 'rapido';
 
 export interface AgentPersonality {
   traits: string[];

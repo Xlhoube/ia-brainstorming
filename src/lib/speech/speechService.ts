@@ -87,15 +87,20 @@ class SpeechService {
     this.onSpeakingChangeCallbacks.forEach(cb => cb(isSpeaking, agentId));
   }
 
-  public speak(agentId: string, text: string) {
-    if (!this.isAudioEnabled) return;
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  public speak(agentId: string, text: string, onEnd?: () => void) {
+    if (!this.isAudioEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      if (onEnd) setTimeout(onEnd, 50);
+      return;
+    }
 
     this.stop();
 
     // Limpar texto de caracteres especiais ou quebras excessivas
     const cleanText = text.replace(/[*_#`]/g, ' ').replace(/\s+/g, ' ').trim();
-    if (!cleanText) return;
+    if (!cleanText) {
+      if (onEnd) setTimeout(onEnd, 50);
+      return;
+    }
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     const profile = AGENT_VOICE_PROFILES[agentId] || { pitch: 1.0, rate: 1.0, preferredLang: 'pt-PT' };
@@ -123,6 +128,7 @@ class SpeechService {
     utterance.onend = () => {
       this.notify(false, null);
       this.currentUtterance = null;
+      if (onEnd) onEnd();
     };
 
     utterance.onerror = (e) => {
@@ -132,6 +138,7 @@ class SpeechService {
       }
       this.notify(false, null);
       this.currentUtterance = null;
+      if (onEnd) onEnd();
     };
 
     this.currentUtterance = utterance;
