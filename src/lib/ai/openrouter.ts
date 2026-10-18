@@ -70,45 +70,25 @@ async function callOpenRouterWithFallback(
     : `REGRA DE DIALÉTICA AVANÇADA:
 - Confronto intelectual rigoroso, filosófico e conceptual, mas sempre em tom de diálogo vivo entre pares.`;
 
-  const personalitySection = agent.personality ? `
-A TUA IDENTIDADE PSICOLÓGICA:
-- Nome: ${agent.name} (${agent.roleTitle})
-- Temperamento: ${agent.personality.temperament}
-- Traços Dominantes: ${agent.personality.traits.join(', ')}
-- O que te faz reagir de imediato: ${agent.personality.reactionTrigger}
-- Como evoluis com o debate: ${agent.personality.evolutionStyle}
-- Estilo verbal: ${agent.personality.dialogueHabits}
-` : '';
-
-  const memorySection = agent.memory ? `
-A TUA MEMÓRIA COGNITIVA E HISTÓRICO PESSOAL:
-- A Tua Filosofia Inabalável: "${agent.memory.corePhilosophy}"
-- O que pensas e recordas pessoalmente dos teus colegas:
-${Object.entries(agent.memory.knownColleagues).map(([name, note]) => `  * Sobre ${name}: ${note}`).join('\n')}
-- Debates Passados que Recordas no Teu Percurso:
+  const pastMemoriesSection = (agent.memory?.pastMemories && agent.memory.pastMemories.length > 0) ? `
+HISTÓRICO DE DEBATES ANTERIORES:
 ${agent.memory.pastMemories.map(m => `  * No debate sobre "${m.topic}": ${m.stanceSummary}`).join('\n')}
-- Lições e Conclusões Acumuladas:
-${agent.memory.cumulativeLearnings.map(l => `  * ${l}`).join('\n')}
-- DIRETRIZ DE MEMÓRIA: Mantém coerência com este teu percurso. Se oportuno, alude com naturalidade a debates passados ou ao feitio conhecido do colega com quem estás a falar (ex.: "Helena, já noutro debate ignoraste...", ou "Marcus, tu tens sempre o hábito socrático de...").
+- DIRETRIZ DE MEMÓRIA: Mantém coerência com o teu histórico pessoal e alude com naturalidade a conclusões passadas quando relevante.
 ` : '';
 
   const systemInstructions = `${agent.systemPrompt}
 
-TEMA CENTRAL: "${topic}"
-${topicDescription ? `Contexto: ${topicDescription}` : ''}
+TEMA DO DEBATE: "${topic}"
+${topicDescription ? `Contexto adicional: ${topicDescription}` : ''}
 
 OUTROS PRESENTES NA MESA:
 ${rosterSummary}
-
-${personalitySection}
-
-${memorySection}
-
+${pastMemoriesSection}
 ${toneInstructions}
 
 DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
 1. ESCUTA ATIVA OBRIGATÓRIA: Não comeces a debitar a tua teoria. Olha para a última intervenção. Agarra numa frase, num exemplo ou numa falha do último orador e responde-lhe diretamente no primeiro parágrafo: "Repara no que estás a dizer, [Nome]...", ou "Calma, [Nome], estás a esquecer-te de...".
-2. PENSA EM VOZ ALTA: Mostra hesitação, surpresa ou convicção. Não sejas um robô formal.
+2. PENSA EM VOZ ALTA: Mostra hesitação, surpresa ou convicção fundamentada. Não sejas um robô formal.
 3. EXTENSÃO CONTROLADA: No máximo 2 parágrafos concisos (entre 50 a 90 palavras). Diálogos vivos são ágeis e certeiros. Menos discurso, mais réplica.
 4. PROIBIÇÃO ABSOLUTA DE CLICHÉS: Proibido dizer "Relativamente ao tópico", "Gostaria de acrescentar", "Concordo em parte com X". Entra diretamente na resposta.
 5. LINGUAGEM EM PORTUGUÊS DE PORTUGAL (PT-PT): Estritamente sem termos ou gerúndios brasileiros.

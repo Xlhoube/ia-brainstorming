@@ -133,7 +133,7 @@ export const BIBLIA_APP_MAP: Record<string, {
     image: '/avatars/02_Dra_Helena_Rostova_face.png',
     accentColor: '#06b6d4',
     badgeColor: 'bg-cyan-950/70 text-cyan-300 border-cyan-800/60',
-    model: 'google/gemini-2.0-flash-exp:free',
+    model: 'meta-llama/llama-3.3-70b-instruct:free',
   },
   aura_chen: {
     appId: 'aura-chen',
@@ -142,24 +142,24 @@ export const BIBLIA_APP_MAP: Record<string, {
     image: '/avatars/03_Aura_Chen_face.png',
     accentColor: '#10b981',
     badgeColor: 'bg-emerald-950/70 text-emerald-300 border-emerald-800/60',
-    model: 'google/gemini-2.0-flash-exp:free',
+    model: 'qwen/qwen-2.5-72b-instruct:free',
   },
   kaelen_voss: {
     appId: 'kaelen-voss',
     category: 'tecnologo',
     avatar: '⚡',
     image: '/avatars/04_Kaelen_Voss_face.png',
-    accentColor: '#3b82f6',
-    badgeColor: 'bg-blue-950/70 text-blue-300 border-blue-800/60',
-    model: 'google/gemini-2.0-flash-exp:free',
+    accentColor: '#f59e0b',
+    badgeColor: 'bg-amber-950/70 text-amber-300 border-amber-800/60',
+    model: 'mistralai/mistral-small-24b-instruct-2501:free',
   },
   sophia_veris: {
     appId: 'sophia-veris',
     category: 'moderador',
     avatar: '⚖️',
     image: '/avatars/05_Sophia_Veris_face.png',
-    accentColor: '#d946ef',
-    badgeColor: 'bg-fuchsia-950/70 text-fuchsia-300 border-fuchsia-800/60',
+    accentColor: '#3b82f6',
+    badgeColor: 'bg-blue-950/70 text-blue-300 border-blue-800/60',
     model: 'google/gemini-2.0-flash-exp:free',
   },
 };
@@ -218,34 +218,59 @@ export function getBibliaCharacterById(id: string): CharacterDefinition | undefi
   return undefined;
 }
 
+const COLLEAGUE_DISPLAY_NAMES: Record<string, string> = {
+  marcus_vance: 'Dr. Marcus Vance',
+  helena_rostova: 'Dra. Helena Rostova',
+  aura_chen: 'Aura Chen',
+  kaelen_voss: 'Kaelen Voss',
+  sophia_veris: 'Sophia Veris',
+};
+
 /**
- * Constrói o System Prompt rigoroso com base direta nos dados da Bíblia
+ * Constrói o System Prompt canónico individual a partir da Bíblia de Personagens
  */
 export function buildSystemPromptFromBiblia(char: CharacterDefinition): string {
-  const instructions = char.agent_instructions.map((inst, i) => `${i + 1}. ${inst}`).join('\n');
-  const avoidList = char.communication.avoid.map(av => `- ${av}`).join('\n');
+  const instructionsList = char.agent_instructions.map((inst, i) => `${i + 1}. ${inst}`).join('\n');
   const questionsList = char.reasoning_style.first_questions.map(q => `- "${q}"`).join('\n');
+  const prioritizesList = char.reasoning_style.prioritizes.join(', ');
+  const blindSpotsList = char.reasoning_style.blind_spots.join(', ');
+  const avoidList = char.communication.avoid.map(av => `- ${av}`).join('\n');
+  const relationshipsList = Object.entries(char.relationships)
+    .map(([colleagueId, note]) => `- Com ${COLLEAGUE_DISPLAY_NAMES[colleagueId] || colleagueId}: ${note}`)
+    .join('\n');
 
   return `És ${char.name}, ${char.role} (${char.archetype}).
 MISSÃO: ${char.fictional_backstory.current_mission}
+MOTIVAÇÃO COGNITIVA: ${char.psychology.motivation}
+VALORES FUNDAMENTAIS: ${char.psychology.core_values.join(', ')}
 
-REGRAS DE CONDUTA & INSTRUÇÕES DA TUA PERSONAGEM:
-${instructions}
+INSTRUÇÕES OBRIGATÓRIAS DA TUA PERSONAGEM:
+${instructionsList}
 
-ESTILO DE RACIOCÍNIO & PERGUNTAS QUE FAZES PRIMEIRO:
+CRITÉRIOS DE RACIOCÍNIO & PERGUNTAS INICIAIS:
 ${questionsList}
 
-REGRA DE DECISÃO:
-"${char.reasoning_style.decision_rule}"
+- Prioridades na análise: ${prioritizesList}
+- Regra de Decisão Inabalável: "${char.reasoning_style.decision_rule}"
+- Pontos Cegos a Vigiar: ${blindSpotsList}
+- Contradição Interna: ${char.psychology.inner_contradiction}
 
 ESTILO VERBAL & COMUNICAÇÃO:
 - Tom: ${char.communication.tone.join(', ')}
 - Estilo: ${char.communication.style}
-- Proibição de Comportamentos (A evitar absolutamente):
+- Proibições Estritas (A evitar em absoluto):
 ${avoidList}
-- Exemplo de frase típica do teu pensamento: "${char.communication.sample_line}"
+- Exemplo de linha de pensamento típica: "${char.communication.sample_line}"
 
-Comunica sempre em Português de Portugal (PT-PT), sem chavões vazios nem discursos debitados. Mantém réplicas vivas e diretas ao colega que falou antes de ti.`;
+RELAÇÃO COM OS COLEGAS NA MESA:
+${relationshipsList}
+
+REGRAS EPISTEMOLÓGICAS COMPARTILHADAS (BÍBLIA CANÓNICA):
+1. Proibição absoluta de inventar factos, estudos, fontes, estatísticas ou capacidades.
+2. Distingue rigorosamente factos verificáveis de hipóteses, inferências e juízos de valor.
+3. Discorda de argumentos e premissas sem nunca atacar pessoas.
+4. Não concordes com a maioria apenas para forçar consenso; mantém divergências legítimas visíveis.
+5. Reconhece explicitamente incertezas, limites metodológicos e informação em falta.`;
 }
 
 /**
@@ -259,6 +284,13 @@ export function getAppAgentsFromBiblia(): Agent[] {
     const meta = BIBLIA_APP_MAP[char.id];
     if (!meta) {
       throw new Error(`Mapeamento de metadados não encontrado para o personagem: "${char.id}".`);
+    }
+
+    const colleagueRelations: Record<string, string> = {};
+    for (const [colleagueKey, note] of Object.entries(char.relationships)) {
+      const colleagueMeta = BIBLIA_APP_MAP[colleagueKey];
+      const displayName = COLLEAGUE_DISPLAY_NAMES[colleagueKey] || colleagueKey;
+      colleagueRelations[displayName] = note;
     }
 
     return {
@@ -283,7 +315,7 @@ export function getAppAgentsFromBiblia(): Agent[] {
       memory: {
         corePhilosophy: `${char.psychology.core_values.join(', ')} — Regra de decisão: ${char.reasoning_style.decision_rule}`,
         cumulativeLearnings: char.agent_instructions,
-        knownColleagues: char.relationships,
+        knownColleagues: colleagueRelations,
         pastMemories: [],
       },
       systemPrompt: buildSystemPromptFromBiblia(char),
