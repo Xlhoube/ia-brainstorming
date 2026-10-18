@@ -1,0 +1,68 @@
+export type AgentRole = 
+  | 'filosofo' 
+  | 'cientista' 
+  | 'humanista' 
+  | 'tecnologo' 
+  | 'moderador'
+  | 'economista'
+  | 'psicologo'
+  | 'personalizado';
+
+export interface Agent {
+  id: string;
+  name: string;
+  roleTitle: string;
+  category: AgentRole;
+  avatar: string;
+  accentColor: string; // Tailwind color string e.g. '#3b82f6' or 'from-blue-500 to-indigo-600'
+  badgeColor: string;
+  systemPrompt: string;
+  model: string;
+  provider: 'openrouter' | 'groq' | 'google' | 'mock';
+  stanceDescription: string;
+}
+
+export interface DebateMessage {
+  id: string;
+  agentId: string;
+  agentName: string;
+  agentRole: string;
+  avatar: string;
+  accentColor: string;
+  content: string;
+  round: number;
+  timestamp: string;
+  isHuman?: boolean;
+  replyToAgentName?: string;
+  keyPoints?: string[];
+}
+
+export interface PresetTopic {
+  id: string;
+  title: string;
+  category: 'Filosofia & Consciência' | 'Sociedade & Futuro' | 'Tecnologia & IA' | 'Ciência & Espaço' | 'Ética & Humanidade';
+  description: string;
+  suggestedAgents: string[];
+}
+
+export interface DebateState {
+  id: string;
+  topic: string;
+  topicDescription: string;
+  status: 'idle' | 'running' | 'paused' | 'concluded';
+  currentRound: number;
+  maxRounds: number;
+  activeSpeakerId: string | null;
+  speedDelayMs: number;
+  selectedAgentIds: string[];
+  messages: DebateMessage[];
+  conclusionSummary?: string;
+  consensusPoints?: string[];
+  divergencePoints?: string[];
+}
+
+export interface OpenRouterConfig {
+  apiKey: string;
+  siteUrl?: string;
+  siteName?: string;
+}
