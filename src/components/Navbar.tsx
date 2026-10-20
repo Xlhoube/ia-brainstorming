@@ -18,6 +18,8 @@ interface NavbarProps {
   status: string;
   currentRound: number;
   maxRounds: number;
+  currentStageName?: string;
+  currentStageIndex?: number;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -34,6 +36,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   status,
   currentRound,
   maxRounds,
+  currentStageName,
+  currentStageIndex,
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#050814]/85 backdrop-blur-md px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2">
@@ -54,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               IA Brain Storming
             </h1>
             <span className="text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hidden md:inline-block">
-              v0.12.0
+              v0.13.0
             </span>
           </div>
           <p className="text-[10px] sm:text-[11px] text-slate-400 hidden lg:block truncate">
@@ -75,13 +79,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : status === 'running' ? (
               <span className="flex items-center gap-1.5 text-blue-300 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
-                <span>Dialética Livre</span>
+                <span>{currentStageName ? `🧭 Etapa ${(currentStageIndex ?? 0) + 1}/5: ${currentStageName}` : 'Dialética Livre'}</span>
                 <span className="text-slate-600">•</span>
                 <span className="font-mono font-bold text-blue-400">Ciclo {currentRound}</span>
               </span>
             ) : (
               <span className="flex items-center gap-1.5 text-amber-300 font-medium">
                 <span>⏸️ Em Pausa</span>
+                {currentStageName && (
+                  <>
+                    <span className="text-slate-600">•</span>
+                    <span>🧭 {currentStageName}</span>
+                  </>
+                )}
                 <span className="text-slate-600">•</span>
                 <span className="font-mono text-amber-400">Ciclo {currentRound}</span>
               </span>

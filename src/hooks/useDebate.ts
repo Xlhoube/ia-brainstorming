@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Agent, DebateMessage, DebateState, LanguageTone, DebatePacing } from '@/types/debate';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Agent, DebateMessage, DebateState, LanguageTone, DebatePacing, CanonicalDebateStage } from '@/types/debate';
 import { DEFAULT_AGENTS } from '@/lib/constants/agents';
+import { getCanonicalDebateStages } from '@/lib/agents/bibliaLoader';
 import { speechService } from '@/lib/speech/speechService';
 import { LocalDatabase, SavedDebateSession } from '@/lib/db/localDatabase';
 import { AppwriteDatabaseService } from '@/lib/appwrite/databaseService';
@@ -31,6 +32,14 @@ export function useDebate() {
   const [status, setStatus] = useState<DebateState['status']>('idle');
   const [currentRound, setCurrentRound] = useState<number>(1);
   const [maxRounds, setMaxRounds] = useState<number>(4);
+
+  // 5 Etapas Canónicas do Protocolo de Debate (The Five)
+  const canonicalStages = useMemo<CanonicalDebateStage[]>(() => getCanonicalDebateStages(), []);
+  const [currentStageIndex, setCurrentStageIndex] = useState<number>(0);
+  const currentStage = canonicalStages[currentStageIndex] || canonicalStages[0];
+  const currentStageIndexRef = useRef(0);
+  currentStageIndexRef.current = currentStageIndex;
+
   const [activeSpeakerId, setActiveSpeakerId] = useState<string | null>(null);
   const [speedDelayMs, setSpeedDelayMs] = useState<number>(2500);
   const [messages, setMessages] = useState<DebateMessage[]>([]);
@@ -144,13 +153,15 @@ export function useDebate() {
         messages,
         selectedAgentIds,
         currentRound,
+        currentStageIndex,
+        currentStageName: currentStage.name,
         maxRounds,
         synthesisResult,
         createdAt: parseInt(sessionId.replace('session-', '')) || Date.now(),
         updatedAt: Date.now(),
       });
     }
-  }, [messages, synthesisResult, sessionId, topic, topicDescription, selectedAgentIds, currentRound, maxRounds]);
+  }, [messages, synthesisResult, sessionId, topic, topicDescription, selectedAgentIds, currentRound, currentStageIndex, currentStage.name, maxRounds]);
 
   const setTone = (newTone: LanguageTone) => {
     setToneState(newTone);
@@ -201,7 +212,7 @@ export function useDebate() {
     });
   };
 
-  // Turno atómico com gestão humana de cadência e leitura
+  // Turno atómico com gestão humana de cadência e leitura com progressão nas 5 etapas canónicas
   const runNextTurn = useCallback(async () => {
     if (isGenerating) return;
 
@@ -215,10 +226,33 @@ export function useDebate() {
     const activeAgents = agents.filter(a => selectedAgentIds.includes(a.id));
     if (activeAgents.length === 0) return;
 
-    const nextAgentIndex = currentSpeakerIndexRef.current % activeAgents.length;
-    const currentAgent = activeAgents[nextAgentIndex];
-    currentSpeakerIndexRef.current += 1;
+    const moderator = activeAgents.find(a => a.id === 'sophia-veris' || a.category === 'moderador');
+    const nonModerators = activeAgents.filter(a => a.id !== (moderator?.id || ''));
 
+    const stageIdx = currentStageIndexRef.current;
+    const stageObj = canonicalStages[stageIdx] || canonicalStages[0];
+
+    // Determinação do orador adequado conforme a etapa canónica (The Five)
+    let currentAgent: Agent;
+
+    if (stageIdx === 0) {
+      // Etapa 0: Compreender (Sophia Veris / Moderadora abre a discussão e enquadra o problema)
+      currentAgent = moderator || activeAgents[0];
+    } else if (stageIdx === 1) {
+      // Etapa 1: Análise independente (Cada pensador expressa primeiro a sua visão autónoma)
+      const targetPool = nonModerators.length > 0 ? nonModerators : activeAgents;
+      const spokenStage1 = messages.filter(m => m.stageIndex === 1).map(m => m.agentId);
+      const pendingStage1 = targetPool.filter(a => !spokenStage1.includes(a.id));
+      currentAgent = pendingStage1[0] || targetPool[currentSpeakerIndexRef.current % targetPool.length];
+    } else if (stageIdx === 4) {
+      // Etapa 4: Síntese (Sophia Veris / Moderadora sintetiza convergências e aporias sem forçar consenso)
+      currentAgent = moderator || activeAgents[0];
+    } else {
+      // Etapa 2 (Confronto de argumentos) e Etapa 3 (Verificação)
+      currentAgent = activeAgents[currentSpeakerIndexRef.current % activeAgents.length];
+    }
+
+    currentSpeakerIndexRef.current += 1;
     setActiveSpeakerId(currentAgent.id);
     setIsGenerating(true);
 
@@ -234,15 +268,56 @@ export function useDebate() {
           messages,
           apiKey,
           tone,
+          stage: stageObj,
+          stageIndex: stageIdx,
         }),
       });
 
       const data = await res.json();
       if (data.success && data.message) {
+        if (!data.message.stageName) {
+          data.message.stageName = stageObj.name;
+          data.message.stageIndex = stageIdx;
+        }
+
+        // Se estiver na etapa 4 (Síntese) e nenhum desfecho veio indicado no texto, atribuir desfecho de síntese
+        if (stageIdx === 4 && !data.message.dialecticalConclusion) {
+          data.message.dialecticalConclusion = 'sintese';
+        }
+
         setMessages(prev => [...prev, data.message]);
 
         if (currentSpeakerIndexRef.current % activeAgents.length === 0) {
           setCurrentRound(r => r + 1);
+        }
+
+        // Progressão automática entre as 5 etapas canónicas da Bíblia:
+        if (stageIdx === 0) {
+          // Após o enquadramento inicial de Compreender, passa à Análise independente
+          setCurrentStageIndex(1);
+          currentStageIndexRef.current = 1;
+        } else if (stageIdx === 1) {
+          // Quando todos os pensadores tiverem formulado a sua análise independente, passa ao Confronto
+          const targetPool = nonModerators.length > 0 ? nonModerators : activeAgents;
+          const stage1Count = [...messages, data.message].filter(m => m.stageIndex === 1).length;
+          if (stage1Count >= targetPool.length) {
+            setCurrentStageIndex(2);
+            currentStageIndexRef.current = 2;
+          }
+        } else if (stageIdx === 2) {
+          // Após pelo menos 1 ciclo de confronto entre os pensadores, avança para Verificação
+          const stage2Count = [...messages, data.message].filter(m => m.stageIndex === 2).length;
+          if (stage2Count >= Math.max(activeAgents.length, 3)) {
+            setCurrentStageIndex(3);
+            currentStageIndexRef.current = 3;
+          }
+        } else if (stageIdx === 3) {
+          // Após intervenções de verificação empírica, avança para Síntese
+          const stage3Count = [...messages, data.message].filter(m => m.stageIndex === 3).length;
+          if (stage3Count >= Math.min(activeAgents.length, 2)) {
+            setCurrentStageIndex(4);
+            currentStageIndexRef.current = 4;
+          }
         }
 
         // Se o especialista declarou autonomamente a conclusão dialética da mesa (Síntese, Consenso ou Aporia)
@@ -376,6 +451,8 @@ export function useDebate() {
     setSessionId(newId);
     setMessages([]);
     setCurrentRound(1);
+    setCurrentStageIndex(0);
+    currentStageIndexRef.current = 0;
     currentSpeakerIndexRef.current = 0;
     setSynthesisResult(null);
     setStatus('running');
@@ -384,7 +461,7 @@ export function useDebate() {
     if (readingTimerRef.current) clearTimeout(readingTimerRef.current);
     if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
 
-    // Dispara a intervenção de abertura da mesa redonda
+    // Dispara a intervenção de abertura da mesa redonda na Etapa 0 (Compreender)
     setTimeout(() => {
       runNextTurn();
     }, 200);
@@ -412,6 +489,8 @@ export function useDebate() {
     setSessionId('session-' + Date.now());
     setMessages([]);
     setCurrentRound(1);
+    setCurrentStageIndex(0);
+    currentStageIndexRef.current = 0;
     currentSpeakerIndexRef.current = 0;
     setActiveSpeakerId(null);
     setSynthesisResult(null);
@@ -432,6 +511,9 @@ export function useDebate() {
     setSelectedAgentIds(saved.selectedAgentIds || selectedAgentIds);
     setCurrentRound(saved.currentRound || 1);
     setMaxRounds(saved.maxRounds || 4);
+    const loadedStageIdx = saved.currentStageIndex ?? (saved.messages?.length ? (saved.messages[saved.messages.length - 1].stageIndex ?? 0) : 0);
+    setCurrentStageIndex(loadedStageIdx);
+    currentStageIndexRef.current = loadedStageIdx;
     setSynthesisResult(saved.synthesisResult || null);
     currentSpeakerIndexRef.current = (saved.messages || []).length;
   };
@@ -441,6 +523,7 @@ export function useDebate() {
 
     const raw = content.trim();
     const isGreeting = /boa noite|bom dia|boa tarde|ol[aá]|oi|boas|como est[aã]o|tudo bem/i.test(raw);
+    const currentStageObj = canonicalStages[currentStageIndexRef.current] || canonicalStages[0];
 
     const humanMsg: DebateMessage = {
       id: 'human-' + Date.now(),
@@ -451,6 +534,8 @@ export function useDebate() {
       accentColor: '#3b82f6',
       content: raw,
       round: currentRound,
+      stageName: currentStageObj.name,
+      stageIndex: currentStageIndexRef.current,
       timestamp: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
       isHuman: true,
     };
@@ -494,6 +579,8 @@ export function useDebate() {
           messages: nextMessages,
           apiKey,
           tone,
+          stage: currentStageObj,
+          stageIndex: currentStageIndexRef.current,
         }),
       });
 
@@ -653,5 +740,15 @@ export function useDebate() {
     synthesizeDebate,
     addAgentLearning,
     addAgentMemoryEntry,
+    // Protocolo Canónico em 5 Etapas (The Five)
+    canonicalStages,
+    currentStageIndex,
+    currentStage,
+    setStage: (idx: number) => {
+      if (idx >= 0 && idx < canonicalStages.length) {
+        setCurrentStageIndex(idx);
+        currentStageIndexRef.current = idx;
+      }
+    },
   };
 }

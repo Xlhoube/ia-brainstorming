@@ -192,6 +192,17 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                               </span>
                             );
                           })()}
+
+                          {/* Distintivo de Etapa Canónica (The Five) */}
+                          {msg.stageName && (
+                            <span
+                              className="text-[8px] sm:text-[9px] font-semibold px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-950/70 text-indigo-300 border border-indigo-700/60 flex items-center gap-1 shadow-sm"
+                              title={`Etapa do Protocolo Canónico: ${msg.stageName}`}
+                            >
+                              <span>🧭</span>
+                              <span>{msg.stageName}</span>
+                            </span>
+                          )}
                         </div>
                         <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">
                           {isHuman ? 'Intervenção Humana' : `Intervenção #${index + 1}`} • {msg.timestamp}

@@ -3,7 +3,7 @@
  * Fonte de verdade única: the_five_biblia_personagens_v1.json
  */
 
-import { Agent } from '@/types/debate';
+import { Agent, CanonicalDebateStage } from '@/types/debate';
 import bibliaRaw from '../../../the_five_biblia_personagens_v1.json';
 
 // --- Interfaces Tipadas da Bíblia Narrativa ---
@@ -321,4 +321,31 @@ export function getAppAgentsFromBiblia(): Agent[] {
       systemPrompt: buildSystemPromptFromBiblia(char),
     };
   });
+}
+
+/**
+ * Devolve o protocolo de debate canónico (5 etapas, condições de conclusão e anti-patterns)
+ */
+export function getDebateProtocol(): DebateProtocol {
+  return getBiblia().project.debate_protocol;
+}
+
+/**
+ * Devolve as 5 Etapas Canónicas do Debate com identificadores e instruções
+ */
+export function getCanonicalDebateStages(): CanonicalDebateStage[] {
+  const protocol = getDebateProtocol();
+  const idMap: Record<string, string> = {
+    'Compreender': 'compreender',
+    'Análise independente': 'analise_independente',
+    'Confronto de argumentos': 'confronto_argumentos',
+    'Verificação': 'verificacao',
+    'Síntese': 'sintese',
+  };
+
+  return protocol.stages.map(stage => ({
+    id: idMap[stage.name] || stage.name.toLowerCase().replace(/\s+/g, '_'),
+    name: stage.name,
+    instruction: stage.instruction,
+  }));
 }

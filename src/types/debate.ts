@@ -51,6 +51,12 @@ export interface Agent {
 
 export type DialecticalOutcome = 'consenso' | 'aporia' | 'sintese';
 
+export interface CanonicalDebateStage {
+  id: string;
+  name: string;
+  instruction: string;
+}
+
 export interface DebateMessage {
   id: string;
   agentId: string;
@@ -61,6 +67,8 @@ export interface DebateMessage {
   accentColor: string;
   content: string;
   round: number;
+  stageName?: string;
+  stageIndex?: number;
   timestamp: string;
   isHuman?: boolean;
   replyToAgentName?: string;
@@ -82,6 +90,8 @@ export interface DebateState {
   topicDescription: string;
   status: 'idle' | 'running' | 'paused' | 'concluded';
   currentRound: number;
+  currentStageIndex?: number;
+  currentStageName?: string;
   maxRounds?: number;
   activeSpeakerId: string | null;
   speedDelayMs: number;

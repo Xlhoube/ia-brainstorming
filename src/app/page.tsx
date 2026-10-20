@@ -46,6 +46,8 @@ export default function HomePage() {
     injectHumanIntervention,
     synthesizeDebate,
     addAgentLearning,
+    currentStage,
+    currentStageIndex,
   } = useDebate();
 
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
@@ -92,6 +94,8 @@ export default function HomePage() {
         status={status}
         currentRound={currentRound}
         maxRounds={maxRounds}
+        currentStageName={currentStage?.name}
+        currentStageIndex={currentStageIndex}
       />
 
       {/* Roster de Agentes da Mesa Redonda */}

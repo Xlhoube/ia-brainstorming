@@ -5,7 +5,7 @@ import { Agent, DebateMessage, LanguageTone } from '@/types/debate';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { agent, topic, topicDescription, allAgents, messages, apiKey, tone } = body as {
+    const { agent, topic, topicDescription, allAgents, messages, apiKey, tone, stage, stageIndex } = body as {
       agent: Agent;
       topic: string;
       topicDescription?: string;
@@ -13,6 +13,11 @@ export async function POST(req: NextRequest) {
       messages: DebateMessage[];
       apiKey?: string;
       tone?: LanguageTone;
+      stage?: {
+        name: string;
+        instruction: string;
+      };
+      stageIndex?: number;
     };
 
     if (!agent || !topic) {
@@ -30,6 +35,7 @@ export async function POST(req: NextRequest) {
       messages: messages || [],
       apiKey,
       tone: tone || 'simples',
+      stage,
     });
 
     const { cleanText, dialecticalConclusion } = extractDialecticalConclusion(rawContent);
@@ -44,6 +50,8 @@ export async function POST(req: NextRequest) {
       accentColor: agent.accentColor,
       content: cleanText,
       round: (messages && messages.length > 0 ? messages[messages.length - 1].round : 1),
+      stageName: stage?.name,
+      stageIndex: typeof stageIndex === 'number' ? stageIndex : undefined,
       timestamp: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
       dialecticalConclusion,
     };

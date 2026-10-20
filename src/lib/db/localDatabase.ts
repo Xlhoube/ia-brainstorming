@@ -7,6 +7,8 @@ export interface SavedDebateSession {
   messages: DebateMessage[];
   selectedAgentIds: string[];
   currentRound: number;
+  currentStageIndex?: number;
+  currentStageName?: string;
   maxRounds?: number;
   dialecticalOutcome?: DialecticalOutcome;
   synthesisResult: any | null;

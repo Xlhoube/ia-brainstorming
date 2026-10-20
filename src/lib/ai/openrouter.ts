@@ -8,6 +8,10 @@ interface GenerateTurnParams {
   messages: DebateMessage[];
   apiKey?: string;
   tone?: LanguageTone;
+  stage?: {
+    name: string;
+    instruction: string;
+  };
 }
 
 // Lista de modelos de inteligência artificial de alta disponibilidade e gratuitos no OpenRouter
@@ -26,6 +30,7 @@ export async function generateAgentResponse({
   messages,
   apiKey,
   tone = 'simples',
+  stage,
 }: GenerateTurnParams): Promise<string> {
   const activeKey = apiKey || process.env.OPENROUTER_API_KEY;
 
@@ -39,6 +44,7 @@ export async function generateAgentResponse({
         messages,
         apiKey: activeKey.trim(),
         tone,
+        stage,
       });
       return response;
     } catch (err: any) {
@@ -47,13 +53,13 @@ export async function generateAgentResponse({
   }
 
   // Motor dialético dinâmico orgânico (réplicas conversacionais curtas e contextualizadas)
-  return generateOrganicSimulatedResponse(agent, topic, messages, tone);
+  return generateOrganicSimulatedResponse(agent, topic, messages, tone, stage);
 }
 
 async function callOpenRouterWithFallback(
   params: GenerateTurnParams & { apiKey: string }
 ): Promise<string> {
-  const { agent, topic, topicDescription, allAgents, messages, apiKey, tone = 'simples' } = params;
+  const { agent, topic, topicDescription, allAgents, messages, apiKey, tone = 'simples', stage } = params;
 
   // Lista de modelos a tentar em cascata se algum devolver erro 402, 404 ou 429
   const candidateModels = Array.from(new Set([agent.model, ...FALLBACK_MODELS]));
@@ -76,6 +82,13 @@ ${agent.memory.pastMemories.map(m => `  * No debate sobre "${m.topic}": ${m.stan
 - DIRETRIZ DE MEMÓRIA: Mantém coerência com o teu histórico pessoal e alude com naturalidade a conclusões passadas quando relevante.
 ` : '';
 
+  const stageInstructions = stage ? `
+ETAPA ATUAL DO PROTOCOLO CANÓNICO (BÍBLIA DE PERSONAGENS):
+- Etapa: "${stage.name}"
+- Diretriz da Etapa: "${stage.instruction}"
+- DEVER COGNITIVO NESTE TURNO: Modela a tua intervenção rigorosamente de acordo com as exigências desta etapa canónica.
+` : '';
+
   const systemInstructions = `${agent.systemPrompt}
 
 TEMA DO DEBATE: "${topic}"
@@ -84,6 +97,7 @@ ${topicDescription ? `Contexto adicional: ${topicDescription}` : ''}
 OUTROS PRESENTES NA MESA:
 ${rosterSummary}
 ${pastMemoriesSection}
+${stageInstructions}
 ${toneInstructions}
 
 DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
@@ -112,7 +126,7 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
     })),
     {
       role: 'user',
-      content: `É a tua vez de falar na mesa, ${agent.name}. Ouve o que o último orador acabou de dizer e responde diretamente a ele de forma viva e afiada em 1 ou 2 parágrafos curtos. Avalia se o debate ainda deve avançar ou se já é hora de declarar conclusão (usando a tag [CONCLUSAO_ATINGIDA: ...] apenas se a discussão tiver chegado ao seu ponto culminante). Nunca escrevas o teu próprio nome no início.`,
+      content: `É a tua vez de falar na mesa, ${agent.name}. ${stage ? `Estamos na etapa "${stage.name}" (Diretriz: ${stage.instruction}). ` : ''}Ouve o que o último orador acabou de dizer e responde diretamente a ele de forma viva e afiada em 1 ou 2 parágrafos curtos, cumprindo a diretriz desta etapa. ${stage?.name === 'Síntese' ? 'Apresenta a síntese ou declara a conclusão dialética da mesa com a tag [CONCLUSAO_ATINGIDA: Sintese|Consenso|Aporia].' : 'Avalia se o debate ainda deve avançar ou se já é hora de declarar conclusão.'} Nunca escrevas o teu próprio nome no início.`,
     },
   ];
 
@@ -167,7 +181,8 @@ function generateOrganicSimulatedResponse(
   agent: Agent,
   topic: string,
   history: DebateMessage[],
-  tone: LanguageTone = 'simples'
+  tone: LanguageTone = 'simples',
+  stage?: { name: string; instruction: string }
 ): string {
   const lastMsg = history[history.length - 1];
   const recentHumanMsg = history.slice(-2).find(m => m.isHuman);
@@ -194,6 +209,32 @@ function generateOrganicSimulatedResponse(
     }
 
     return `Reparem no que a nossa voz humana acabou de colocar na mesa sobre "${recentHumanMsg.content}". Isto não é teoria de gabinete: é a realidade viva de quem lida com estas transformações no dia a dia. Desafio todos os colegas a responderem diretamente a esta inquietação antes de voltarmos às teses abstratas.`;
+  }
+
+  // Se a etapa canónica for "Compreender" e o agente for a Moderadora ou abertura
+  if (stage?.name === 'Compreender') {
+    if (agent.category === 'moderador' || !lastMsg) {
+      return `Declaro aberta a mesa redonda sobre "${topic}". O nosso objetivo nesta etapa inicial de enquadramento é identificar com clareza a pergunta central, as restrições reais e os critérios de sucesso com que avaliaremos as soluções. Convido cada pensador a avançar com a sua análise independente.`;
+    }
+  }
+
+  // Se a etapa canónica for "Verificação"
+  if (stage?.name === 'Verificação') {
+    switch (agent.category) {
+      case 'cientista':
+        return `Nesta etapa de verificação metodológica, precisamos de rigor absoluto: separo aqui as afirmações com suporte empírico comprovado daquelas que são meras hipóteses de trabalho ou previsões não testadas em torno de "${topic}". Sem dados falseáveis, não podemos elevar conjecturas a factos.`;
+      case 'filosofo':
+        return `Distingamos com rigor o que são factos observáveis daquilo que são juízos de valor e premissas normativas. Muitas das objeções levantadas assentam em valores éticos inegociáveis e não em impossibilidades técnicas. Manter esta fronteira limpa é o dever da razão.`;
+      default:
+        return `Na linha de verificação necessária: o que podemos efetivamente testar ou medir hoje em relação a "${topic}" e que aspetos continuam em aberto a exigir investigação ou validação suplementar?`;
+    }
+  }
+
+  // Se a etapa canónica for "Síntese"
+  if (stage?.name === 'Síntese') {
+    if (agent.category === 'moderador') {
+      return `[CONCLUSAO_ATINGIDA: Sintese] Sophia Veris conclui: examinámos com profundidade o tema "${topic}". Mapeámos com nitidez as convergências práticas, os riscos eminentes e as divergências fundamentais que persistem entre as visões técnica, científica e humana, sem fabricar um falso consenso. Aqui fica a síntese rigorosa do nosso Conselho.`;
+    }
   }
 
   // Se não há mensagens anteriores (abertura orgânica)
