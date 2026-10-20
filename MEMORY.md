@@ -2,7 +2,7 @@
 
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
-- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.13.0
+- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.14.0
 - **Data da Última Atualização:** 2026-10-20
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
