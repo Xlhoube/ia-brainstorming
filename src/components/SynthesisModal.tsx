@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, FileText, CheckCircle2, AlertCircle, HelpCircle, Award, Copy, Check, RefreshCw, Sparkles, Printer } from 'lucide-react';
+import { X, FileText, CheckCircle2, AlertCircle, HelpCircle, Award, Copy, Check, RefreshCw, Sparkles, Printer, Mic } from 'lucide-react';
 
 interface SynthesisModalProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ interface SynthesisModalProps {
   currentMessagesCount: number;
   onRefreshSynthesis: () => void;
   isSynthesizing: boolean;
+  onOpenPodcast?: () => void;
 }
 
 export const SynthesisModal: React.FC<SynthesisModalProps> = ({
@@ -30,6 +31,7 @@ export const SynthesisModal: React.FC<SynthesisModalProps> = ({
   currentMessagesCount,
   onRefreshSynthesis,
   isSynthesizing,
+  onOpenPodcast,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -109,6 +111,20 @@ ${synthesis.overallVerdict}
               <Printer className="w-3.5 h-3.5" />
               <span>PDF</span>
             </button>
+
+            {onOpenPodcast && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenPodcast();
+                }}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] sm:text-xs font-semibold shadow-md transition-all"
+                title="Abrir o Estúdio de Podcast e exportar guião com síntese"
+              >
+                <Mic className="w-3.5 h-3.5" />
+                <span>Podcast</span>
+              </button>
+            )}
 
             <button
               onClick={onRefreshSynthesis}

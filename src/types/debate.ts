@@ -25,11 +25,63 @@ export interface AgentMemoryEntry {
   date: string;
 }
 
+export type StructuredMemoryCategory =
+  | 'confirmed_facts'
+  | 'explicit_preferences'
+  | 'decisions'
+  | 'open_hypotheses'
+  | 'lessons_learned'
+  | 'conversation_summaries';
+
+export interface StructuredMemoryItem {
+  id: string;
+  category: StructuredMemoryCategory;
+  content: string;
+  source?: string;
+  confidence?: 'baixa' | 'media' | 'alta' | 'confirmada';
+  status?: 'confirmado' | 'hipotese' | 'revisto' | 'arquivado';
+  date?: string;
+  timestamp: number;
+}
+
 export interface AgentMemory {
   corePhilosophy: string;
   cumulativeLearnings: string[];
   knownColleagues: Record<string, string>;
   pastMemories: AgentMemoryEntry[];
+  structuredEntries?: StructuredMemoryItem[];
+}
+
+export interface PodcastChapter {
+  title: string;
+  startTimeSec: number;
+  speakerName?: string;
+  speaker?: string;
+  stage?: string;
+}
+
+export interface PodcastEpisode {
+  id: string;
+  title: string;
+  topic: string;
+  durationSec: number;
+  audioBlobUrl?: string;
+  chapters: PodcastChapter[];
+  scriptMarkdown: string;
+  createdAt: number;
+}
+
+export interface SynthesisResult {
+  centralThesis: string;
+  consensus: string[];
+  divergences: string[];
+  openQuestions: string[];
+  overallVerdict: string;
+  consensusSummary?: string;
+  practicalRecommendations?: string[];
+  analyzedCount?: number;
+  updatedAt?: string;
+  tone?: LanguageTone;
 }
 
 export interface Agent {
@@ -55,7 +107,10 @@ export interface CanonicalDebateStage {
   id: string;
   name: string;
   instruction: string;
+  description?: string;
 }
+
+export type DebateStage = CanonicalDebateStage;
 
 export interface DebateMessage {
   id: string;
@@ -68,6 +123,7 @@ export interface DebateMessage {
   content: string;
   round: number;
   stageName?: string;
+  stage?: string;
   stageIndex?: number;
   timestamp: string;
   isHuman?: boolean;
@@ -79,7 +135,17 @@ export interface DebateMessage {
 export interface PresetTopic {
   id: string;
   title: string;
-  category: 'Filosofia & Consciência' | 'Sociedade & Futuro' | 'Tecnologia & IA' | 'Ciência & Espaço' | 'Ética & Humanidade';
+  category:
+    | 'Filosofia & Consciência'
+    | 'Sociedade & Futuro'
+    | 'Tecnologia & IA'
+    | 'Ciência & Espaço'
+    | 'Ética & Humanidade'
+    | 'Física & Fronteira Científica'
+    | 'Biotecnologia & Ética'
+    | 'Neurociência & Futuro'
+    | 'IA de Fronteira & Segurança'
+    | 'Energia & Geopolítica';
   description: string;
   suggestedAgents: string[];
 }

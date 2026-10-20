@@ -1,4 +1,4 @@
-import { DebateMessage, AgentMemory, AgentMemoryEntry, DialecticalOutcome } from '@/types/debate';
+import { DebateMessage, AgentMemory, AgentMemoryEntry, DialecticalOutcome, StructuredMemoryItem } from '@/types/debate';
 
 export interface SavedDebateSession {
   id: string;
@@ -117,4 +117,62 @@ export class LocalDatabase {
       console.error('Erro ao registar memória de debate:', err);
     }
   }
+
+  public static addStructuredMemory(agentId: string, item: StructuredMemoryItem): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const all = this.getAgentMemories();
+      const current = all[agentId] || {
+        corePhilosophy: '',
+        cumulativeLearnings: [],
+        knownColleagues: {},
+        pastMemories: [],
+        structuredEntries: []
+      };
+      current.structuredEntries = [item, ...(current.structuredEntries || [])];
+      this.saveAgentMemory(agentId, current);
+    } catch (err) {
+      console.error('Erro ao adicionar memória estruturada:', err);
+    }
+  }
+
+  public static deleteStructuredMemory(agentId: string, itemId: string): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const all = this.getAgentMemories();
+      const current = all[agentId];
+      if (current && current.structuredEntries) {
+        current.structuredEntries = current.structuredEntries.filter(m => m.id !== itemId);
+        this.saveAgentMemory(agentId, current);
+      }
+    } catch (err) {
+      console.error('Erro ao remover memória estruturada:', err);
+    }
+  }
+
+  public static updateStructuredMemory(
+    agentId: string,
+    itemId: string,
+    updates: Partial<StructuredMemoryItem>
+  ): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const all = this.getAgentMemories();
+      const current = all[agentId];
+      if (current && current.structuredEntries) {
+        current.structuredEntries = current.structuredEntries.map(m =>
+          m.id === itemId ? { ...m, ...updates } : m
+        );
+        this.saveAgentMemory(agentId, current);
+      }
+    } catch (err) {
+      console.error('Erro ao atualizar memória estruturada:', err);
+    }
+  }
+
+  public static getStructuredMemories(agentId: string): StructuredMemoryItem[] {
+    const all = this.getAgentMemories();
+    return all[agentId]?.structuredEntries || [];
+  }
 }
+

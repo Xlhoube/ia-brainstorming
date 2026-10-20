@@ -35,5 +35,41 @@ export const PRESET_TOPICS: PresetTopic[] = [
     category: 'Tecnologia & IA',
     description: 'A possibilidade de erradicar doenças versus o risco de criar uma clivagem genética e social intransponível entre os aumentados e os naturais.',
     suggestedAgents: ['aura-chen', 'dra-helena-rostova', 'kaelen-voss', 'dr-marcus-vance']
+  },
+  {
+    id: 'computacao-quantica-causalidade',
+    title: 'Computação Quântica e Causalidade: Estará a física a desmontar a flecha do tempo e o livre-arbítrio?',
+    category: 'Física & Fronteira Científica',
+    description: 'Entrelaçamento não-local, computação quântica tolerante a falhas, experiências de escolha retardada de Wheeler e as implicações ontológicas da medição e do determinismo universal.',
+    suggestedAgents: ['dra-helena-rostova', 'dr-marcus-vance', 'aura-chen', 'kaelen-voss']
+  },
+  {
+    id: 'biologia-sintetica-vida-artificial',
+    title: 'Biologia Sintética e Vida Desenhada: Teremos o direito de criar genomas sem precedentes evolutivos?',
+    category: 'Biotecnologia & Ética',
+    description: 'A transição de ler e editar ADN para desenhar organismos sintéticos artificiais de raiz, os riscos de biosegurança associados e as fronteiras do que definimos como vida.',
+    suggestedAgents: ['dra-helena-rostova', 'sophia-veris', 'kaelen-voss', 'aura-chen']
+  },
+  {
+    id: 'interfaces-cerebro-maquina',
+    title: 'Interfaces Cérebro-Máquina: O advento da telepatia tecnológica e o fim da privacidade cognitiva',
+    category: 'Neurociência & Futuro',
+    description: 'Implantes neurais de alta densidade ligando diretamente o córtex cerebral a nós de rede de IA: simbiose evolutiva indispensável ou a vulnerabilidade definitiva do pensamento humano?',
+    suggestedAgents: ['kaelen-voss', 'dr-marcus-vance', 'aura-chen', 'sophia-veris']
+  },
+  {
+    id: 'paradoxo-superinteligencia-alinhamento',
+    title: 'O Paradoxo do Controlo: Pode um sistema cognitivamente inferior conter com segurança uma Superinteligência?',
+    category: 'IA de Fronteira & Segurança',
+    description: 'O problema do alinhamento ortogonal, armadilhas instrumentais de convergência, ' + 
+                 'e os limites matemáticos e computacionais da interpretabilidade mecânica de redes neuronais gigantes.',
+    suggestedAgents: ['aura-chen', 'dr-marcus-vance', 'dra-helena-rostova', 'kaelen-voss']
+  },
+  {
+    id: 'fusao-nuclear-geopolitica',
+    title: 'Energia de Fusão Comercial: Abundância planetária universal ou nova hegemonia geopolítica?',
+    category: 'Energia & Geopolítica',
+    description: 'Quando os reatores de fusão por confinamento magnético ou inercial atingirem ganho líquido comercial, como se reconfigurarão o comércio internacional e os equilíbrios de poder global?',
+    suggestedAgents: ['kaelen-voss', 'sophia-veris', 'dra-helena-rostova', 'dr-marcus-vance']
   }
 ];

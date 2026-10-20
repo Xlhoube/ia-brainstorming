@@ -50,71 +50,41 @@
 - **[2026-10-18] ADR-019:** Remoção de Legendas e Enquadramento Integral do Painel de Especialistas: Remoção da badge sobreposta no topo esquerdo do banner e ajuste de auto-scroll inicial no hook de debate, permitindo a visualização 100% integral dos 5 pensadores e das citações sem cortes e com centralização harmónica.
 - **[2026-10-19] ADR-020:** Dialética Livre Sem Limites de Turnos & Conclusão Emergente Autonoma pelo Conselho de Especialistas: Remoção de qualquer teto rígido ou forçado de rondas (como "Ronda 1/4"). O debate progride livremente pelo tempo necessário com contador de ciclos dinâmico (`Dialética Livre • Ciclo X`). Os especialistas têm autoridade para avaliar a maturidade da discussão e declarar autonomamente a conclusão da mesa por Síntese, Consenso ou Aporia, despoletando instantaneamente o distintivo editorial na mensagem, o arquivo de memória e a síntese final do Conselho.
 - **[2026-10-19] ADR-021:** Integração da Bíblia Canónica (The Five) e Injeção Cognitiva de Prompts (Fases B e C): Integração de `the_five_biblia_personagens_v1.json` como fonte canónica única e `bibliaLoader.ts` para validação tipada e construção de prompts individuais sem duplicação de definições. Remoção cirúrgica do círculo verde com visto em `AgentRoster.tsx`. Os agentes recebem instruções cognitivas profundas (critérios de raciocínio, primeiras perguntas, regra de decisão inabalável, pontos cegos e regras epistemológicas da Bíblia) com extensão controlada (~700 tokens), preservando a compatibilidade total com os IDs operacionais, avatares e sessões do Appwrite.
-- **[2026-10-20] ADR-022:** Orquestração do Debate em 5 Etapas Canónicas (Fase D): Implementação da máquina de estados com a progressão canónica de 5 etapas da Bíblia (1. Compreender ➔ 2. Análise independente ➔ 3. Confronto de argumentos ➔ 4. Verificação ➔ 5. Síntese) em `src/hooks/useDebate.ts`, carregadas a partir de `the_five_biblia_personagens_v1.json` via `bibliaLoader.ts`. Sophia Veris assume a abertura da mesa redonda (enquadrando pergunta central, restrições e critérios de sucesso) e o encerramento com a síntese final sem consenso forçado. Os prompts do OpenRouter e o motor dialético orgânico passam a receber e a refletir ativamente a etapa atual. Adicionado indicador visual de etapa na Navbar (`🧭 Etapa X/5: Nome`) e distintivos nas mensagens de debate. Bateria de testes automatizados (`scripts/test-phase-d.mjs`) criada e aprovada a 100%.struções cognitivas profundas (critérios de raciocínio, primeiras perguntas, regra de decisão inabalável, pontos cegos e regras epistemológicas da Bíblia) com extensão controlada (~700 tokens), preservando a compatibilidade total com os IDs operacionais, avatares e sessões do Appwrite.
+- **[2026-10-20] ADR-022:** Orquestração do Debate em 5 Etapas Canónicas (Fase D): Implementação da máquina de estados com a progressão canónica de 5 etapas da Bíblia (1. Compreender ➔ 2. Análise independente ➔ 3. Confronto de argumentos ➔ 4. Verificação ➔ 5. Síntese) em `src/hooks/useDebate.ts`, carregadas a partir de `the_five_biblia_personagens_v1.json` via `bibliaLoader.ts`. Sophia Veris assume a abertura da mesa redonda e o encerramento com a síntese final sem consenso forçado. Bateria de testes automatizados (`scripts/test-phase-d.mjs`) criada e aprovada a 100%.
+- **[2026-10-20] ADR-023:** Memória Estruturada Canónica (Fase E): Implementação do armazenamento de memória estruturada conforme as diretrizes canónicas da Bíblia (`the_five_biblia_personagens_v1.json` e Secção 8 de `agents_the_five.md`). Distinção estrita e tipada entre 6 categorias cognitivas (`confirmed_facts`, `explicit_preferences`, `decisions`, `open_hypotheses`, `lessons_learned`, `conversation_summaries`). Injeção contextual das memórias estruturadas ativas nos prompts de sistema OpenRouter e motor dialético simulado. Persistência local reativa em `localDatabase.ts` e interface de gestão visual no modal de pensadores (`AgentRoster.tsx`) com filtros por categoria, badges temáticas, remoção com um clique e formulário direto para ensinar novos factos ou preferências a qualquer pensador.
+- **[2026-10-20] ADR-024:** The Five Podcast Studio & Masterização de Áudio WAV Local: Criação do serviço `podcastService.ts` e do componente `PodcastModal.tsx` para produção e broadcast de episódios dos debates. Geração automática de guiões completos de estúdio em formato Markdown, cálculo de capítulos com marcadores de tempo por etapa e intervenção, síntese local em PCM 16-bit 44.1kHz estéreo de áudio WAV (jingle dialético harmónico aditivo com modulação binaural), e exportação de ficheiros `.wav` e `.md` no navegador. Expansão de tópicos dialéticos de ponta para 10 cenários de fronteira científica (Computação Quântica, Biologia Sintética, Interfaces Cérebro-Máquina, Paradoxo do Controlo de Superinteligência e Fusão Nuclear). Bateria de testes automatizados (`scripts/test-phase-e.ts`) executada com 100% de sucesso.
 
 ---
 
-## ✅ O Que Já Funciona (v0.13.0)
-- [x] **Orquestração Canónica em 5 Etapas (Fase D):** Implementação completa da progressão dialética em 5 etapas (1. Compreender ➔ 2. Análise independente ➔ 3. Confronto de argumentos ➔ 4. Verificação ➔ 5. Síntese) em `src/hooks/useDebate.ts`, carregadas a partir de `the_five_biblia_personagens_v1.json` com tipagem estrita no `bibliaLoader.ts`.
+## ✅ O Que Já Funciona (v0.14.0)
+- [x] **Memória Estruturada Canónica (Fase E):** Separação cognitiva em 6 categorias (`confirmed_facts`, `explicit_preferences`, `decisions`, `open_hypotheses`, `lessons_learned`, `conversation_summaries`) com persistência, injeção nos prompts de IA e gestão CRUD visual no modal dos agentes.
+- [x] **The Five Podcast Studio:** Modal dedicado de estúdio de transmissão com geração de guião broadcast em Markdown, timeline de capítulos por etapa, e sintetizador de áudio WAV PCM 16-bit 44.1kHz para descarregar localmente.
+- [x] **Stepper Visual das 5 Etapas Canónicas:** Barra de progresso interativa no topo do debate indicando o avanço pelo protocolo canónico (01 Compreender ➔ 02 Análise ➔ 03 Confronto ➔ 04 Verificação ➔ 05 Síntese).
+- [x] **10 Tópicos Dialéticos de Fronteira Científica:** Expansão de temas em `PRESET_TOPICS` abrangendo computação quântica, biologia sintética, BCI, alinhamento de superinteligência e geopolítica da fusão comercial.
+- [x] **Orquestração Canónica em 5 Etapas (Fase D):** Implementação completa da progressão dialética em 5 etapas em `src/hooks/useDebate.ts`, carregadas a partir de `the_five_biblia_personagens_v1.json` com tipagem estrita no `bibliaLoader.ts`.
 - [x] **Priorização de Sophia Veris para Abertura & Síntese:** Sophia Veris enquadra a discussão na Etapa 0 (Compreender) definindo pergunta, restrições e critérios de sucesso, e encerra o debate na Etapa 4 (Síntese) apresentando convergências e aporias sem forçar consensos falsos.
 - [x] **Injeção de Metadados e Diretrizes de Etapa nos Prompts:** OpenRouter e motor dialético simulado recebem o contexto e a instrução canónica da etapa ativa, orientando o raciocínio de cada pensador.
 - [x] **Indicadores Visuais de Etapa:** Visualização em tempo real na barra superior (`🧭 Etapa X/5: Nome · Ciclo Y`) e distintivo elegante em cada cartão de intervenção na timeline.
-- [x] **Bateria de Testes Automatizados da Fase D (`scripts/test-phase-d.mjs`):** Validação dos 6 critérios canónicos (etapas da Bíblia, tipagem, injeção de prompts, motor simulado, máquina de estados e resiliência sem moderador) aprovados a 100%.
+- [x] **Bateria de Testes Automatizados da Fase D e E:** `scripts/test-phase-d.mjs` e `scripts/test-phase-e.ts` com 100% de sucesso.
 - [x] **Bíblia Canónica Integrada (Fase B):** Ficheiro `the_five_biblia_personagens_v1.json` ativo na raiz com especificações completas das 5 personagens, sem resumos ou omissões.
-- [x] **Carregador e Validador Tipado (`bibliaLoader.ts`):** Validação estrutural de esquema no arranque e mapeamento seguro para identificadores operacionais (`dr-marcus-vance`, `dra-helena-rostova`, `aura-chen`, `kaelen-voss`, `sophia-veris`).
-- [x] **Eliminação de Código Duplicado:** `src/lib/constants/agents.ts` agora exporta `DEFAULT_AGENTS` derivado diretamente do `bibliaLoader`, removendo mais de 260 linhas de dados estáticos redundantes.
-- [x] **Injeção de Prompts Cognitivamente Distintos (Fase C):** Cada pensador recebe nos seus prompts a missão, valores, primeiras perguntas, critérios de análise, regra de decisão e regras epistemológicas partilhadas (proibição de inventar fontes; distinção de factos vs valores; proibição de consenso forçado).
-- [x] **Remoção do Visto Verde de Seleção:** Elemento gráfico de círculo verde com visto removido cirurgicamente dos cartões em `AgentRoster.tsx`, mantendo a lógica de seleção e o realce visual intactos.
-- [x] **Bateria de Testes Automatizados da Fase C (`scripts/test-phase-c.mjs`):** Validação dos 6 critérios (prompts não vazios, instruções canónicas presentes, diferenciação mútua, mapeamento de IDs, tratamento de erros da Bíblia e funcionamento de cascata/fallback).
-- [x] Dialética livre sem teto fixo de rondas: o debate corre sem interrupção forçada aos 4 turnos, avançando por ciclos orgânicos enquanto os agentes tiverem argumentos vivos.
-- [x] Conclusão emergente e autónoma pelos pensadores: agentes declaram conclusão (Síntese, Consenso ou Aporia) com badge visual destacado na linha temporal.
-- [x] Atualização da Navbar para `Dialética Livre • Ciclo X` durante o debate e `⚖️ Conclusão da Mesa` quando o conselho delibera o encerramento.
-- [x] Despoletamento automático de relatório de síntese e arquivo de memória nos especialistas aquando da declaração de conclusão.
-- [x] Painel de especialistas integral e limpo: exibição dos 5 pensadores com cabeças, torsos, nomes e citações sem legendas sobrepostas no canto superior esquerdo.
-- [x] Prevenção de auto-scroll no arranque: a área principal abre fixada no topo (`scrollTop = 0`), garantindo visibilidade total do tema central e do painel.
-- [x] Higienização de prefixos redundantes de auto-identificação: o texto das mensagens surge sem etiquetas de guião de teatro e entra logo na conversa direta com o colega.
-- [x] Avatares individuais com rostos perfeitamente centralizados em todos os cartões, barras de navegação, timeline de mensagens e modais.
-- [x] Banner do Conselho de Especialistas panorâmico com enquadramento integral das cabeças dos 5 pensadores no acolhimento e no modal cinemático.
-- [x] Memória Cognitiva dos Pensadores: Arquitetura completa de memória de longo prazo com persistência local e na cloud.
-- [x] Injeção de memória episódica no prompt de sistema OpenRouter: os agentes invocam posições passadas, mantêm consistência ideológica e usam a sua perceção pessoal dos colegas durante as réplicas.
-- [x] Arquivo automático de memórias de debate: no final de cada ronda, os resumos dos tópicos e posições são registados na memória dos agentes ativos.
-- [x] Modal de Especialistas com aba dedicada `🧠 Memória Cognitiva`: inspeção visual da Filosofia Nuclear, Perceção dos Colegas, Histórico de Debates e Aprendizagens Acumuladas.
-- [x] Ferramenta de Ensino Interativo: o utilizador pode ensinar diretamente novas lições a qualquer pensador, que passam a orientar o seu raciocínio futuro.
-- [x] Badges de Memória `🧠 X` na barra superior com contador em tempo real do volume de memórias e lições de cada especialista.
-- [x] Adaptação de ecrã integral: suporte perfeito a Mobile (375px+), Tablet (768px+) e Desktop/Ultra-wide (1536px+).
-- [x] Painel de especialistas móvel em carrossel horizontal com snap e ocupação vertical reduzida.
-- [x] Navbar e Controlos inferiores responsivos com ícones e textos adaptativos para evitar quebras ou sobreposições.
-- [x] Visibilidade tátil dos botões de áudio e cópia nos cartões de debate (visíveis por defeito em ecrãs móveis e via hover em desktop).
-- [x] Suporte a `100dvh` para prevenir corte das barras de controlo por menus de navegadores de telemóvel.
-- [x] Modais responsivos (`SynthesisModal`, `TopicModal`, `HistoryModal`, `SettingsModal`, `EditorialReport`) com scroll vertical independente e cabeçalhos flexíveis.
-- [x] Motor de diálogo dialético orgânico: intervenções ágeis (50-90 palavras) em formato de réplica viva, sem palestras ou discursos estáticos.
-- [x] Escuta ativa nos agentes: cada orador responde especificamente ao que o orador anterior acabou de defender, citando o nome e desmontando o argumento.
-- [x] Cascata inteligente de modelos OpenRouter com fallback automático para modelos topo de gama gratuitos quando há restrição de saldo ou erro 402/404.
-- [x] Motor de simulação contextual orgânico renovado para garantir ritmo humano e debates fluidos mesmo em modo offline.
+- [x] **Carregador e Validador Tipado (`bibliaLoader.ts`):** Validação estrutural de esquema no arranque e mapeamento seguro para identificadores operacionais.
+- [x] **Eliminação de Código Duplicado:** `src/lib/constants/agents.ts` agora exporta `DEFAULT_AGENTS` derivado diretamente do `bibliaLoader`.
+- [x] **Injeção de Prompts Cognitivamente Distintos (Fase C):** Cada pensador recebe nos seus prompts a missão, valores, primeiras perguntas, critérios de análise, regra de decisão e regras epistemológicas partilhadas.
+- [x] Dialética livre sem teto fixo de rondas com conclusão emergente e autónoma pelos pensadores (Síntese, Consenso ou Aporia).
+- [x] Avatares individuais fotográficos com enquadramento facial biométrico e banner panorâmico 16:6.
+- [x] Motor de diálogo dialético orgânico (réplicas ágeis de 50-90 palavras) e cascata inteligente OpenRouter com fallback automático.
 - [x] Integração completa com o Appwrite Cloud (Endpoint: `https://fra.cloud.appwrite.io/v1`, Projeto: `6ad53e750013ac9f2271`).
-- [x] Serviço `AppwriteDatabaseService` híbrido: gravação automática em tempo real e sincronização transparente de debates.
-- [x] Modal de Histórico com selo ativo `Appwrite Cloud Sync` e recuperação de sessões passadas.
-- [x] Perfis psicológicos e traços dominantes com visualização em badges `🎭` na barra superior e no cabeçalho das mensagens.
-- [x] Modal cinemático expansível com cartões detalhados de personalidade, temperamento e dinâmica de evolução da opinião.
-- [x] Avatares fotográficos em alta definição integrados na barra superior de seleção de agentes e na timeline.
-- [x] Modal cinemático expansível com a fotografia do Conselho de Especialistas e mini-perfis detalhados.
-- [x] Banner cinemático convocatório no ecrã de acolhimento inicial da sala.
-- [x] Retratos reais dos oradores nos cartões de cada mensagem do debate dialético.
-- [x] Inclusão das fotos dos intervenientes na secção de oradores do relatório editorial para PDF.
-- [x] Layout de ecrã fixo com scroll independente na timeline de mensagens.
-- [x] Diálogo direto na sala: dizer "Boa noite" ou colocar qualquer questão ativa de imediato a resposta falada da Moderadora e dos especialistas.
-- [x] Eliminação total de diálogo repetido com progressão de 4 fases por ronda.
-- [x] Seletor de tom na Navbar: "Linguagem Simples" (comum, direta, analógica) vs "Linguagem Académica" (técnica e filosófica).
-- [x] Botão "Exportar PDF" no modal de síntese acoplado ao layout editorial `EditorialReport`.
-- [x] Síntese evolutiva com recálculo automático e botão manual de atualização.
-- [x] Síntese de voz TTS com perfis distintos por agente e controlo de mudo.
-- [x] Base de dados local com histórico de debates gravados.
+- [x] Seletor de tom na Navbar: "Linguagem Simples" vs "Linguagem Académica".
+- [x] Exportação Editorial em PDF de Alta Fidelidade com design white paper de duas colunas.
 - [x] Conectado e sincronizado com o repositório remoto do GitHub: https://github.com/Xlhoube/ia-brainstorming.
 
 ---
 
 ## ⏳ Open Issues / Próximos Passos
-- [x] **Fase D — Orquestração do Debate:** Implementar a progressão em 5 etapas canónicas (Compreender -> Análise independente -> Confronto de argumentos -> Verificação -> Síntese) em `src/hooks/useDebate.ts`.
-- [ ] **Fase E — Memória Estruturada:** Evolução do armazenamento de memória persistente conforme as diretrizes canónicas da Bíblia.
-- [ ] Implementar exportação direta de áudio ou podcast dos debates gerados.
-- [ ] Explorar novos temas dialéticos de fronteira científica.
+- [x] **Fase D — Orquestração do Debate:** Implementar a progressão em 5 etapas canónicas em `src/hooks/useDebate.ts`.
+- [x] **Fase E — Memória Estruturada:** Evolução do armazenamento de memória persistente conforme as diretrizes canónicas da Bíblia.
+- [x] Implementar exportação direta de áudio ou podcast dos debates gerados.
+- [x] Explorar novos temas dialéticos de fronteira científica.
+- [ ] Implementar feed RSS para publicação direta dos episódios de podcast exportados.
+- [ ] Explorar geração de áudio multi-voz nativa via Web Audio API em segundo plano com vozes clonadas.
+

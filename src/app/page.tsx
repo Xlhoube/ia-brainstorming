@@ -11,6 +11,7 @@ import { SettingsModal } from '@/components/SettingsModal';
 import { SynthesisModal } from '@/components/SynthesisModal';
 import { HistoryModal } from '@/components/HistoryModal';
 import { EditorialReport } from '@/components/EditorialReport';
+import { PodcastModal } from '@/components/PodcastModal';
 
 export default function HomePage() {
   const {
@@ -46,14 +47,19 @@ export default function HomePage() {
     injectHumanIntervention,
     synthesizeDebate,
     addAgentLearning,
+    addStructuredMemoryEntry,
+    deleteStructuredMemoryEntry,
+    canonicalStages,
     currentStage,
     currentStageIndex,
+    setStage,
   } = useDebate();
 
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isSynthesisModalOpen, setIsSynthesisModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isPodcastModalOpen, setIsPodcastModalOpen] = useState(false);
 
   // Agente ativo atual
   const activeAgent = agents.find(a => a.id === activeSpeakerId);
@@ -105,10 +111,12 @@ export default function HomePage() {
         activeSpeakerId={activeSpeakerId}
         onToggleAgent={toggleAgent}
         onAddAgentLearning={addAgentLearning}
+        onAddStructuredMemory={addStructuredMemoryEntry}
+        onDeleteStructuredMemory={deleteStructuredMemoryEntry}
         isDebating={status === 'running'}
       />
 
-      {/* Linha do Tempo e Mensagens do Debate */}
+      {/* Linha do Tempo e Mensagens do Debate com Stepper de 5 Etapas */}
       <DebateTimeline
         messages={messages}
         agents={agents}
@@ -116,6 +124,9 @@ export default function HomePage() {
         topicDescription={topicDescription}
         isGenerating={isGenerating}
         activeSpeakerName={activeAgent?.name}
+        canonicalStages={canonicalStages}
+        currentStageIndex={currentStageIndex}
+        onSelectStage={setStage}
         onOpenTopics={() => setIsTopicModalOpen(true)}
         onSpeakMessage={speakSingleMessage}
         onQuickSpeak={injectHumanIntervention}
@@ -130,6 +141,7 @@ export default function HomePage() {
         onNextTurn={runNextTurn}
         onSynthesize={handleOpenSynthesis}
         onInjectHuman={injectHumanIntervention}
+        onOpenPodcast={() => setIsPodcastModalOpen(true)}
         isGenerating={isGenerating}
         isSynthesizing={isSynthesizing}
         messagesCount={messages.length}
@@ -158,12 +170,25 @@ export default function HomePage() {
         currentMessagesCount={messages.length}
         onRefreshSynthesis={synthesizeDebate}
         isSynthesizing={isSynthesizing}
+        onOpenPodcast={() => setIsPodcastModalOpen(true)}
       />
 
       <HistoryModal
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
         onLoadSession={loadSavedSession}
+      />
+
+      {/* Estúdio de Podcast Dialético e Masterização de Áudio */}
+      <PodcastModal
+        isOpen={isPodcastModalOpen}
+        onClose={() => setIsPodcastModalOpen(false)}
+        topic={topic}
+        topicDescription={topicDescription}
+        messages={messages}
+        agents={agents}
+        stages={canonicalStages}
+        synthesis={synthesisResult}
       />
 
       {/* Relatório com Design Editorial White Paper (ativo no modo de impressão/PDF) */}

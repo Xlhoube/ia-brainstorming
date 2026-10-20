@@ -82,6 +82,12 @@ ${agent.memory.pastMemories.map(m => `  * No debate sobre "${m.topic}": ${m.stan
 - DIRETRIZ DE MEMÓRIA: Mantém coerência com o teu histórico pessoal e alude com naturalidade a conclusões passadas quando relevante.
 ` : '';
 
+  const structuredMemoriesSection = (agent.memory?.structuredEntries && agent.memory.structuredEntries.length > 0) ? `
+MEMÓRIA ESTRUTURADA CANÓNICA (THE FIVE):
+${agent.memory.structuredEntries.map(e => `  - [${e.category.toUpperCase()} | Confiança: ${e.confidence}]: ${e.content}`).join('\n')}
+- DIRETRIZ DE MEMÓRIA ESTRUTURADA: Respeita os factos confirmados e as decisões registadas; não convertas hipóteses em factos consumados.
+` : '';
+
   const stageInstructions = stage ? `
 ETAPA ATUAL DO PROTOCOLO CANÓNICO (BÍBLIA DE PERSONAGENS):
 - Etapa: "${stage.name}"
@@ -97,6 +103,7 @@ ${topicDescription ? `Contexto adicional: ${topicDescription}` : ''}
 OUTROS PRESENTES NA MESA:
 ${rosterSummary}
 ${pastMemoriesSection}
+${structuredMemoriesSection}
 ${stageInstructions}
 ${toneInstructions}
 

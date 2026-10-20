@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Agent } from '@/types/debate';
-import { Check, Volume2, Users, X, Sparkles, Brain, Plus, BookmarkCheck } from 'lucide-react';
+import { Agent, StructuredMemoryCategory, StructuredMemoryItem } from '@/types/debate';
+import { Check, Volume2, Users, X, Sparkles, Brain, Plus, BookmarkCheck, Trash2, Tag, ShieldCheck } from 'lucide-react';
 
 interface AgentRosterProps {
   agents: Agent[];
@@ -11,6 +11,8 @@ interface AgentRosterProps {
   onToggleAgent: (id: string) => void;
   isDebating: boolean;
   onAddAgentLearning?: (agentId: string, insight: string) => void;
+  onAddStructuredMemory?: (agentId: string, item: Omit<StructuredMemoryItem, 'id' | 'timestamp'>) => void;
+  onDeleteStructuredMemory?: (agentId: string, entryId: string) => void;
 }
 
 export const AgentRoster: React.FC<AgentRosterProps> = ({
@@ -20,11 +22,17 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
   onToggleAgent,
   isDebating,
   onAddAgentLearning,
+  onAddStructuredMemory,
+  onDeleteStructuredMemory,
 }) => {
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [activeModalTab, setActiveModalTab] = useState<'profile' | 'memory'>('profile');
   const [newLearningInputs, setNewLearningInputs] = useState<Record<string, string>>({});
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [newStructuredInputs, setNewStructuredInputs] = useState<
+    Record<string, { content: string; category: StructuredMemoryCategory }>
+  >({});
 
   const handleImageError = (agentId: string) => {
     setFailedImages(prev => ({ ...prev, [agentId]: true }));
@@ -35,6 +43,19 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
     if (!text || !onAddAgentLearning) return;
     onAddAgentLearning(agentId, text);
     setNewLearningInputs(prev => ({ ...prev, [agentId]: '' }));
+  };
+
+  const handleAddStructuredMemory = (agentId: string) => {
+    const current = newStructuredInputs[agentId];
+    if (!current || !current.content.trim() || !onAddStructuredMemory) return;
+    onAddStructuredMemory(agentId, {
+      category: current.category || 'lessons_learned',
+      content: current.content.trim(),
+    });
+    setNewStructuredInputs(prev => ({
+      ...prev,
+      [agentId]: { content: '', category: current.category || 'lessons_learned' },
+    }));
   };
 
   return (
@@ -345,6 +366,126 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                                   </div>
                                 ))}
                               </div>
+                            </div>
+
+                            {/* Memória Estruturada Canónica (The Five Protocol) */}
+                            <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                                  <span>Memória Estruturada Canónica</span>
+                                </span>
+                                <span className="text-blue-400 font-mono text-[9px]">
+                                  {(agent.memory.structuredEntries || []).length} registos
+                                </span>
+                              </div>
+
+                              {/* Lista de Registos Estruturados */}
+                              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                                {(!agent.memory.structuredEntries || agent.memory.structuredEntries.length === 0) ? (
+                                  <p className="text-[10px] text-slate-500 italic">Nenhum registo estruturado ativo.</p>
+                                ) : (
+                                  agent.memory.structuredEntries
+                                    .filter(item => categoryFilter === 'all' || item.category === categoryFilter)
+                                    .map(item => {
+                                      const categoryBadgeMap: Record<StructuredMemoryCategory, { label: string; color: string }> = {
+                                        confirmed_facts: { label: 'Facto Confirmado', color: 'bg-blue-950/60 text-blue-300 border-blue-800/40' },
+                                        explicit_preferences: { label: 'Preferência', color: 'bg-purple-950/60 text-purple-300 border-purple-800/40' },
+                                        decisions: { label: 'Decisão', color: 'bg-amber-950/60 text-amber-300 border-amber-800/40' },
+                                        open_hypotheses: { label: 'Hipótese Aberta', color: 'bg-cyan-950/60 text-cyan-300 border-cyan-800/40' },
+                                        lessons_learned: { label: 'Lição Aprendida', color: 'bg-emerald-950/60 text-emerald-300 border-emerald-800/40' },
+                                        conversation_summaries: { label: 'Resumo', color: 'bg-slate-800 text-slate-300 border-slate-700' },
+                                      };
+                                      const badge = categoryBadgeMap[item.category] || { label: item.category, color: 'bg-slate-800 text-slate-300 border-slate-700' };
+
+                                      return (
+                                        <div
+                                          key={item.id}
+                                          className="p-2 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] flex items-start justify-between gap-2 hover:border-slate-700 transition-colors"
+                                        >
+                                          <div className="space-y-1 min-w-0 flex-1">
+                                            <div className="flex items-center gap-1.5">
+                                              <span className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${badge.color}`}>
+                                                {badge.label}
+                                              </span>
+                                              <span className="text-[9px] text-slate-500 font-mono">
+                                                {new Date(item.timestamp).toLocaleDateString('pt-PT')}
+                                              </span>
+                                            </div>
+                                            <p className="text-slate-200 text-[11px] leading-relaxed break-words">
+                                              {item.content}
+                                            </p>
+                                          </div>
+                                          {onDeleteStructuredMemory && (
+                                            <button
+                                              onClick={() => onDeleteStructuredMemory(agent.id, item.id)}
+                                              className="p-1 text-slate-500 hover:text-rose-400 rounded hover:bg-slate-800 transition-colors shrink-0"
+                                              title="Eliminar este registo de memória"
+                                            >
+                                              <Trash2 className="w-3 h-3" />
+                                            </button>
+                                          )}
+                                        </div>
+                                      );
+                                    })
+                                )}
+                              </div>
+
+                              {/* Formulário para Adicionar Entrada de Memória Estruturada */}
+                              {onAddStructuredMemory && (
+                                <div className="pt-2 border-t border-slate-800/60 space-y-1.5">
+                                  <div className="flex items-center gap-1.5">
+                                    <select
+                                      value={newStructuredInputs[agent.id]?.category || 'lessons_learned'}
+                                      onChange={e =>
+                                        setNewStructuredInputs(prev => ({
+                                          ...prev,
+                                          [agent.id]: {
+                                            content: prev[agent.id]?.content || '',
+                                            category: e.target.value as StructuredMemoryCategory,
+                                          },
+                                        }))
+                                      }
+                                      className="h-7 px-2 rounded-md bg-slate-950 border border-slate-800 text-[10px] text-slate-300 focus:outline-none focus:border-blue-500"
+                                    >
+                                      <option value="lessons_learned">💡 Lição Aprendida</option>
+                                      <option value="confirmed_facts">📊 Facto Confirmado</option>
+                                      <option value="decisions">⚖️ Decisão</option>
+                                      <option value="open_hypotheses">🔬 Hipótese Aberta</option>
+                                      <option value="explicit_preferences">🎯 Preferência</option>
+                                    </select>
+                                    <input
+                                      type="text"
+                                      value={newStructuredInputs[agent.id]?.content || ''}
+                                      onChange={e =>
+                                        setNewStructuredInputs(prev => ({
+                                          ...prev,
+                                          [agent.id]: {
+                                            category: prev[agent.id]?.category || 'lessons_learned',
+                                            content: e.target.value,
+                                          },
+                                        }))
+                                      }
+                                      onKeyDown={e => {
+                                        if (e.key === 'Enter') {
+                                          e.preventDefault();
+                                          handleAddStructuredMemory(agent.id);
+                                        }
+                                      }}
+                                      placeholder="Novo registo para este agente..."
+                                      className="flex-1 h-7 px-2 rounded-md bg-slate-950 border border-slate-800 text-[11px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
+                                    />
+                                    <button
+                                      onClick={() => handleAddStructuredMemory(agent.id)}
+                                      disabled={!newStructuredInputs[agent.id]?.content?.trim()}
+                                      className="h-7 px-2.5 rounded-md bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-medium text-[10px] flex items-center gap-1 transition-all shrink-0"
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                      <span>Gravar</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
                             {/* Debates Passados Recordados */}

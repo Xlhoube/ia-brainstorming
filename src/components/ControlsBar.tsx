@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, Pause, FastForward, FileText, Send, Sparkles, BookOpen } from 'lucide-react';
+import { Play, Pause, FastForward, FileText, Send, Sparkles, BookOpen, Mic } from 'lucide-react';
 import { DebatePacing } from '@/types/debate';
 
 interface ControlsBarProps {
@@ -12,6 +12,7 @@ interface ControlsBarProps {
   onNextTurn: () => void;
   onSynthesize: () => void;
   onInjectHuman: (content: string) => void;
+  onOpenPodcast?: () => void;
   isGenerating: boolean;
   isSynthesizing: boolean;
   messagesCount: number;
@@ -29,6 +30,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   onNextTurn,
   onSynthesize,
   onInjectHuman,
+  onOpenPodcast,
   isGenerating,
   isSynthesizing,
   messagesCount,
@@ -212,6 +214,18 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {onOpenPodcast && (
+              <button
+                onClick={onOpenPodcast}
+                className="h-9 sm:h-10 px-3 sm:px-3.5 rounded-xl bg-indigo-950/40 hover:bg-indigo-900/50 border border-indigo-700/50 text-indigo-300 font-semibold text-xs flex items-center gap-1.5 sm:gap-2 transition-all shadow-sm"
+                title="Abrir o Estúdio de Podcast (guiões, capítulos e masterização áudio)"
+              >
+                <Mic className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="hidden sm:inline">Podcast Studio</span>
+                <span className="inline sm:hidden">Podcast</span>
+              </button>
+            )}
+
             {messagesCount >= 2 && (
               <button
                 onClick={onSynthesize}

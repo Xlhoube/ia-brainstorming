@@ -3,7 +3,7 @@
  * Fonte de verdade única: the_five_biblia_personagens_v1.json
  */
 
-import { Agent, CanonicalDebateStage } from '@/types/debate';
+import { Agent, CanonicalDebateStage, StructuredMemoryItem } from '@/types/debate';
 import bibliaRaw from '../../../the_five_biblia_personagens_v1.json';
 
 // --- Interfaces Tipadas da Bíblia Narrativa ---
@@ -317,10 +317,145 @@ export function getAppAgentsFromBiblia(): Agent[] {
         cumulativeLearnings: char.agent_instructions,
         knownColleagues: colleagueRelations,
         pastMemories: [],
+        structuredEntries: getInitialStructuredMemories(char.id),
       },
       systemPrompt: buildSystemPromptFromBiblia(char),
     };
   });
+}
+
+export function getInitialStructuredMemories(charId: string): StructuredMemoryItem[] {
+  const now = Date.now();
+  const dateStr = new Date().toLocaleDateString('pt-PT');
+
+  switch (charId) {
+    case 'marcus_vance':
+      return [
+        {
+          id: 'mem-marcus-1',
+          category: 'confirmed_facts',
+          content: 'A consciência subjetiva não pode ser deduzida exclusivamente a partir do cálculo algorítmico sem salto categorial ontológico.',
+          source: 'Bíblia Canónica',
+          confidence: 'confirmada',
+          status: 'confirmado',
+          date: dateStr,
+          timestamp: now,
+        },
+        {
+          id: 'mem-marcus-2',
+          category: 'open_hypotheses',
+          content: 'É possível desenhar uma inteligência artificial capaz de apreender significado semântico genuíno em vez de mera correlação probabilística?',
+          source: 'Filosofia da Mente',
+          confidence: 'media',
+          status: 'hipotese',
+          date: dateStr,
+          timestamp: now,
+        },
+        {
+          id: 'mem-marcus-3',
+          category: 'explicit_preferences',
+          content: 'Exigir sempre a clarificação de premissas epistémicas antes de qualquer cálculo ou implementação técnica.',
+          source: 'Bíblia Canónica',
+          confidence: 'confirmada',
+          status: 'confirmado',
+          date: dateStr,
+          timestamp: now,
+        },
+      ];
+    case 'helena_rostova':
+      return [
+        {
+          id: 'mem-helena-1',
+          category: 'confirmed_facts',
+          content: 'Modelos de computação operam sob limites termodinâmicos rigorosos e consumo mensurável de recursos físicos.',
+          source: 'Física & Computação',
+          confidence: 'confirmada',
+          status: 'confirmado',
+          date: dateStr,
+          timestamp: now,
+        },
+        {
+          id: 'mem-helena-2',
+          category: 'lessons_learned',
+          content: 'Jamais elevar correlações estatísticas de grande escala a relações de causalidade demonstrada sem experiência controlada.',
+          source: 'Metodologia Empírica',
+          confidence: 'alta',
+          status: 'confirmado',
+          date: dateStr,
+          timestamp: now,
+        },
+      ];
+    case 'aura_chen':
+      return [
+        {
+          id: 'mem-aura-1',
+          category: 'confirmed_facts',
+          content: 'Qualquer transição tecnológica sem mecanismos explícitos de salvaguarda social aprofunda a desigualdade e a fragilidade humana.',
+          source: 'Ciências Sociais',
+          confidence: 'confirmada',
+          status: 'confirmado',
+          date: dateStr,
+          timestamp: now,
+        },
+        {
+          id: 'mem-aura-2',
+          category: 'decisions',
+          content: 'Submeter sempre qualquer proposta de inovação ao teste do impacto sobre as comunidades e populações mais vulneráveis.',
+          source: 'Regra Deontológica',
+          confidence: 'confirmada',
+          status: 'confirmado',
+          date: dateStr,
+          timestamp: now,
+        },
+      ];
+    case 'kaelen_voss':
+      return [
+        {
+          id: 'mem-kaelen-1',
+          category: 'decisions',
+          content: 'Converter qualquer debate abstrato num teste empírico ou protótipo funcional com critérios claros de sucesso e falha.',
+          source: 'Engenharia Iterativa',
+          confidence: 'confirmada',
+          status: 'confirmado',
+          date: dateStr,
+          timestamp: now,
+        },
+        {
+          id: 'mem-kaelen-2',
+          category: 'open_hypotheses',
+          content: 'Podemos construir arquiteturas de agentes autónomos que aprendam e corrijam os seus próprios desvios com segurança garantida?',
+          source: 'Fronteira Tecnológica',
+          confidence: 'alta',
+          status: 'hipotese',
+          date: dateStr,
+          timestamp: now,
+        },
+      ];
+    case 'sophia_veris':
+    default:
+      return [
+        {
+          id: 'mem-sophia-1',
+          category: 'decisions',
+          content: 'Nunca forçar consensos fictícios quando subsistem divergências éticas ou conceptuais legítimas e irredutíveis.',
+          source: 'Norma Dialética',
+          confidence: 'confirmada',
+          status: 'confirmado',
+          date: dateStr,
+          timestamp: now,
+        },
+        {
+          id: 'mem-sophia-2',
+          category: 'confirmed_facts',
+          content: 'A deliberação coletiva fundamentada exige distinguir rigorosamente factos comprovados, hipóteses em teste e juízos de valor.',
+          source: 'Bíblia Canónica',
+          confidence: 'confirmada',
+          status: 'confirmado',
+          date: dateStr,
+          timestamp: now,
+        },
+      ];
+  }
 }
 
 /**
@@ -328,6 +463,13 @@ export function getAppAgentsFromBiblia(): Agent[] {
  */
 export function getDebateProtocol(): DebateProtocol {
   return getBiblia().project.debate_protocol;
+}
+
+/**
+ * Devolve as diretrizes canónicas de conceção de memória (The Five)
+ */
+export function getMemoryDesignGuidelines(): MemoryDesignGuidelines {
+  return getBiblia().project.memory_design_guidelines;
 }
 
 /**
@@ -349,3 +491,4 @@ export function getCanonicalDebateStages(): CanonicalDebateStage[] {
     instruction: stage.instruction,
   }));
 }
+

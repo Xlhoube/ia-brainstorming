@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Agent, DebateMessage, DebateState, LanguageTone, DebatePacing, CanonicalDebateStage } from '@/types/debate';
+import { Agent, DebateMessage, DebateState, LanguageTone, DebatePacing, CanonicalDebateStage, StructuredMemoryCategory, StructuredMemoryItem } from '@/types/debate';
 import { DEFAULT_AGENTS } from '@/lib/constants/agents';
 import { getCanonicalDebateStages } from '@/lib/agents/bibliaLoader';
 import { speechService } from '@/lib/speech/speechService';
@@ -128,7 +128,11 @@ export function useDebate() {
                 pastMemories: [
                   ...(savedMemories[a.id].pastMemories || []),
                   ...a.memory.pastMemories
-                ].filter((m, idx, arr) => arr.findIndex(x => x.topic === m.topic) === idx)
+                ].filter((m, idx, arr) => arr.findIndex(x => x.topic === m.topic) === idx),
+                structuredEntries: [
+                  ...(savedMemories[a.id].structuredEntries || []),
+                  ...(a.memory.structuredEntries || [])
+                ].filter((m, idx, arr) => arr.findIndex(x => x.id === m.id) === idx),
               }
             };
           }
@@ -444,6 +448,67 @@ export function useDebate() {
     }));
   };
 
+  const addStructuredMemoryEntry = (
+    agentId: string,
+    categoryOrItem: StructuredMemoryCategory | Omit<StructuredMemoryItem, 'id' | 'timestamp'>,
+    contentParam?: string,
+    sourceParam: string = 'Utilizador',
+    confidenceParam: 'baixa' | 'media' | 'alta' | 'confirmada' = 'confirmada',
+    statusParam: 'confirmado' | 'hipotese' | 'revisto' | 'arquivado' = 'confirmado'
+  ) => {
+    let category: StructuredMemoryCategory;
+    let content: string;
+    let source = sourceParam;
+    let confidence = confidenceParam;
+    let status = statusParam;
+
+    if (typeof categoryOrItem === 'object') {
+      category = categoryOrItem.category;
+      content = categoryOrItem.content;
+      if (categoryOrItem.source) source = categoryOrItem.source;
+      if (categoryOrItem.confidence) confidence = categoryOrItem.confidence;
+      if (categoryOrItem.status) status = categoryOrItem.status;
+    } else {
+      category = categoryOrItem;
+      content = contentParam || '';
+    }
+
+    if (!content.trim()) return;
+    const newItem: StructuredMemoryItem = {
+      id: 'mem-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      category,
+      content: content.trim(),
+      source: source.trim(),
+      confidence,
+      status,
+      date: new Date().toLocaleDateString('pt-PT'),
+      timestamp: Date.now(),
+    };
+
+    setAgents(prev => prev.map(a => {
+      if (a.id === agentId) {
+        const updatedEntries = [newItem, ...(a.memory.structuredEntries || [])];
+        const updatedMemory = { ...a.memory, structuredEntries: updatedEntries };
+        LocalDatabase.saveAgentMemory(agentId, updatedMemory);
+        return { ...a, memory: updatedMemory };
+      }
+      return a;
+    }));
+  };
+
+  const deleteStructuredMemoryEntry = (agentId: string, itemId: string) => {
+    setAgents(prev => prev.map(a => {
+      if (a.id === agentId) {
+        const updatedEntries = (a.memory.structuredEntries || []).filter(e => e.id !== itemId);
+        const updatedMemory = { ...a.memory, structuredEntries: updatedEntries };
+        LocalDatabase.saveAgentMemory(agentId, updatedMemory);
+        return { ...a, memory: updatedMemory };
+      }
+      return a;
+    }));
+  };
+
+
   const startDebate = (newTopic?: string, newDescription?: string) => {
     if (newTopic) setTopic(newTopic);
     if (newDescription) setTopicDescription(newDescription);
@@ -740,6 +805,8 @@ export function useDebate() {
     synthesizeDebate,
     addAgentLearning,
     addAgentMemoryEntry,
+    addStructuredMemoryEntry,
+    deleteStructuredMemoryEntry,
     // Protocolo Canónico em 5 Etapas (The Five)
     canonicalStages,
     currentStageIndex,
