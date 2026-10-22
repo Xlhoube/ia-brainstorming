@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Agent, DebateMessage, DebateState, LanguageTone, DebatePacing, CanonicalDebateStage, StructuredMemoryCategory, StructuredMemoryItem } from '@/types/debate';
+import { Agent, DebateMessage, DebateState, LanguageTone, DebatePacing, CanonicalDebateStage, StructuredMemoryCategory, StructuredMemoryItem, DialecticalOutcome } from '@/types/debate';
 import { DEFAULT_AGENTS } from '@/lib/constants/agents';
 import { getCanonicalDebateStages } from '@/lib/agents/bibliaLoader';
 import { speechService } from '@/lib/speech/speechService';
@@ -107,7 +107,7 @@ export function useDebate() {
         }
       }
 
-      // Carregar memórias guardadas e mesclar com os agentes
+      // Carregar memórias guardadas locais e mesclar com os agentes
       const savedMemories = LocalDatabase.getAgentMemories();
       if (savedMemories && Object.keys(savedMemories).length > 0) {
         setAgents(prev => prev.map(a => {
@@ -139,6 +139,42 @@ export function useDebate() {
           return a;
         }));
       }
+
+      // Sincronização em segundo plano com o Appwrite Cloud
+      AppwriteDatabaseService.getAgentMemories().then(cloudMemories => {
+        if (cloudMemories && Object.keys(cloudMemories).length > 0) {
+          setAgents(prev => prev.map(a => {
+            if (cloudMemories[a.id]) {
+              return {
+                ...a,
+                memory: {
+                  ...a.memory,
+                  ...cloudMemories[a.id],
+                  knownColleagues: {
+                    ...a.memory.knownColleagues,
+                    ...(cloudMemories[a.id].knownColleagues || {})
+                  },
+                  cumulativeLearnings: Array.from(new Set([
+                    ...(cloudMemories[a.id].cumulativeLearnings || []),
+                    ...a.memory.cumulativeLearnings
+                  ])),
+                  pastMemories: [
+                    ...(cloudMemories[a.id].pastMemories || []),
+                    ...a.memory.pastMemories
+                  ].filter((m, idx, arr) => arr.findIndex(x => x.topic === m.topic) === idx),
+                  structuredEntries: [
+                    ...(cloudMemories[a.id].structuredEntries || []),
+                    ...(a.memory.structuredEntries || [])
+                  ].filter((m, idx, arr) => arr.findIndex(x => x.id === m.id) === idx),
+                }
+              };
+            }
+            return a;
+          }));
+        }
+      }).catch(err => {
+        console.warn('Sincronização de memórias Appwrite em background:', err);
+      });
 
       return () => {
         unsubscribe();
@@ -332,12 +368,41 @@ export function useDebate() {
           setIsWaitingForNextTurn(false);
           setReadingCountdown(null);
           try {
+            const rawConclusion = String(conclusion).toLowerCase();
+            const dialecticalOutcome: DialecticalOutcome = rawConclusion.includes('aporia')
+              ? 'aporia'
+              : (rawConclusion.includes('consenso') ? 'consenso' : 'sintese');
+
+            // Registo automático de aprendizagens e memória estruturada para cada pensador presente
             activeAgents.forEach(ag => {
               const agentMsgs = [...messages, data.message].filter(m => m.agentId === ag.id);
               const lastSpeak = agentMsgs[agentMsgs.length - 1];
-              const summary = lastSpeak ? lastSpeak.content.slice(0, 140) + '...' : `Defendeu a sua posição sobre "${topic}"`;
-              LocalDatabase.recordDebateMemoryForAgent(ag.id, topic, summary);
+              const summary = lastSpeak ? lastSpeak.content.slice(0, 160) + '...' : `Defendeu a sua posição sobre "${topic}"`;
+              const prevSpeaker = messages.length > 0 ? messages[messages.length - 1].agentName : undefined;
+
+              LocalDatabase.recordAutomaticDebateConclusionMemory(
+                ag.id,
+                topic,
+                summary,
+                dialecticalOutcome,
+                prevSpeaker
+              );
             });
+
+            // Atualizar o estado em memória dos agentes na interface
+            const updatedMemories = LocalDatabase.getAgentMemories();
+            setAgents(prev => prev.map(a => {
+              if (updatedMemories[a.id]) {
+                return {
+                  ...a,
+                  memory: updatedMemories[a.id]
+                };
+              }
+              return a;
+            }));
+
+            // Sincronizar automaticamente no Appwrite Cloud
+            AppwriteDatabaseService.saveAgentMemories(updatedMemories);
           } catch (memErr) {
             console.warn('Erro ao arquivar memórias de debate:', memErr);
           }
@@ -415,37 +480,45 @@ export function useDebate() {
 
   const addAgentLearning = (agentId: string, insight: string) => {
     if (!insight.trim()) return;
-    setAgents(prev => prev.map(a => {
-      if (a.id === agentId) {
-        const updatedMemory = {
-          ...a.memory,
-          cumulativeLearnings: [insight.trim(), ...(a.memory.cumulativeLearnings || [])]
-        };
-        LocalDatabase.saveAgentMemory(agentId, updatedMemory);
-        return { ...a, memory: updatedMemory };
-      }
-      return a;
-    }));
+    setAgents(prev => {
+      const updated = prev.map(a => {
+        if (a.id === agentId) {
+          const updatedMemory = {
+            ...a.memory,
+            cumulativeLearnings: [insight.trim(), ...(a.memory.cumulativeLearnings || [])]
+          };
+          LocalDatabase.saveAgentMemory(agentId, updatedMemory);
+          return { ...a, memory: updatedMemory };
+        }
+        return a;
+      });
+      AppwriteDatabaseService.saveAgentMemories(LocalDatabase.getAgentMemories());
+      return updated;
+    });
   };
 
   const addAgentMemoryEntry = (agentId: string, memoryTopic: string, stance: string) => {
     if (!memoryTopic.trim()) return;
-    setAgents(prev => prev.map(a => {
-      if (a.id === agentId) {
-        const newEntry = {
-          topic: memoryTopic.trim(),
-          stanceSummary: stance.trim(),
-          date: new Date().toLocaleDateString('pt-PT')
-        };
-        const updatedMemory = {
-          ...a.memory,
-          pastMemories: [newEntry, ...(a.memory.pastMemories || []).slice(0, 5)]
-        };
-        LocalDatabase.saveAgentMemory(agentId, updatedMemory);
-        return { ...a, memory: updatedMemory };
-      }
-      return a;
-    }));
+    setAgents(prev => {
+      const updated = prev.map(a => {
+        if (a.id === agentId) {
+          const newEntry = {
+            topic: memoryTopic.trim(),
+            stanceSummary: stance.trim(),
+            date: new Date().toLocaleDateString('pt-PT')
+          };
+          const updatedMemory = {
+            ...a.memory,
+            pastMemories: [newEntry, ...(a.memory.pastMemories || []).slice(0, 5)]
+          };
+          LocalDatabase.saveAgentMemory(agentId, updatedMemory);
+          return { ...a, memory: updatedMemory };
+        }
+        return a;
+      });
+      AppwriteDatabaseService.saveAgentMemories(LocalDatabase.getAgentMemories());
+      return updated;
+    });
   };
 
   const addStructuredMemoryEntry = (
@@ -461,6 +534,9 @@ export function useDebate() {
     let source = sourceParam;
     let confidence = confidenceParam;
     let status = statusParam;
+    let emotionalImpact: 'neutro' | 'revelador' | 'inquietante' | 'decisivo' | undefined = undefined;
+    let relatedColleague: string | undefined = undefined;
+    let topicContext: string | undefined = undefined;
 
     if (typeof categoryOrItem === 'object') {
       category = categoryOrItem.category;
@@ -468,6 +544,9 @@ export function useDebate() {
       if (categoryOrItem.source) source = categoryOrItem.source;
       if (categoryOrItem.confidence) confidence = categoryOrItem.confidence;
       if (categoryOrItem.status) status = categoryOrItem.status;
+      if (categoryOrItem.emotionalImpact) emotionalImpact = categoryOrItem.emotionalImpact;
+      if (categoryOrItem.relatedColleague) relatedColleague = categoryOrItem.relatedColleague;
+      if (categoryOrItem.topicContext) topicContext = categoryOrItem.topicContext;
     } else {
       category = categoryOrItem;
       content = contentParam || '';
@@ -483,29 +562,40 @@ export function useDebate() {
       status,
       date: new Date().toLocaleDateString('pt-PT'),
       timestamp: Date.now(),
+      emotionalImpact,
+      relatedColleague,
+      topicContext,
     };
 
-    setAgents(prev => prev.map(a => {
-      if (a.id === agentId) {
-        const updatedEntries = [newItem, ...(a.memory.structuredEntries || [])];
-        const updatedMemory = { ...a.memory, structuredEntries: updatedEntries };
-        LocalDatabase.saveAgentMemory(agentId, updatedMemory);
-        return { ...a, memory: updatedMemory };
-      }
-      return a;
-    }));
+    setAgents(prev => {
+      const updated = prev.map(a => {
+        if (a.id === agentId) {
+          const updatedEntries = [newItem, ...(a.memory.structuredEntries || [])];
+          const updatedMemory = { ...a.memory, structuredEntries: updatedEntries };
+          LocalDatabase.saveAgentMemory(agentId, updatedMemory);
+          return { ...a, memory: updatedMemory };
+        }
+        return a;
+      });
+      AppwriteDatabaseService.saveAgentMemories(LocalDatabase.getAgentMemories());
+      return updated;
+    });
   };
 
   const deleteStructuredMemoryEntry = (agentId: string, itemId: string) => {
-    setAgents(prev => prev.map(a => {
-      if (a.id === agentId) {
-        const updatedEntries = (a.memory.structuredEntries || []).filter(e => e.id !== itemId);
-        const updatedMemory = { ...a.memory, structuredEntries: updatedEntries };
-        LocalDatabase.saveAgentMemory(agentId, updatedMemory);
-        return { ...a, memory: updatedMemory };
-      }
-      return a;
-    }));
+    setAgents(prev => {
+      const updated = prev.map(a => {
+        if (a.id === agentId) {
+          const updatedEntries = (a.memory.structuredEntries || []).filter(e => e.id !== itemId);
+          const updatedMemory = { ...a.memory, structuredEntries: updatedEntries };
+          LocalDatabase.saveAgentMemory(agentId, updatedMemory);
+          return { ...a, memory: updatedMemory };
+        }
+        return a;
+      });
+      AppwriteDatabaseService.saveAgentMemories(LocalDatabase.getAgentMemories());
+      return updated;
+    });
   };
 
 
@@ -660,12 +750,38 @@ export function useDebate() {
           setIsWaitingForNextTurn(false);
           setReadingCountdown(null);
           try {
+            const rawConclusion = String(conclusion).toLowerCase();
+            const dialecticalOutcome: DialecticalOutcome = rawConclusion.includes('aporia')
+              ? 'aporia'
+              : (rawConclusion.includes('consenso') ? 'consenso' : 'sintese');
+
             activeAgents.forEach(ag => {
               const agentMsgs = [...nextMessages, data.message].filter(m => m.agentId === ag.id);
               const lastSpeak = agentMsgs[agentMsgs.length - 1];
-              const summary = lastSpeak ? lastSpeak.content.slice(0, 140) + '...' : `Defendeu a sua posição sobre "${topic}"`;
-              LocalDatabase.recordDebateMemoryForAgent(ag.id, topic, summary);
+              const summary = lastSpeak ? lastSpeak.content.slice(0, 160) + '...' : `Defendeu a sua posição sobre "${topic}"`;
+              const prevSpeaker = nextMessages.length > 0 ? nextMessages[nextMessages.length - 1].agentName : undefined;
+
+              LocalDatabase.recordAutomaticDebateConclusionMemory(
+                ag.id,
+                topic,
+                summary,
+                dialecticalOutcome,
+                prevSpeaker
+              );
             });
+
+            const updatedMemories = LocalDatabase.getAgentMemories();
+            setAgents(prev => prev.map(a => {
+              if (updatedMemories[a.id]) {
+                return {
+                  ...a,
+                  memory: updatedMemories[a.id]
+                };
+              }
+              return a;
+            }));
+
+            AppwriteDatabaseService.saveAgentMemories(updatedMemories);
           } catch (memErr) {
             console.warn('Erro ao arquivar memórias de debate:', memErr);
           }

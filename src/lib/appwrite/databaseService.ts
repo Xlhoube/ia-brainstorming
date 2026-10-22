@@ -108,4 +108,97 @@ export class AppwriteDatabaseService {
       console.warn('Appwrite deleteSession info:', err.message || err);
     }
   }
+
+  /**
+   * Sincroniza e persiste as memórias cognitivas individuais de todos os especialistas
+   * no Appwrite Cloud (mantendo cópia local imediata de alta disponibilidade).
+   */
+  public static async saveAgentMemories(memories: Record<string, import('@/types/debate').AgentMemory>): Promise<void> {
+    LocalDatabase.saveAllAgentMemories(memories);
+
+    try {
+      const docId = 'global_agent_memories';
+      const payload = {
+        sessionId: docId,
+        topic: 'Arquivo Cognitivo de Especialistas',
+        topicDescription: 'Sincronização persistente de memórias individuais dos 5 pensadores (The Five)',
+        data: JSON.stringify(memories),
+        updatedAt: new Date().toISOString(),
+      };
+
+      try {
+        await appwriteDatabases.updateDocument(
+          APPWRITE_CONFIG.databaseId,
+          APPWRITE_CONFIG.collectionId,
+          docId,
+          payload
+        );
+      } catch (updateErr: any) {
+        if (updateErr?.code === 404 || updateErr?.message?.includes('not found')) {
+          await appwriteDatabases.createDocument(
+            APPWRITE_CONFIG.databaseId,
+            APPWRITE_CONFIG.collectionId,
+            docId,
+            payload
+          );
+        } else {
+          throw updateErr;
+        }
+      }
+    } catch (err: any) {
+      console.warn('Appwrite Cloud saveAgentMemories info:', err.message || err);
+    }
+  }
+
+  /**
+   * Obtém as memórias dos agentes, mesclando cloud e local de forma resiliente.
+   */
+  public static async getAgentMemories(): Promise<Record<string, import('@/types/debate').AgentMemory>> {
+    const local = LocalDatabase.getAgentMemories();
+
+    try {
+      const doc = await appwriteDatabases.getDocument(
+        APPWRITE_CONFIG.databaseId,
+        APPWRITE_CONFIG.collectionId,
+        'global_agent_memories'
+      );
+
+      if (doc && doc.data) {
+        const cloudMemories = JSON.parse(doc.data) as Record<string, import('@/types/debate').AgentMemory>;
+        const merged: Record<string, import('@/types/debate').AgentMemory> = { ...local };
+
+        for (const [agentId, cloudMem] of Object.entries(cloudMemories)) {
+          if (!merged[agentId]) {
+            merged[agentId] = cloudMem;
+          } else {
+            const localEntries = merged[agentId].structuredEntries || [];
+            const cloudEntries = cloudMem.structuredEntries || [];
+            const allEntries = [...localEntries];
+            for (const ce of cloudEntries) {
+              if (!allEntries.some(e => e.id === ce.id)) {
+                allEntries.push(ce);
+              }
+            }
+
+            merged[agentId] = {
+              ...merged[agentId],
+              ...cloudMem,
+              structuredEntries: allEntries,
+              pastMemories: [
+                ...(merged[agentId].pastMemories || []),
+                ...(cloudMem.pastMemories || [])
+              ].filter((m, idx, arr) => arr.findIndex(x => x.topic === m.topic) === idx),
+            };
+          }
+        }
+
+        LocalDatabase.saveAllAgentMemories(merged);
+        return merged;
+      }
+    } catch (err: any) {
+      console.warn('Appwrite Cloud getAgentMemories fallback para local:', err.message || err);
+    }
+
+    return local;
+  }
 }

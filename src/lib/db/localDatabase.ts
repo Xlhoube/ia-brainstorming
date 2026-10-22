@@ -95,6 +95,15 @@ export class LocalDatabase {
     }
   }
 
+  public static saveAllAgentMemories(memories: Record<string, AgentMemory>): void {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(STORAGE_KEY_MEMORIES, JSON.stringify(memories));
+    } catch (err) {
+      console.error('Erro ao gravar todas as memórias locais:', err);
+    }
+  }
+
   public static recordDebateMemoryForAgent(
     agentId: string,
     topic: string,
@@ -116,6 +125,60 @@ export class LocalDatabase {
     } catch (err) {
       console.error('Erro ao registar memória de debate:', err);
     }
+  }
+
+  public static recordAutomaticDebateConclusionMemory(
+    agentId: string,
+    topic: string,
+    stanceSummary: string,
+    outcome: DialecticalOutcome = 'sintese',
+    colleagueName?: string
+  ): StructuredMemoryItem {
+    const all = this.getAgentMemories();
+    const current = all[agentId] || {
+      corePhilosophy: '',
+      cumulativeLearnings: [],
+      knownColleagues: {},
+      pastMemories: [],
+      structuredEntries: []
+    };
+
+    let category: import('@/types/debate').StructuredMemoryCategory = 'lessons_learned';
+    let emotionalImpact: 'neutro' | 'revelador' | 'inquietante' | 'decisivo' = 'decisivo';
+
+    if (outcome === 'consenso') {
+      category = 'decisions';
+      emotionalImpact = 'revelador';
+    } else if (outcome === 'aporia') {
+      category = 'open_hypotheses';
+      emotionalImpact = 'inquietante';
+    }
+
+    const newItem: StructuredMemoryItem = {
+      id: `mem-auto-${agentId}-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      category,
+      content: stanceSummary,
+      source: `Debate Dialético: ${topic}`,
+      confidence: 'alta',
+      status: 'confirmado',
+      date: new Date().toLocaleDateString('pt-PT'),
+      timestamp: Date.now(),
+      topicContext: topic,
+      relatedColleague: colleagueName,
+      emotionalImpact,
+    };
+
+    current.structuredEntries = [newItem, ...(current.structuredEntries || [])];
+
+    const pastEntry: AgentMemoryEntry = {
+      topic,
+      stanceSummary,
+      date: new Date().toLocaleDateString('pt-PT'),
+    };
+    current.pastMemories = [pastEntry, ...(current.pastMemories || []).slice(0, 7)];
+
+    this.saveAgentMemory(agentId, current);
+    return newItem;
   }
 
   public static addStructuredMemory(agentId: string, item: StructuredMemoryItem): void {

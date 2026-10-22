@@ -31,7 +31,9 @@ export type StructuredMemoryCategory =
   | 'decisions'
   | 'open_hypotheses'
   | 'lessons_learned'
-  | 'conversation_summaries';
+  | 'conversation_summaries'
+  | 'ethical_red_lines'
+  | 'intellectual_doubts';
 
 export interface StructuredMemoryItem {
   id: string;
@@ -42,6 +44,9 @@ export interface StructuredMemoryItem {
   status?: 'confirmado' | 'hipotese' | 'revisto' | 'arquivado';
   date?: string;
   timestamp: number;
+  emotionalImpact?: 'neutro' | 'revelador' | 'inquietante' | 'decisivo';
+  relatedColleague?: string;
+  topicContext?: string;
 }
 
 export interface AgentMemory {

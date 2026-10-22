@@ -84,8 +84,15 @@ ${agent.memory.pastMemories.map(m => `  * No debate sobre "${m.topic}": ${m.stan
 
   const structuredMemoriesSection = (agent.memory?.structuredEntries && agent.memory.structuredEntries.length > 0) ? `
 MEMÓRIA ESTRUTURADA CANÓNICA (THE FIVE):
-${agent.memory.structuredEntries.map(e => `  - [${e.category.toUpperCase()} | Confiança: ${e.confidence}]: ${e.content}`).join('\n')}
-- DIRETRIZ DE MEMÓRIA ESTRUTURADA: Respeita os factos confirmados e as decisões registadas; não convertas hipóteses em factos consumados.
+${agent.memory.structuredEntries.map(e => {
+  const meta: string[] = [e.category.toUpperCase()];
+  if (e.topicContext) meta.push(`Contexto: "${e.topicContext}"`);
+  if (e.relatedColleague) meta.push(`Interlocutor: ${e.relatedColleague}`);
+  if (e.emotionalImpact) meta.push(`Impacto: ${e.emotionalImpact}`);
+  if (e.confidence) meta.push(`Confiança: ${e.confidence}`);
+  return `  - [${meta.join(' | ')}]: ${e.content}`;
+}).join('\n')}
+- DIRETRIZ DE MEMÓRIA ESTRUTURADA: Respeita rigorosamente os factos confirmados e as tuas linhas vermelhas éticas inegociáveis (ETHICAL_RED_LINES). Explora e reabre dúvidas intelectuais (INTELLECTUAL_DOUBTS) quando o diálogo as convocar e nunca convertas hipóteses em factos consumados.
 ` : '';
 
   const stageInstructions = stage ? `

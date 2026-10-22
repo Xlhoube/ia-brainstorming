@@ -318,7 +318,37 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                 </div>
               ) : (
                 /* Cartões Detalhados de Memória Cognitiva & Histórico */
-                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950/60">
+                <div className="p-4 space-y-4 bg-slate-950/60">
+                  {/* Barra de Filtros de Categoria de Memória */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px]">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 mr-1 flex items-center gap-1 shrink-0">
+                      <Tag className="w-3 h-3 text-blue-400" />
+                      <span>Filtrar:</span>
+                    </span>
+                    {[
+                      { id: 'all', label: 'Todas as Memórias' },
+                      { id: 'ethical_red_lines', label: '🛑 Linhas Vermelhas' },
+                      { id: 'intellectual_doubts', label: '❓ Dúvidas Intelectuais' },
+                      { id: 'lessons_learned', label: '💡 Lições Aprendidas' },
+                      { id: 'confirmed_facts', label: '📊 Factos Confirmados' },
+                      { id: 'decisions', label: '⚖️ Decisões' },
+                      { id: 'open_hypotheses', label: '🔬 Hipóteses Abertas' },
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        onClick={() => setCategoryFilter(f.id)}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all shrink-0 ${
+                          categoryFilter === f.id
+                            ? 'bg-blue-600 text-white shadow-sm'
+                            : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {agents.map(agent => (
                     <div
                       key={agent.id}
@@ -395,6 +425,8 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                                         open_hypotheses: { label: 'Hipótese Aberta', color: 'bg-cyan-950/60 text-cyan-300 border-cyan-800/40' },
                                         lessons_learned: { label: 'Lição Aprendida', color: 'bg-emerald-950/60 text-emerald-300 border-emerald-800/40' },
                                         conversation_summaries: { label: 'Resumo', color: 'bg-slate-800 text-slate-300 border-slate-700' },
+                                        ethical_red_lines: { label: '🛑 Linha Vermelha Ética', color: 'bg-rose-950/70 text-rose-300 border-rose-800/60' },
+                                        intellectual_doubts: { label: '❓ Dúvida Intelectual', color: 'bg-violet-950/70 text-violet-300 border-violet-800/60' },
                                       };
                                       const badge = categoryBadgeMap[item.category] || { label: item.category, color: 'bg-slate-800 text-slate-300 border-slate-700' };
 
@@ -404,14 +436,32 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                                           className="p-2 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] flex items-start justify-between gap-2 hover:border-slate-700 transition-colors"
                                         >
                                           <div className="space-y-1 min-w-0 flex-1">
-                                            <div className="flex items-center gap-1.5">
+                                            <div className="flex flex-wrap items-center gap-1.5">
                                               <span className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${badge.color}`}>
                                                 {badge.label}
                                               </span>
-                                              <span className="text-[9px] text-slate-500 font-mono">
+                                              {item.emotionalImpact && (
+                                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800/80 text-amber-300 border border-slate-700/60 font-mono">
+                                                  {item.emotionalImpact === 'decisivo' && '⚡ '}
+                                                  {item.emotionalImpact === 'revelador' && '✨ '}
+                                                  {item.emotionalImpact === 'inquietante' && '🌊 '}
+                                                  {item.emotionalImpact}
+                                                </span>
+                                              )}
+                                              {item.relatedColleague && (
+                                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 font-mono">
+                                                  com {item.relatedColleague}
+                                                </span>
+                                              )}
+                                              <span className="text-[9px] text-slate-500 font-mono ml-auto">
                                                 {new Date(item.timestamp).toLocaleDateString('pt-PT')}
                                               </span>
                                             </div>
+                                            {item.topicContext && (
+                                              <p className="text-[10px] text-slate-400 font-mono italic">
+                                                Contexto: {item.topicContext}
+                                              </p>
+                                            )}
                                             <p className="text-slate-200 text-[11px] leading-relaxed break-words">
                                               {item.content}
                                             </p>
@@ -449,6 +499,8 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                                       className="h-7 px-2 rounded-md bg-slate-950 border border-slate-800 text-[10px] text-slate-300 focus:outline-none focus:border-blue-500"
                                     >
                                       <option value="lessons_learned">💡 Lição Aprendida</option>
+                                      <option value="ethical_red_lines">🛑 Linha Vermelha Ética</option>
+                                      <option value="intellectual_doubts">❓ Dúvida Intelectual</option>
                                       <option value="confirmed_facts">📊 Facto Confirmado</option>
                                       <option value="decisions">⚖️ Decisão</option>
                                       <option value="open_hypotheses">🔬 Hipótese Aberta</option>
@@ -558,6 +610,7 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                       )}
                     </div>
                   ))}
+                  </div>
                 </div>
               )}
             </div>

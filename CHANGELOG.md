@@ -2,6 +2,20 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.15.0] - 2026-10-22
+
+### Adicionado
+- **Memória Individual dos Especialistas (Pilares 2, 3 e 4):**
+  - **Auto-Registo de Memórias:** No encerramento autónomo ou manual de cada debate, cada pensador participante extrai e arquiva automaticamente a sua aprendizagem estruturada individual com categoria dinâmica (`lessons_learned`, `decisions` ou `open_hypotheses`) e registo de interlocutor e tema.
+  - **Sincronização Híbrida Appwrite Cloud:** Métodos `saveAgentMemories` e `getAgentMemories` em `AppwriteDatabaseService`, permitindo sincronização na nuvem e persistência cruzada com salvaguarda local-first.
+  - **Novas Categorias Canónicas & Atributos Ricos:**
+    - `ethical_red_lines`: Linhas vermelhas éticas inegociáveis para cada pensador.
+    - `intellectual_doubts`: Dúvidas intelectuais e dilemas em aberto transportados para futuros debates.
+    - Metadados de `emotionalImpact` (`decisivo`, `revelador`, `inquietante`), `relatedColleague` e `topicContext`.
+  - **Interface & Filtros no Painel de Especialistas:** Nova barra de filtros horizontais por categoria em `AgentRoster.tsx`, badges contextuais e formulário alargado para introdução manual.
+  - **Injeção Cognitiva no OpenRouter:** Os prompts de IA recebem as linhas vermelhas e dúvidas intelectuais individuais com diretrizes estritas de respeito epistemológico.
+- **Validação Automatizada:** Bateria de testes `scripts/test-memory-enhancements.mjs` com 100% de sucesso.
+
 ## [0.14.1] - 2026-10-22
 
 ### Corrigido / Alterado
