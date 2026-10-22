@@ -172,16 +172,16 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                   👋 &ldquo;Boa noite a todos!&rdquo;
                 </button>
                 <button
-                  onClick={() => onQuickSpeak('O que acham que vai acontecer com o futuro do trabalho e da inteligência artificial?')}
+                  onClick={() => onQuickSpeak(`Qual é, na vossa opinião, o principal dilema ou desacordo sobre "${topic}"?`)}
                   className="px-3 py-1.5 rounded-full bg-slate-900/90 hover:bg-indigo-950/60 border border-slate-700/70 hover:border-indigo-500/60 text-[11px] sm:text-xs text-indigo-300 font-medium transition-all shadow-sm hover:scale-[1.03]"
                 >
-                  💬 &ldquo;O que acham do futuro do trabalho?&rdquo;
+                  💬 &ldquo;Qual é o vosso principal desacordo?&rdquo;
                 </button>
                 <button
-                  onClick={() => onQuickSpeak('Será que uma máquina consegue ter sentimentos reais e consciência?')}
+                  onClick={() => onQuickSpeak(`Como podemos equilibrar os riscos e as oportunidades reais de "${topic}"?`)}
                   className="px-3 py-1.5 rounded-full bg-slate-900/90 hover:bg-indigo-950/60 border border-slate-700/70 hover:border-indigo-500/60 text-[11px] sm:text-xs text-indigo-300 font-medium transition-all shadow-sm hover:scale-[1.03]"
                 >
-                  🤖 &ldquo;As máquinas conseguem sentir?&rdquo;
+                  ⚖️ &ldquo;Como equilibrar riscos e benefícios?&rdquo;
                 </button>
               </div>
             )}

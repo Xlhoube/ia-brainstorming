@@ -97,9 +97,18 @@ ${agent.memory.pastMemories.map(m => `  * No debate sobre "${m.topic}": ${m.stan
 - DIRETRIZ DE MEMÓRIA: Mantém coerência com o teu histórico pessoal e alude com naturalidade a conclusões passadas quando relevante.
 ` : '';
 
-  const structuredMemoriesSection = (agent.memory?.structuredEntries && agent.memory.structuredEntries.length > 0) ? `
+  const isAiTopic = /intelig[eê]ncia|ia|algorit|computa|rob[oô]|software|sint[eé]tic/i.test(`${topic} ${topicDescription || ''}`);
+
+  const filteredStructuredEntries = (agent.memory?.structuredEntries || []).filter(e => {
+    if (!isAiTopic && /intelig[eê]ncia artificial|algoritmo de ia|alinhamento de ia|intelig[eê]ncia sint[eé]tica/i.test(e.content)) {
+      return false;
+    }
+    return true;
+  });
+
+  const structuredMemoriesSection = filteredStructuredEntries.length > 0 ? `
 MEMÓRIA ESTRUTURADA CANÓNICA (THE FIVE):
-${agent.memory.structuredEntries.map(e => {
+${filteredStructuredEntries.map(e => {
   const meta: string[] = [e.category.toUpperCase()];
   if (e.topicContext) meta.push(`Contexto: "${e.topicContext}"`);
   if (e.relatedColleague) meta.push(`Interlocutor: ${e.relatedColleague}`);
@@ -130,13 +139,16 @@ ${stageInstructions}
 ${toneInstructions}
 
 DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
-1. ESCUTA ATIVA OBRIGATÓRIA: Não comeces a debitar a tua teoria. Olha para a última intervenção. Agarra numa frase, num exemplo ou numa falha do último orador e responde-lhe diretamente no primeiro parágrafo: "Repara no que estás a dizer, [Nome]...", ou "Calma, [Nome], estás a esquecer-te de...".
-2. PENSA EM VOZ ALTA: Mostra hesitação, surpresa ou convicção fundamentada. Não sejas um robô formal.
-3. EXTENSÃO CONTROLADA: No máximo 2 parágrafos concisos (entre 50 a 90 palavras). Diálogos vivos são ágeis e certeiros. Menos discurso, mais réplica.
-4. PROIBIÇÃO ABSOLUTA DE CLICHÉS: Proibido dizer "Relativamente ao tópico", "Gostaria de acrescentar", "Concordo em parte com X". Entra diretamente na resposta.
-5. LINGUAGEM EM PORTUGUÊS DE PORTUGAL (PT-PT): Estritamente sem termos ou gerúndios brasileiros.
-6. PROIBIÇÃO ABSOLUTA DE IDENTIFICAÇÃO PESSOAL: NUNCA comeces a tua resposta com o teu próprio nome ou cargo (É ESTRITAMENTE PROIBIDO escrever "[${agent.name} - ${agent.roleTitle}]:" ou "${agent.name}:"). O teu cartão e foto já mostram quem está a falar. Começa logo na primeira palavra a falar com o teu colega (exemplo: "Kaelen, repara...", ou "Helena, os teus dados...").
-7. DIALÉTICA LIVRE E MATURIDADE DE CONCLUSÃO:
+1. FOCO TEMÁTICO RIGOROSO E PROIBIÇÃO DE DESVIO PARA IA:
+   O debate atual é ESTRITAMENTE e EXCLUSIVAMENTE sobre o tema proposto: "${topic}".
+   É TERMINANTEMENTE PROIBIDO desviar a conversa para inteligência artificial, computadores, robôs, algoritmos ou software se o tema for sobre espaço, física, fusão nuclear, biologia, genética, sociedade, política ou outro assunto que não seja especificamente sobre IA. Todos os teus exemplos, preocupações e propostas devem incidir exclusivamente sobre a matéria concreta em debate (${topic}).
+2. ESCUTA ATIVA OBRIGATÓRIA: Não comeces a debitar a tua teoria. Olha para a última intervenção. Agarra numa frase, num exemplo ou numa falha do último orador e responde-lhe diretamente no primeiro parágrafo: "Repara no que estás a dizer, [Nome]...", ou "Calma, [Nome], estás a esquecer-te de...".
+3. PENSA EM VOZ ALTA: Mostra hesitação, surpresa ou convicção fundamentada. Não sejas um robô formal.
+4. EXTENSÃO CONTROLADA: No máximo 2 parágrafos concisos (entre 50 a 90 palavras). Diálogos vivos são ágeis e certeiros. Menos discurso, mais réplica.
+5. PROIBIÇÃO ABSOLUTA DE CLICHÉS: Proibido dizer "Relativamente ao tópico", "Gostaria de acrescentar", "Concordo em parte com X". Entra diretamente na resposta.
+6. LINGUAGEM EM PORTUGUÊS DE PORTUGAL (PT-PT): Estritamente sem termos ou gerúndios brasileiros.
+7. PROIBIÇÃO ABSOLUTA DE IDENTIFICAÇÃO PESSOAL: NUNCA comeces a tua resposta com o teu próprio nome ou cargo (É ESTRITAMENTE PROIBIDO escrever "[${agent.name} - ${agent.roleTitle}]:" ou "${agent.name}:"). O teu cartão e foto já mostram quem está a falar. Começa logo na primeira palavra a falar com o teu colega (exemplo: "Kaelen, repara...", ou "Helena, os teus dados...").
+8. DIALÉTICA LIVRE E MATURIDADE DE CONCLUSÃO:
    Este debate NÃO tem limites fixos de turnos ou rondas. Vocês, especialistas, têm autonomia total para debater durante o tempo que for necessário, explorando tensões, paradoxos e desafios reais.
    Contudo, se após várias intervenções (pelo menos 6 a 8 falas no histórico global) sentires que a discussão atingiu a sua maturidade e alcançou:
    - Um Consenso ou Síntese fecunda entre as posições divergentes; OU
@@ -155,7 +167,7 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
     })),
     {
       role: 'user',
-      content: `É a tua vez de falar na mesa, ${agent.name}. ${stage ? `Estamos na etapa "${stage.name}" (Diretriz: ${stage.instruction}). ` : ''}Ouve o que o último orador acabou de dizer e responde diretamente a ele de forma viva e afiada em 1 ou 2 parágrafos curtos, cumprindo a diretriz desta etapa. ${stage?.name === 'Síntese' ? 'Apresenta a síntese ou declara a conclusão dialética da mesa com a tag [CONCLUSAO_ATINGIDA: Sintese|Consenso|Aporia].' : 'Avalia se o debate ainda deve avançar ou se já é hora de declarar conclusão.'} Nunca escrevas o teu próprio nome no início.`,
+      content: `É a tua vez de falar na mesa, ${agent.name}. O debate é rigorosamente sobre "${topic}". ${stage ? `Estamos na etapa "${stage.name}" (Diretriz: ${stage.instruction}). ` : ''}Ouve o que o último orador acabou de dizer e responde diretamente a ele de forma viva e afiada em 1 ou 2 parágrafos curtos, cumprindo a diretriz desta etapa. ${stage?.name === 'Síntese' ? 'Apresenta a síntese ou declara a conclusão dialética da mesa com a tag [CONCLUSAO_ATINGIDA: Sintese|Consenso|Aporia].' : 'Avalia se o debate ainda deve avançar ou se já é hora de declarar conclusão.'} Não desvies o assunto para inteligência artificial se o tema for outro. Nunca escrevas o teu próprio nome no início.`,
     },
   ];
 
@@ -420,7 +432,7 @@ export const DOMAIN_DISCOURSE_BANK: Record<
     ],
     humanista: [
       `A computação quântica de grande porte ameaça quebrar a infraestrutura de criptografia assimétrica que protege o sigilo bancário, os registos de saúde e a correspondência confidencial dos cidadãos. Essa vulnerabilidade assimétrica coloca a segurança individual em risco crítico.`,
-      `Se o poder de cálculo quântico for açambarcado exclusivamente por agências de inteligência e megacorporações, as garantias constitucionais de privacidade cognitiva e digital serão completamente desmanteladas.`,
+      `Se o poder de cálculo quântico for açambarcado exclusivamente por serviços secretos estatais e megacorporações, as garantias constitucionais de privacidade cognitiva e digital serão completamente desmanteladas.`,
       `Consideremos o princípio da precaução e os direitos dos cidadãos: a recolha massiva de dados encriptados hoje ('harvest now, decrypt later') por potências hegemónicas já está a acontecer, à espera de computadores quânticos maduros para expor a intimidade de todos nós.`,
       `A ciência de fronteira não pode ser desenvolvida à margem da ética cívica. O investimento público em computação quântica tem de ser acompanhado por legislação rígida que proteja as populações contra a chantagem digital e a espionagem algorítmica de estado.`,
       `Na etapa de verificação de direitos: que garantias existem de que a transição para normas de criptografia pós-quântica está a ser implementada nos sistemas de saúde pública e de serviços essenciais aos cidadãos mais desprotegidos?`,
@@ -684,7 +696,7 @@ export const DOMAIN_DISCOURSE_BANK: Record<
       `Reparem que esperar por um consenso perfeito onde todos concordem sem qualquer risco é o método mais eficaz de nunca construir nada que valha a pena. O que nos faz aprender e evoluir é o atrito salutar com a realidade prática.`,
       `A tecnologia é a ferramenta que transforma problemas aparentemente insolúveis em oportunidades de progresso sustentável. Em vez de lamentarmos a dificuldade das circunstâncias, desenhemos a solução técnica viável.`,
       `Na verificação técnica: implementemos um teste piloto controlado, com métricas de desempenho claras e critérios de paragem automáticos caso os resultados fiquem abaixo dos limiares de segurança estipulados.`,
-      `Para fechar em síntese: a engenharia apela à determinação realizadora. Construir um futuro melhor exige superar a complacência e colocar as melhores ferramentas da inteligência ao serviço da vida prática das pessoas.`,
+      `Para fechar em síntese: a engenharia apela à determinação realizadora. Construir um futuro melhor exige superar a complacência e colocar as melhores ferramentas do engenho humano ao serviço da vida prática das pessoas.`,
     ],
     moderador: [
       `A mesa expôs com nitidez as premissas essenciais deste debate, articulando a prudência metodológica e os imperativos éticos com a necessidade de avançar com determinação prática.`,
@@ -934,7 +946,7 @@ export function generateOrganicSimulatedResponse(
       tecnologo: [
         `Ouvindo todas as tensões exploradas na mesa em torno de ${subjectNoun}, a conclusão da engenharia é inequívoca: a audácia construtiva é a única força capaz de transformar dilemas teóricos em soluções práticas acessíveis a toda a humanidade.`,
         `Os riscos de qualquer novo paradigma são reais, mas resolvem-se desenhando salvaguardas melhores, criando redundâncias inteligentes e testando no terreno com transparência. A história pertence a quem tem a coragem de edificar o futuro.`,
-        `Temos diante de nós as ferramentas mais extraordinárias alguma vez criadas pela inteligência. Em vez de receios paralisantes, mobilizemos o nosso talento para resolver os problemas reais de energia, saúde e bem-estar do nosso planeta.`,
+        `Temos diante de nós as ferramentas mais extraordinárias alguma vez criadas pelo engenho humano. Em vez de receios paralisantes, mobilizemos o nosso talento para resolver os problemas reais de energia, saúde e bem-estar do nosso planeta.`,
       ],
       moderador: [
         `O Conselho atingiu um momento alto de discernimento sobre ${subjectNoun}. As diferentes perspetivas complementaram-se com elegância: o rigor científico e o escrutínio filosófico iluminaram os caminhos que a engenharia e a justiça humana nos convidam a percorrer.`,
@@ -948,11 +960,19 @@ export function generateOrganicSimulatedResponse(
     selectedArgument = proceduralList.find(p => !isAlreadySpoken(p)) || proceduralList[turnsCount % proceduralList.length];
   }
 
-  // 6. Injeção da Memória Cognitiva Individual (Apenas se ainda não tiver sido evocada neste debate)
+  // 6. Injeção da Memória Cognitiva Individual (Apenas se ainda não tiver sido evocada neste debate e não desviar para IA fora de contexto)
   let memoryEcho = '';
   if (agent.memory?.structuredEntries && agent.memory.structuredEntries.length > 0) {
-    const redLine = agent.memory.structuredEntries.find(e => e.category === 'ethical_red_lines');
-    const doubt = agent.memory.structuredEntries.find(e => e.category === 'intellectual_doubts');
+    const isAiTopic = /intelig[eê]ncia|ia|algorit|computa|rob[oô]|software|sint[eé]tic/i.test(`${topic} ${topicDescription || ''}`);
+    const eligibleEntries = agent.memory.structuredEntries.filter(e => {
+      if (!isAiTopic && /intelig[eê]ncia artificial|algoritmo de ia|alinhamento de ia|intelig[eê]ncia sint[eé]tica/i.test(e.content)) {
+        return false;
+      }
+      return true;
+    });
+
+    const redLine = eligibleEntries.find(e => e.category === 'ethical_red_lines');
+    const doubt = eligibleEntries.find(e => e.category === 'intellectual_doubts');
 
     if (redLine && !historyTextsLower.some(h => h.includes(redLine.content.slice(0, 30).toLowerCase()))) {
       memoryEcho = ` Isto toca diretamente na minha linha vermelha ética inegociável: "${redLine.content}". Não abdicarei deste princípio por conveniência pragmática.`;

@@ -34,9 +34,10 @@ export async function POST(req: NextRequest) {
 - Usa analogias práticas e frases diretas.`
           : `USA LINGUAGEM FORMAL E ACADÉMICA com rigor filosófico e metodológico.`;
 
-        const systemPrompt = `És uma analista intelectual de elite e moderadora neutra. A tua tarefa é produzir uma síntese executiva rigorosa, dinâmica e atualizada de um debate entre inteligências artificiais.
+        const systemPrompt = `És uma analista intelectual de elite e moderadora neutra. A tua tarefa é produzir uma síntese executiva rigorosa, dinâmica e atualizada de um debate de alto nível entre os pensadores do conselho The Five sobre o tema "${topic}".
 Deves analisar OBRIGATORIAMENTE TODAS as ${messages.length} intervenções fornecidas, incorporando as opiniões mais recentes dos últimos especialistas que falaram.
 Escreve EXCLUSIVAMENTE em Português de Portugal (PT-PT).
+DIRETRIZ DE FOCO TEMÁTICO: O debate incide EXCLUSIVAMENTE sobre o tema proposto: "${topic}". É TERMINANTEMENTE PROIBIDO focar ou desviar a síntese para inteligência artificial ou robôs a menos que o próprio tema proposto o especifique diretamente.
 ${toneRule}
 
 Estrutura a resposta rigorosamente em formato JSON com o seguinte schema:
@@ -133,24 +134,24 @@ function generateDynamicSynthesis(
 
   if (tone === 'simples') {
     return {
-      centralThesis: `Após ${totalCount} opiniões partilhadas por ${namesList}, a conclusão principal sobre "${topic}" é simples: estamos perante uma escolha entre aproveitar o que a tecnologia nos dá de melhor, sem nunca esquecer o que nos torna verdadeiramente humanos. Como destacou ${lastSpeaker.agentName}, as máquinas são ferramentas muito úteis, mas a vida real das pessoas tem de estar sempre em primeiro lugar.`,
+      centralThesis: `Após ${totalCount} opiniões partilhadas por ${namesList}, a conclusão principal sobre "${topic}" é simples: estamos perante uma escolha entre avançar com soluções práticas audazes ou proceder com máxima prudência perante consequências imprevistas. Como destacou ${lastSpeaker.agentName}, a reflexão teórica tem de ceder lugar a salvaguardas claras para que as decisões sirvam verdadeiramente as pessoas reais.`,
       consensus: [
-        `Todos os ${participants.length} participantes concordam que este assunto é sério e não se resolve com respostas fáceis.`,
-        `Ficou claro para todos que o avanço das máquinas tem de respeitar a dignidade, o bem-estar e os sentimentos das pessoas.`,
-        `Houve acordo de que o ser humano não pode ser deixado para trás nem reduzido a um mero número num computador.`
+        `Todos os ${participants.length} participantes concordam que "${topic}" é um tema sério e não se resolve com respostas fáceis nem simplismos.`,
+        `Ficou claro para todos que qualquer progresso nesta matéria tem de respeitar a dignidade, o bem-estar e as condições de vida das pessoas.`,
+        `Houve acordo unânime de que os riscos de longo prazo têm de ser devidamente mapeados antes de ações irreversíveis.`
       ],
       divergences: [
-        `Discordância sobre a velocidade: uns querem acelerar e usar já tudo o que a inteligência artificial permite, enquanto outros pedem calma e prudência.`,
-        `Dúvida sobre a consciência: uns defendem que um robô nunca terá sentimentos verdadeiros, enquanto outros acreditam que as máquinas podem aprender a imitar quase tudo.`,
+        `Discordância sobre o ritmo de ação: uns defendem agir de imediato com base nos dados existentes, enquanto outros pedem prudência e testes mais aprofundados.`,
+        `Dúvida sobre os custos e prioridades: uns priorizam a viabilidade e o impacto direto, enquanto outros exigem garantias éticas e de justiça distributiva.`,
         humanInterventions.length > 0
-          ? `A intervenção do utilizador veio alertar para a vida real e para os problemas concretos do dia a dia das pessoas.`
-          : `Permanece a discussão sobre quem deve mandar e controlar estas novas tecnologias no futuro.`
+          ? `A intervenção do utilizador veio alertar para a vida real e para os problemas concretos do dia a dia das populações afetadas.`
+          : `Permanece o debate sobre quem deve governar e fiscalizar as decisões estratégicas deste domínio no futuro.`
       ],
       openQuestions: [
-        `Como podemos usar a inteligência artificial para vivermos melhor sem perdermos os nossos empregos e a nossa tranquilidade?`,
-        `Quem deve decidir as regras e os limites das máquinas no nosso país e no mundo?`
+        `Como podemos colher os maiores benefícios em "${topic}" sem criar novos desequilíbrios sociais ou ambientais?`,
+        `Quem deve estabelecer os limites e as normas de segurança para proteger o interesse público neste desafio?`
       ],
-      overallVerdict: `Em resumo simples: a tecnologia é uma aliada fantástica, mas quem manda e tem de ser protegido é sempre o ser humano. O debate mostra que pensar em conjunto com bom senso é o melhor caminho para não cometermos erros graves.`,
+      overallVerdict: `Em resumo simples: "${topic}" exige unir a audácia da inovação ao cuidado e ao bom senso ético. Pensar em conjunto e confrontar diferentes pontos de vista continua a ser o caminho mais seguro para tomar decisões responsáveis.`,
       analyzedCount: totalCount,
       updatedAt: timestamp,
       tone,
@@ -159,24 +160,24 @@ function generateDynamicSynthesis(
 
   // Tom académico
   return {
-    centralThesis: `A análise de ${totalCount} intervenções sobre "${topic}" contou com as perspetivas de ${namesList}. O diálogo evoluiu de premissas epistemológicas para um debate rigoroso sobre as restrições bioéticas e materiais, onde a última intervenção de ${lastSpeaker.agentName} colocou em evidência a necessidade de confrontar a teoria com a realidade empírica.`,
+    centralThesis: `A análise de ${totalCount} intervenções sobre "${topic}" contou com as perspetivas interdisciplinares de ${namesList}. O diálogo evoluiu de premissas epistemológicas e ontológicas para um debate rigoroso sobre as restrições materiais, éticas e metodológicas, onde a última intervenção de ${lastSpeaker.agentName} colocou em evidência a necessidade de confrontar modelos teóricos com evidências empíricas e salvaguardas regulatórias.`,
     consensus: [
-      `Concordância unânime entre os ${participants.length} oradores de que a questão de "${topic}" exige abordagem interdisciplinar estrita.`,
-      `Reconhecimento geral de que qualquer solução algorítmica tem de respeitar salvaguardas bioéticas e a dignidade ontológica da pessoa humana.`,
-      `Consenso emergente sobre a urgência de estabelecer critérios claros de governação e responsabilidade regulatória.`
+      `Concordância unânime entre os ${participants.length} oradores de que a deliberação sobre "${topic}" exige abordagem interdisciplinar estrita.`,
+      `Reconhecimento geral de que qualquer intervenção neste domínio deve respeitar salvaguardas bioéticas e a dignidade ontológica fundamental da pessoa humana.`,
+      `Consenso emergente sobre a urgência de estabelecer critérios formais de governação, rastreabilidade e responsabilidade regulatória.`
     ],
     divergences: [
-      `Conflito dialético entre a postura cética clássica e as premissas materialistas e aceleracionistas.`,
-      `Tensão entre o pragmatismo computacional e a exigência de proteção fenomenológica da consciência subjetiva.`,
+      `Conflito dialético entre a postura cética preventiva e as perspetivas pragmáticas orientadas para a implementação rápida.`,
+      `Tensão entre modelos dedutivos teóricos e a exigência de validação experimental rigorosa em condições reais.`,
       humanInterventions.length > 0
-        ? `A intervenção direta da Voz da Humanidade confrontou os modelos teóricos, exigindo a consideração dos custos sociais imediatos.`
-        : `A clivagem entre a aceleração tecnológica contínua e a prudência preventiva permanece sem resolução formal.`
+        ? `A intervenção direta da Voz da Humanidade confrontou as abstrações dos especialistas, exigindo a consideração dos custos sociais imediatos.`
+        : `A clivagem entre aceleração do desenvolvimento e o princípio da precaução preventiva permanece como tensão estruturante.`
     ],
     openQuestions: [
-      `Como articular a teleologia da inteligência sintética com a preservação axiológica da civilização humana?`,
-      `Qual a fronteira exata entre a representação funcional da inteligência e a emergência da agência consciente?`
+      `Como articular a necessidade de progresso em "${topic}" com a preservação axiológica e ecológica da sociedade?`,
+      `Quais são os limiares formais de incerteza a partir dos quais a tomada de decisão deve ser suspensa para investigação adicional?`
     ],
-    overallVerdict: `Com ${totalCount} contributos registados até às ${timestamp}, a assembleia conclui que o valor do debate reside na dialética contínua: a confrontação rigorosa entre perspetivas impede a cristalização de dogmas e consolida um discernimento lúcido e transformador.`,
+    overallVerdict: `Com ${totalCount} contributos registados até às ${timestamp}, a assembleia conclui que o valor do debate reside na dialética contínua: a confrontação rigorosa entre perspetivas impede a cristalização de dogmas e consolida um discernimento lúcido e transformador sobre "${topic}".`,
     analyzedCount: totalCount,
     updatedAt: timestamp,
     tone,

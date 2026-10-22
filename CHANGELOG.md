@@ -2,6 +2,18 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.15.3] - 2026-10-22
+
+### Corrigido / Alterado
+- **Foco Temático Rigoroso & Prevenção Total de Desvio para IA (Anti-Drift):**
+  - **Neutralização de Memórias de Base:** Reformuladas as memórias estruturadas iniciais dos cinco especialistas em `src/lib/agents/bibliaLoader.ts` (Dr. Marcus Vance, Dra. Helena Rostova, Aura Chen, Kaelen Voss, Sophia Veris) para operarem com princípios universais de epistemologia, termodinâmica, justiça cívica e engenharia, eliminando expressões indutoras de desvio para IA (ex.: "inteligência sintética", "alinhamento de IA", "cálculo algorítmico").
+  - **Filtro de Relevância em `memoryEcho` e Prompts:** Em `src/lib/ai/openrouter.ts`, o motor avalia se o debate incide sobre tecnologia/IA antes de passar ou evocar memórias relacionadas; em debates de espaço, fusão, genética, física ou ecologia, memórias sobre IA são estritamente filtradas.
+  - **Diretriz Mandatória Anti-Desvio nos Prompts Remotos:** Inserida regra formal de foco temático no System Prompt do OpenRouter proibindo os modelos de desviarem a discussão para inteligência artificial, computadores ou robôs quando o tema em debate for de outra natureza.
+  - **Depuração de Ambiguidade nos Domínios Físicos:** Substituídas expressões potencialmente indutoras de IA no banco de discurso de `quantica` e `geral` ("serviços secretos estatais" em vez de "agências de inteligência"; "engenho humano" em vez de "inteligência").
+  - **Síntese Fiel ao Tópico (`synthesize/route.ts`):** Eliminados todos os textos rígidos de fallback que pressupunham que qualquer debate era sobre IA e robôs; o resumo executivo adapta-se com fidelidade ao tema real proposto.
+  - **Sugestões Rápidas Dinâmicas (`DebateTimeline.tsx`):** Os botões rápidos de intervenção humana no ecrã adaptam-se dinamicamente ao tópico ativo em vez de sugerirem perguntas pré-formatadas sobre o futuro da IA ou robôs com sentimentos.
+- **Validação Automatizada:** Novo script de testes em `scripts/test-thematic-relevance.mjs` com 5 testes de pureza temática e verificação estrita de ausência de desvio para IA em temas não-IA.
+
 ## [0.15.2] - 2026-10-22
 
 ### Corrigido / Alterado

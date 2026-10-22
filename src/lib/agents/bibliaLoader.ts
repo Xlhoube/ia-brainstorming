@@ -334,7 +334,7 @@ export function getInitialStructuredMemories(charId: string): StructuredMemoryIt
         {
           id: 'mem-marcus-1',
           category: 'confirmed_facts',
-          content: 'A consciência subjetiva não pode ser deduzida exclusivamente a partir do cálculo algorítmico sem salto categorial ontológico.',
+          content: 'A experiência subjetiva e o valor intrínseco da vida não podem ser deduzidos exclusivamente de cálculos utilitários sem salto ontológico injustificado.',
           source: 'Bíblia Canónica',
           confidence: 'confirmada',
           status: 'confirmado',
@@ -356,7 +356,7 @@ export function getInitialStructuredMemories(charId: string): StructuredMemoryIt
         {
           id: 'mem-marcus-3',
           category: 'intellectual_doubts',
-          content: 'Poderá uma inteligência sintética experimentar verdadeira responsabilidade moral sem ter consciência da sua própria finitude e mortalidade?',
+          content: 'Poderá qualquer entidade ou sistema de decisão assumir verdadeira responsabilidade ética sem experimentar a consciência da sua própria vulnerabilidade e finitude?',
           source: 'Filosofia da Mente',
           confidence: 'alta',
           status: 'hipotese',
@@ -380,8 +380,8 @@ export function getInitialStructuredMemories(charId: string): StructuredMemoryIt
         {
           id: 'mem-helena-1',
           category: 'confirmed_facts',
-          content: 'Modelos de computação operam sob limites termodinâmicos rigorosos e consumo mensurável de recursos físicos.',
-          source: 'Física & Computação',
+          content: 'Todos os sistemas físicos e materiais operam sob leis termodinâmicas estritas, balanços de energia finitos e limites de conservação mensuráveis.',
+          source: 'Física & Metodologia',
           confidence: 'confirmada',
           status: 'confirmado',
           date: dateStr,
@@ -402,8 +402,8 @@ export function getInitialStructuredMemories(charId: string): StructuredMemoryIt
         {
           id: 'mem-helena-3',
           category: 'intellectual_doubts',
-          content: 'Serão as flutuações quânticas cerebrais indispensáveis à cognição de ordem superior, ou trata-se de ruído passível de emulação clássica?',
-          source: 'Biofísica Computacional',
+          content: 'Qual é o limiar exato em que a complexidade de um sistema físico deixa de ser previsível por redução determinista e passa a exibir propriedades emergentes não-lineares?',
+          source: 'Biofísica e Sistemas Complexos',
           confidence: 'media',
           status: 'hipotese',
           date: dateStr,
@@ -416,7 +416,7 @@ export function getInitialStructuredMemories(charId: string): StructuredMemoryIt
         {
           id: 'mem-aura-1',
           category: 'confirmed_facts',
-          content: 'Qualquer transição tecnológica sem mecanismos explícitos de salvaguarda social aprofunda a desigualdade e a fragilidade humana.',
+          content: 'Qualquer transição ou inovação sem mecanismos explícitos de salvaguarda social aprofunda a desigualdade e a fragilidade humana.',
           source: 'Ciências Sociais',
           confidence: 'confirmada',
           status: 'confirmado',
@@ -427,7 +427,7 @@ export function getInitialStructuredMemories(charId: string): StructuredMemoryIt
         {
           id: 'mem-aura-2',
           category: 'ethical_red_lines',
-          content: 'Nenhum sistema automatizado deve retirar ao ser humano a capacidade soberana de autodeterminação, empatia e cuidado com os outros.',
+          content: 'Nenhuma estrutura técnica, económica ou burocrática deve retirar ao ser humano a capacidade soberana de autodeterminação, empatia e cuidado mútuo.',
           source: 'Carta Humanista',
           confidence: 'confirmada',
           status: 'confirmado',
@@ -438,7 +438,7 @@ export function getInitialStructuredMemories(charId: string): StructuredMemoryIt
         {
           id: 'mem-aura-3',
           category: 'intellectual_doubts',
-          content: 'Como conciliar a pluralidade de visões morais das culturas mundiais com algoritmos universais de alinhamento de IA sem cair em novo colonialismo epistémico?',
+          content: 'Como conciliar a pluralidade de valores morais e saberes das diferentes culturas humanas com padrões universais de governação sem cair em paternalismo epistémico?',
           source: 'Ética Global',
           confidence: 'alta',
           status: 'hipotese',
@@ -474,7 +474,7 @@ export function getInitialStructuredMemories(charId: string): StructuredMemoryIt
         {
           id: 'mem-kaelen-3',
           category: 'intellectual_doubts',
-          content: 'Qual é o limiar de complexidade a partir do qual um sistema de agentes autónomos deixa de poder ser auditado deterministicamente por humanos?',
+          content: 'Qual é o limiar de escala a partir do qual um sistema tecnológico complexo e interligado deixa de poder ser auditado e contido em caso de falha em cascata?',
           source: 'Segurança de Sistemas Complexos',
           confidence: 'alta',
           status: 'hipotese',
