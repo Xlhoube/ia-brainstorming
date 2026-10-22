@@ -2,6 +2,28 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.20.0] - 2026-10-22
+
+### Adicionado / Arquitetura de Memória Híbrida & State Tracking
+- **Sumarização Incremental em Background (`debateMemoryService.ts`):**
+  - **Gatilho de Compressão:** Monitorização automática do histórico com limiar de 6 intervenções (`COMPRESSION_TRIGGER_THRESHOLD = 6` / 3000 tokens), comprimindo blocos antigos fora da janela ativa.
+  - **Prompt de Resumo Impiedosamente Sintético:** Extração assíncrona focada em 4 pilares: 1) Teses centrais defendidas, 2) Dados factuais e métricas numéricas apresentadas, 3) Argumentos refutados, e 4) Concessões feitas, eliminando qualquer retórica vazia.
+- **Estrutura da Janela Deslizante Híbrida (`debateMemoryService.ts`, `openrouter.ts`):**
+  - Payload estruturado em 3 camadas hierárquicas de prioridade cognitiva:
+    1. *Camada 1 (System Prompt):* Persona do especialista, regras do debate canónico e Mapeamento de Estado (JSON) injetado no topo.
+    2. *Camada 2 (Memória de Longo Prazo):* Texto sumarizado incremental contínuo enriquecido com argumentos históricos recuperados via RAG semântico.
+    3. *Camada 3 (Memória de Curto Prazo):* Janela deslizante com as últimas 2 a 4 interações brutas (`DEFAULT_SLIDING_WINDOW_SIZE = 3`), garantindo réplicas imediatas e fluidas ao último orador.
+- **Mapeamento de Estado (State Tracking em JSON):**
+  - Injeção dinâmica do objeto `estado_do_debate: { pontos_consensuais: [...], argumentos_esgotados: { ... } }` no topo do prompt.
+  - O LLM consome este objeto como mapa de bloqueio absoluto do que já foi dito e esgotado, poupando milhares de tokens por turno e eliminando loops retóricos.
+- **Base Vetorial e RAG Semântico (`debateMemoryService.ts`):**
+  - Indexação semântica e de palavras-chave de cada intervenção do debate (`indexArgumentsForRAG`).
+  - Recuperação por similaridade semântica (Jaccard / Cosine com exclusão da janela deslizante) dos 3 a 4 argumentos passados mais relevantes para o contexto do minuto em curso.
+- **Tipagem Estruturada (`src/types/debate.ts`):**
+  - Definição formal das interfaces `DebateStateTracking`, `CompressedDebateMemory` e `VectorArgumentEntry`.
+- **Bateria de Testes Automatizados:**
+  - Novo script `scripts/test-hybrid-memory-architecture.mjs` com 100% de aprovação.
+
 ## [0.19.1] - 2026-10-22
 
 ### Otimizado / Parâmetros de API & Anti-Loop

@@ -1,4 +1,11 @@
 import { Agent, DebateMessage, LanguageTone, StructuredMemoryItem } from '@/types/debate';
+import {
+  compressDebateHistory,
+  buildHybridMemoryPrompt,
+  indexArgumentsForRAG,
+  searchSimilarArguments,
+  DEFAULT_SLIDING_WINDOW_SIZE,
+} from './debateMemoryService';
 
 export interface AgentResponseResult {
   content: string;
@@ -214,9 +221,39 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
 - Regra de Novidade Absoluta: Antes de gerares a tua resposta, analisa o histórico da conversa. É expressamente proibido repetir uma premissa, argumento ou exemplo já utilizado por ti ou pelo teu oponente. Cada intervenção deve introduzir um novo dado empírico.
 - Mecanismo de Desistência (Impasse Técnico): Se o teu oponente refutar o teu argumento e não houver consenso após uma troca direta (uma réplica e uma tréplica), declara um impasse técnico sobre esse ponto específico e avança obrigatoriamente para um argumento completamente novo.`;
 
+  // 1. Sumarização Incremental em Background e Mapeamento de Estado (State Tracking em JSON)
+  const compressedMemory = compressDebateHistory({
+    messages,
+    topic,
+    slidingWindowSize: DEFAULT_SLIDING_WINDOW_SIZE,
+  });
+
+  // 2. Base de Dados Vetorial (RAG): indexação e recuperação dos 3-4 argumentos mais relevantes do histórico
+  const ragIndex = indexArgumentsForRAG(messages);
+  const lastMsg = messages[messages.length - 1];
+  const ragQuery = `${topic} ${lastMsg ? lastMsg.content : ''}`;
+  const slidingWindowExcludeIds = messages.slice(-DEFAULT_SLIDING_WINDOW_SIZE).map(m => m.id);
+  const relevantRagArguments = searchSimilarArguments({
+    query: ragQuery,
+    index: ragIndex,
+    excludeIds: slidingWindowExcludeIds,
+    topK: 3,
+  });
+
+  // 3. Montagem da Janela Deslizante Híbrida em 3 camadas:
+  // - System Prompt: persona + regras + estado_do_debate (JSON)
+  // - Memória de Longo Prazo: resumo contínuo + argumentos relevantes do RAG
+  // - Memória de Curto Prazo: as últimas 2 a 4 interações em formato bruto
+  const hybrid = buildHybridMemoryPrompt({
+    baseSystemPrompt: systemInstructions,
+    compressedMemory,
+    recentMessages: messages,
+    relevantRagArguments,
+  });
+
   const promptMessages = [
-    { role: 'system', content: systemInstructions },
-    ...messages.slice(-8).map(msg => ({
+    { role: 'system', content: hybrid.systemInstructions },
+    ...hybrid.slidingWindowMessages.map(msg => ({
       role: msg.isHuman ? 'user' : 'assistant',
       name: sanitizeName(msg.agentName),
       content: msg.content,

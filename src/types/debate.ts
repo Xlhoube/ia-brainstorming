@@ -185,3 +185,38 @@ export interface OpenRouterConfig {
   siteUrl?: string;
   siteName?: string;
 }
+
+/**
+ * Mapeamento de Estado (State Tracking) em JSON para eliminação de repetições e economia de tokens
+ */
+export interface DebateStateTracking {
+  pontos_consensuais: string[];
+  argumentos_esgotados: Record<string, string[]>;
+  teses_centrais?: string[];
+  dados_factuais?: string[];
+  concessoes_feitas?: string[];
+}
+
+/**
+ * Estrutura de Memória Comprimida de Longo Prazo
+ */
+export interface CompressedDebateMemory {
+  longTermSummary: string;
+  stateTracking: DebateStateTracking;
+  compressedCount: number;
+  updatedAt: number;
+}
+
+/**
+ * Registo de Argumento Indexado para RAG Semântico
+ */
+export interface VectorArgumentEntry {
+  id: string;
+  messageId: string;
+  agentName: string;
+  agentRole: string;
+  text: string;
+  keywords: string[];
+  timestamp: number;
+  embeddingVector?: number[];
+}
