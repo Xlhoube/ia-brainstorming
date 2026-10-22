@@ -2,6 +2,14 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.17.2] - 2026-10-22
+
+### Otimizado / Design de UI
+- **Compactação da Barra do Tema Central Ativo na Timeline (`DebateTimeline.tsx`):**
+  - **Redução Drástica da Altura Vertical:** O banner do tema ativo foi transformado numa barra horizontal compacta e elegante (`py-2 sm:py-2.5`), libertando mais de 65% do espaço vertical anteriormente ocupado.
+  - **Tipografia e Elementos Refinados:** Redução do título para dimensões equilibradas (`text-xs sm:text-sm font-semibold text-white truncate`), descrição discreta em linha única truncada (`text-[10px] text-slate-400`), badge simplificado "Tema" e botão minimalista "Mudar Tema" perfeitamente alinhado.
+  - **Eliminação de Brilhos e Margens Excessivas:** Removido o brilho radial de fundo e apertado o espaçamento entre o cabeçalho e as mensagens do debate (`space-y-3 sm:space-y-4`), maximizando a área de leitura e foco no diálogo dos especialistas.
+
 ## [0.17.1] - 2026-10-22
 
 ### Removido / Limpeza de UI

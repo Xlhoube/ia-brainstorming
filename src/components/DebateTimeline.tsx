@@ -51,34 +51,32 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-y-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-6">
-      <div className="max-w-4xl mx-auto w-full space-y-4 sm:space-y-6">
-        {/* Banner do Tópico Ativo */}
-        <div className="relative rounded-xl sm:rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-slate-800 p-3.5 sm:p-5 shadow-xl backdrop-blur-sm overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="flex items-start justify-between gap-3 sm:gap-4">
-            <div className="space-y-1 sm:space-y-1.5 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  Tema Central em Análise
-                </span>
-              </div>
-              <h2 className="text-base sm:text-lg lg:text-xl font-bold text-white tracking-tight leading-snug">
+      <div className="max-w-4xl mx-auto w-full space-y-3 sm:space-y-4">
+        {/* Barra Compacta do Tópico Ativo */}
+        <div className="rounded-xl bg-slate-900/80 border border-slate-800/80 px-3.5 py-2 sm:px-4 sm:py-2.5 shadow-md backdrop-blur-sm flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 flex-shrink-0">
+              Tema
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-xs sm:text-sm font-semibold text-white tracking-tight truncate" title={topic}>
                 {topic}
               </h2>
               {topicDescription && (
-                <p className="text-[11px] sm:text-xs text-slate-400 leading-relaxed max-w-2xl line-clamp-2 sm:line-clamp-none">
+                <p className="text-[10px] text-slate-400 truncate mt-0.5" title={topicDescription}>
                   {topicDescription}
                 </p>
               )}
             </div>
-
-            <button
-              onClick={onOpenTopics}
-              className="flex-shrink-0 text-[11px] sm:text-xs text-indigo-400 hover:text-indigo-300 font-medium px-2 sm:px-2.5 py-1 rounded-lg bg-indigo-950/30 hover:bg-indigo-950/50 border border-indigo-800/40 transition-colors"
-            >
-              Mudar Tema
-            </button>
           </div>
+
+          <button
+            onClick={onOpenTopics}
+            className="flex-shrink-0 text-[10px] sm:text-[11px] text-indigo-400 hover:text-indigo-300 font-medium px-2.5 py-1 rounded-lg bg-indigo-950/40 hover:bg-indigo-900/50 border border-indigo-800/40 transition-colors whitespace-nowrap shadow-xs"
+            title="Escolher outro tema de debate"
+          >
+            Mudar Tema
+          </button>
         </div>
 
         {/* Mensagens do Debate */}
