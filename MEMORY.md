@@ -2,8 +2,8 @@
 
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
-- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.14.0
-- **Data da Última Atualização:** 2026-10-20
+- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.14.1
+- **Data da Última Atualização:** 2026-10-22
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
 - **Ambiente de Execução e Deploy:** Web Browser (Desktop, Tablet e Telemóvel com layout responsivo 100dvh) / Vercel
@@ -53,10 +53,12 @@
 - **[2026-10-20] ADR-022:** Orquestração do Debate em 5 Etapas Canónicas (Fase D): Implementação da máquina de estados com a progressão canónica de 5 etapas da Bíblia (1. Compreender ➔ 2. Análise independente ➔ 3. Confronto de argumentos ➔ 4. Verificação ➔ 5. Síntese) em `src/hooks/useDebate.ts`, carregadas a partir de `the_five_biblia_personagens_v1.json` via `bibliaLoader.ts`. Sophia Veris assume a abertura da mesa redonda e o encerramento com a síntese final sem consenso forçado. Bateria de testes automatizados (`scripts/test-phase-d.mjs`) criada e aprovada a 100%.
 - **[2026-10-20] ADR-023:** Memória Estruturada Canónica (Fase E): Implementação do armazenamento de memória estruturada conforme as diretrizes canónicas da Bíblia (`the_five_biblia_personagens_v1.json` e Secção 8 de `agents_the_five.md`). Distinção estrita e tipada entre 6 categorias cognitivas (`confirmed_facts`, `explicit_preferences`, `decisions`, `open_hypotheses`, `lessons_learned`, `conversation_summaries`). Injeção contextual das memórias estruturadas ativas nos prompts de sistema OpenRouter e motor dialético simulado. Persistência local reativa em `localDatabase.ts` e interface de gestão visual no modal de pensadores (`AgentRoster.tsx`) com filtros por categoria, badges temáticas, remoção com um clique e formulário direto para ensinar novos factos ou preferências a qualquer pensador.
 - **[2026-10-20] ADR-024:** The Five Podcast Studio & Masterização de Áudio WAV Local: Criação do serviço `podcastService.ts` e do componente `PodcastModal.tsx` para produção e broadcast de episódios dos debates. Geração automática de guiões completos de estúdio em formato Markdown, cálculo de capítulos com marcadores de tempo por etapa e intervenção, síntese local em PCM 16-bit 44.1kHz estéreo de áudio WAV (jingle dialético harmónico aditivo com modulação binaural), e exportação de ficheiros `.wav` e `.md` no navegador. Expansão de tópicos dialéticos de ponta para 10 cenários de fronteira científica (Computação Quântica, Biologia Sintética, Interfaces Cérebro-Máquina, Paradoxo do Controlo de Superinteligência e Fusão Nuclear). Bateria de testes automatizados (`scripts/test-phase-e.ts`) executada com 100% de sucesso.
+- **[2026-10-22] ADR-025:** Síntese Executiva 100% Gratuita (:free) no OpenRouter: Eliminação do modelo comercial pago `google/gemini-2.0-flash-001` em `src/app/api/debate/synthesize/route.ts` e substituição por cascata de contingência com modelos gratuitos (`google/gemini-2.0-flash-exp:free`, `meta-llama/llama-3.3-70b-instruct:free`, `qwen/qwen-2.5-72b-instruct:free`, `mistralai/mistral-small-24b-instruct-2501:free`). Implementação de higienização de fences de código JSON markdown e fallback automático e transparente para síntese local dinâmica caso todos os modelos estejam em sobrecarga temporária.
 
 ---
 
-## ✅ O Que Já Funciona (v0.14.0)
+## ✅ O Que Já Funciona (v0.14.1)
+- [x] **Síntese Executiva 100% Gratuita no OpenRouter (ADR-025):** Eliminação de custos de API na síntese com suporte a cascata de modelos `:free` e higienização robusta de JSON.
 - [x] **Memória Estruturada Canónica (Fase E):** Separação cognitiva em 6 categorias (`confirmed_facts`, `explicit_preferences`, `decisions`, `open_hypotheses`, `lessons_learned`, `conversation_summaries`) com persistência, injeção nos prompts de IA e gestão CRUD visual no modal dos agentes.
 - [x] **The Five Podcast Studio:** Modal dedicado de estúdio de transmissão com geração de guião broadcast em Markdown, timeline de capítulos por etapa, e sintetizador de áudio WAV PCM 16-bit 44.1kHz para descarregar localmente.
 - [x] **Stepper Visual das 5 Etapas Canónicas:** Barra de progresso interativa no topo do debate indicando o avanço pelo protocolo canónico (01 Compreender ➔ 02 Análise ➔ 03 Confronto ➔ 04 Verificação ➔ 05 Síntese).

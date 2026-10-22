@@ -48,42 +48,57 @@ Estrutura a resposta rigorosamente em formato JSON com o seguinte schema:
   "overallVerdict": "Conclusão final clara e compreensível"
 }`;
 
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${activeKey}`,
-            'HTTP-Referer': 'https://localhost:3000',
-            'X-Title': 'IA Brain Storming Synthesizer',
-          },
-          body: JSON.stringify({
-            model: 'google/gemini-2.0-flash-001',
-            messages: [
-              { role: 'system', content: systemPrompt },
-              {
-                role: 'user',
-                content: `Tópico em debate: "${topic}"\nTotal de intervenções a sintetizar: ${messages.length}\nTom: ${selectedTone}\n\nTranscrição completa do debate:\n${transcript}\n\nGera a síntese executiva atualizada em JSON:`,
-              },
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.35,
-          }),
-        });
+        const SYNTHESIS_FREE_MODELS = [
+          'google/gemini-2.0-flash-exp:free',
+          'meta-llama/llama-3.3-70b-instruct:free',
+          'qwen/qwen-2.5-72b-instruct:free',
+          'mistralai/mistral-small-24b-instruct-2501:free',
+        ];
 
-        if (res.ok) {
-          const data = await res.json();
-          const jsonText = data.choices?.[0]?.message?.content;
-          if (jsonText) {
-            const parsed = JSON.parse(jsonText);
-            return NextResponse.json({
-              success: true,
-              synthesis: {
-                ...parsed,
-                analyzedCount: messages.length,
-                updatedAt: nowTime,
-                tone: selectedTone,
+        for (const model of SYNTHESIS_FREE_MODELS) {
+          try {
+            const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${activeKey.trim()}`,
+                'HTTP-Referer': 'https://localhost:3000',
+                'X-Title': 'IA Brain Storming Synthesizer',
               },
+              body: JSON.stringify({
+                model,
+                messages: [
+                  { role: 'system', content: systemPrompt },
+                  {
+                    role: 'user',
+                    content: `Tópico em debate: "${topic}"\nTotal de intervenções a sintetizar: ${messages.length}\nTom: ${selectedTone}\n\nTranscrição completa do debate:\n${transcript}\n\nGera a síntese executiva atualizada em JSON:`,
+                  },
+                ],
+                temperature: 0.35,
+              }),
             });
+
+            if (res.ok) {
+              const data = await res.json();
+              const jsonText = data.choices?.[0]?.message?.content;
+              if (jsonText) {
+                const cleanJson = jsonText.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+                const parsed = JSON.parse(cleanJson);
+                if (parsed && (parsed.centralThesis || parsed.overallVerdict)) {
+                  return NextResponse.json({
+                    success: true,
+                    synthesis: {
+                      ...parsed,
+                      analyzedCount: messages.length,
+                      updatedAt: nowTime,
+                      tone: selectedTone,
+                    },
+                  });
+                }
+              }
+            }
+          } catch (modelErr: any) {
+            console.warn(`Tentativa de síntese com modelo gratuito ${model} falhou:`, modelErr.message);
           }
         }
       } catch (err: any) {
