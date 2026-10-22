@@ -270,6 +270,27 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                               <span>{msg.stageName}</span>
                             </span>
                           )}
+
+                          {/* Distintivo de Origem da Intervenção: Motor Local Inteligente ou IA Remota */}
+                          {!isHuman && (
+                            msg.isSimulated ? (
+                              <span
+                                className="text-[8px] sm:text-[9px] font-medium px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-950/40 text-amber-300 border border-amber-500/30 flex items-center gap-1 shadow-sm cursor-help"
+                                title="Gerado pelo Motor Dialético Local Dinâmico (contextualizado por tema, réplica ao orador e memória do especialista)."
+                              >
+                                <span>⚙️</span>
+                                <span>Motor Dialético Local</span>
+                              </span>
+                            ) : msg.modelUsed ? (
+                              <span
+                                className="text-[8px] sm:text-[9px] font-medium px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 shadow-sm cursor-help"
+                                title={`Gerado pela IA Remota OpenRouter (${msg.modelUsed})`}
+                              >
+                                <span>⚡</span>
+                                <span className="truncate max-w-[120px]">{msg.modelUsed.split('/')[1] || msg.modelUsed}</span>
+                              </span>
+                            ) : null
+                          )}
                         </div>
                         <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">
                           {isHuman ? 'Intervenção Humana' : `Intervenção #${index + 1}`} • {msg.timestamp}

@@ -49,10 +49,10 @@ Estrutura a resposta rigorosamente em formato JSON com o seguinte schema:
 }`;
 
         const SYNTHESIS_FREE_MODELS = [
-          'google/gemini-2.0-flash-exp:free',
           'meta-llama/llama-3.3-70b-instruct:free',
           'qwen/qwen-2.5-72b-instruct:free',
           'mistralai/mistral-small-24b-instruct-2501:free',
+          'google/gemini-2.0-flash-exp:free',
         ];
 
         for (const model of SYNTHESIS_FREE_MODELS) {

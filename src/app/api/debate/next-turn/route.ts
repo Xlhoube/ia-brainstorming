@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const rawContent = await generateAgentResponse({
+    const result = await generateAgentResponse({
       agent,
       topic,
       topicDescription,
@@ -38,7 +38,11 @@ export async function POST(req: NextRequest) {
       stage,
     });
 
-    const { cleanText, dialecticalConclusion } = extractDialecticalConclusion(rawContent);
+    const textToClean = typeof result === 'string' ? result : result.content;
+    const isSimulated = typeof result === 'object' ? result.isSimulated : false;
+    const modelUsed = typeof result === 'object' ? result.modelUsed : undefined;
+
+    const { cleanText, dialecticalConclusion } = extractDialecticalConclusion(textToClean);
 
     const newMessage: DebateMessage = {
       id: 'msg-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
@@ -54,12 +58,16 @@ export async function POST(req: NextRequest) {
       stageIndex: typeof stageIndex === 'number' ? stageIndex : undefined,
       timestamp: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
       dialecticalConclusion,
+      isSimulated,
+      modelUsed,
     };
 
     return NextResponse.json({
       success: true,
       message: newMessage,
       dialecticalConclusion,
+      isSimulated,
+      modelUsed,
     });
   } catch (error: any) {
     console.error('Erro na rota next-turn:', error);

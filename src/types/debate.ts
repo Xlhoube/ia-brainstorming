@@ -135,6 +135,8 @@ export interface DebateMessage {
   replyToAgentName?: string;
   keyPoints?: string[];
   dialecticalConclusion?: DialecticalOutcome;
+  isSimulated?: boolean;
+  modelUsed?: string;
 }
 
 export interface PresetTopic {
