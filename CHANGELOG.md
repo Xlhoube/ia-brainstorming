@@ -2,6 +2,16 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.16.0] - 2026-10-22
+
+### Adicionado / Alterado
+- **Novo Layout Dividido da Interface (Split UI: Especialistas de um Lado e Diálogo do Outro):**
+  - **Separação Semântica e Estrutural em `page.tsx`:** Substituída a organização vertical monolítica por um contentor dividido flexível e responsivo (`flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative`), alocando a barra lateral de especialistas na tag semântica `<aside>` e a área de diálogo e linha do tempo na tag semântica `<main>`.
+  - **Barra Lateral de Especialistas no Desktop (`<aside>`):** `AgentRoster.tsx` adaptado para exibir os cinco pensadores verticalmente em cartões ricos e interativos (com fotografia/avatar em alta definição, indicador pulsante de fala, checkbox de presença na mesa, etiquetas de temperamento psicológico e contador de memórias arquivadas).
+  - **Faixa Compacta Responsiva em Ecrãs Móveis:** Em dispositivos móveis (`< md`), os especialistas mantêm-se acessíveis numa faixa horizontal deslizante de reduzida altura, preservando todo o espaço vertical para leitura confortável do diálogo e mensagens.
+  - **Rodapé Estratégico do Conselho:** Adicionado componente de apoio na barra lateral com resumo da dialética dos The Five (Pragmática, Disruptiva, Cética, Estratégica e Ética).
+  - **Validação Automatizada:** Novo conjunto de testes em `scripts/test-split-ui-layout.mjs` certificando a presença das tags semânticas `<aside>` e `<main>`, a flexibilidade responsiva `md:flex-row`, a colocação correta dos componentes e a compilação rigorosa em TypeScript sem erros.
+
 ## [0.15.4] - 2026-10-22
 
 ### Corrigido / Alterado

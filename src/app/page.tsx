@@ -117,33 +117,40 @@ export default function HomePage() {
         currentStageIndex={currentStageIndex}
       />
 
-      {/* Roster de Agentes da Mesa Redonda */}
-      <AgentRoster
-        agents={agents}
-        selectedIds={selectedAgentIds}
-        activeSpeakerId={activeSpeakerId}
-        onToggleAgent={toggleAgent}
-        onAddAgentLearning={addAgentLearning}
-        onAddStructuredMemory={addStructuredMemoryEntry}
-        onDeleteStructuredMemory={deleteStructuredMemoryEntry}
-        isDebating={status === 'running'}
-      />
+      {/* Área Central Dividida: Especialistas de um lado e Diálogo do outro */}
+      <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
+        {/* Painel Lateral dos Especialistas */}
+        <aside className="w-full md:w-80 lg:w-[340px] xl:w-[360px] flex-shrink-0 border-b md:border-b-0 md:border-r border-slate-800/80 bg-slate-950/70 backdrop-blur-md flex flex-col min-h-0 z-10">
+          <AgentRoster
+            agents={agents}
+            selectedIds={selectedAgentIds}
+            activeSpeakerId={activeSpeakerId}
+            onToggleAgent={toggleAgent}
+            onAddAgentLearning={addAgentLearning}
+            onAddStructuredMemory={addStructuredMemoryEntry}
+            onDeleteStructuredMemory={deleteStructuredMemoryEntry}
+            isDebating={status === 'running'}
+          />
+        </aside>
 
-      {/* Linha do Tempo e Mensagens do Debate com Stepper de 5 Etapas */}
-      <DebateTimeline
-        messages={messages}
-        agents={agents}
-        topic={topic}
-        topicDescription={topicDescription}
-        isGenerating={isGenerating}
-        activeSpeakerName={activeAgent?.name}
-        canonicalStages={canonicalStages}
-        currentStageIndex={currentStageIndex}
-        onSelectStage={setStage}
-        onOpenTopics={() => setIsTopicModalOpen(true)}
-        onSpeakMessage={speakSingleMessage}
-        onQuickSpeak={injectHumanIntervention}
-      />
+        {/* Painel Central do Diálogo e Linha do Tempo */}
+        <main className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+          <DebateTimeline
+            messages={messages}
+            agents={agents}
+            topic={topic}
+            topicDescription={topicDescription}
+            isGenerating={isGenerating}
+            activeSpeakerName={activeAgent?.name}
+            canonicalStages={canonicalStages}
+            currentStageIndex={currentStageIndex}
+            onSelectStage={setStage}
+            onOpenTopics={() => setIsTopicModalOpen(true)}
+            onSpeakMessage={speakSingleMessage}
+            onQuickSpeak={injectHumanIntervention}
+          />
+        </main>
+      </div>
 
       {/* Barra Inferior de Controlos e Intervenção Humana */}
       <ControlsBar

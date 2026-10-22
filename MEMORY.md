@@ -2,13 +2,14 @@
 
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
-- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.15.2
+- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.16.0
 - **Data da Última Atualização:** 2026-10-22
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
 - **Ambiente de Execução e Deploy:** Web Browser (Desktop, Tablet e Telemóvel com layout responsivo 100dvh) / Vercel
 - **Stack:**
   - **Frontend / Fullstack:** Next.js 16 (App Router, Turbopack, TypeScript, React 19) + Tailwind CSS v4.
+  - **Layout Split UI (v0.16.0):** Organização dividida em duas áreas principais: barra lateral semântica `<aside>` com os especialistas e coluna central `<main>` com o diálogo e etapas, otimizada para desktop e com faixa compacta deslizante para mobile.
   - **Backend & Cloud Database:** Appwrite Cloud (Projeto `6ad53e750013ac9f2271`, Endpoint `https://fra.cloud.appwrite.io/v1`) via SDK oficial `appwrite` com arquitetura resiliente híbrida *Local-First + Cloud Sync*.
   - **Bíblia Canónica de Personagens & Loader Tipado:** Fonte de verdade única em `the_five_biblia_personagens_v1.json`, consumida por `src/lib/agents/bibliaLoader.ts`. Disponibiliza os cinco pensadores (`dr-marcus-vance`, `dra-helena-rostova`, `aura-chen`, `kaelen-voss`, `sophia-veris`) com tipagem TypeScript estrita, eliminando duplicações estáticas de código em `src/lib/constants/agents.ts`.
   - **Injeção de Prompts Cognitivamente Distintos (Fase C):** Cada agente recebe instruções individuais baseadas na sua psicologia, critérios de análise, primeiras perguntas, regra de decisão inegociável, pontos cegos, estilo verbal e normas epistemológicas partilhadas (proibição absoluta de inventar factos ou estudos; distinção entre facto, hipótese e valor; proibição de consenso forçado).
@@ -60,10 +61,12 @@
 - **[2026-10-22] ADR-028:** Eliminação Total de Repetições no Mesmo Debate (Motor Dialético Local): Fim do seletor de módulo estático (`turnsCount % 2`) e introdução do `DOMAIN_DISCOURSE_BANK` com mais de 250 argumentos progressivos por etapa canónica, guarda anti-repetição de histórico (`isAlreadySpoken`), escuta ativa com reflexão semântica das palavras do interlocutor e gerador procedimental combinatório para debates longos (15+ turnos), garantindo que nenhuma fala substancial é repetida dentro da mesma sessão.
 - **[2026-10-22] ADR-029:** Foco Temático Rigoroso & Prevenção Total de Desvio para IA (Anti-Drift): Neutralização das memórias iniciais canónicas em `bibliaLoader.ts` (removidos termos enviesados como "inteligência sintética" ou "alinhamento de IA"), introdução de filtro de relevância temática em `memoryEcho` e nos prompts do OpenRouter (proibição expressa de desvio para IA quando o assunto for espaço, fusão, genética, ecologia ou sociedade), limpeza de termos ambíguos nos bancos de discurso e substituição dos templates rígidos de síntese e botões da timeline por estruturas contextuais 100% dinâmicas.
 - **[2026-10-22] ADR-030:** Desbloqueio e Fecho Livre do Modal de Síntese Pós-Conclusão de Debate: Eliminação da condição de bloqueio infinito `isOpen={isSynthesisModalOpen || Boolean(...)}` em `src/app/page.tsx`, substituída por auto-abertura controlada uma única vez por sessão (`autoOpenedSynthesisSessionRef`). Adicionado fecho universal ao `SynthesisModal.tsx` via backdrop overlay e tecla Escape, barra de rodapé com atalhos de navegação (`Fechar e Ver Diálogo`, `Reiniciar Debate`, `Novo Tema`), e opções claras de reinício na `ControlsBar.tsx` quando `status === 'concluded'`.
+- **[2026-10-22] ADR-031:** Novo Layout Dividido (Split UI: Especialistas de um Lado e Diálogo do Outro): Substituição do layout empilhado verticalmente por um contentor semântico com duas colunas (`flex-col md:flex-row min-h-0 overflow-hidden`), onde os especialistas ocupam uma barra lateral dedicada `<aside>` (`AgentRoster.tsx`) e o diálogo ocupa o ecrã central `<main>` (`DebateTimeline.tsx`). Os especialistas passam a dispor de cartões verticais ricos com avatares de alta definição, indicadores de som dinâmicos, seletores de presença no conselho e atalho para o painel de psicologia e memória, enquanto os dispositivos móveis mantêm uma faixa horizontal deslizante compacta para máxima usabilidade.
 
 ---
 
-## ✅ O Que Já Funciona (v0.15.4)
+## ✅ O Que Já Funciona (v0.16.0)
+- [x] **Layout Dividido Split UI (ADR-031):** Especialistas numa coluna lateral dedicada e diálogo na coluna central principal, otimizado tanto para ecrãs de computador e tablet como para telemóveis.
 - [x] **Desbloqueio e Fecho do Modal de Síntese Pós-Conclusão (ADR-030):** Eliminação total do bloqueio de ecrã após o término do debate; o modal fecha com botão, backdrop ou tecla Escape, permitindo ao utilizador continuar a navegar, reiniciar ou escolher novo tema sem recarregar a página.
 - [x] **Foco Temático Rigoroso e Prevenção de Desvio para IA (ADR-029):** Eliminação de qualquer desvio involuntário para temas de IA quando o debate aborda outros assuntos (espaço, energia, física, biologia, sociedade); prompts de IA e motor local rigorosamente focados no tema proposto; síntese e sugestões de diálogo adaptadas ao tópico.
 - [x] **Independência Temática e Zero Repetições no Mesmo Debate (ADR-027 e ADR-028):** Motor dialético dinâmico sem clichés iniciais fixos, banco de 250+ argumentos em 10 domínios, de-duplicação estrita de histórico e gerador procedimental anti-repetição.
