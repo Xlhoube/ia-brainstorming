@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, Pause, FastForward, FileText, Send, Sparkles, BookOpen, Mic } from 'lucide-react';
+import { Play, Pause, FastForward, FileText, Send, Sparkles, BookOpen, Mic, RotateCcw } from 'lucide-react';
 import { DebatePacing } from '@/types/debate';
 
 interface ControlsBarProps {
@@ -13,6 +13,8 @@ interface ControlsBarProps {
   onSynthesize: () => void;
   onInjectHuman: (content: string) => void;
   onOpenPodcast?: () => void;
+  onReset?: () => void;
+  onOpenTopics?: () => void;
   isGenerating: boolean;
   isSynthesizing: boolean;
   messagesCount: number;
@@ -31,6 +33,8 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   onSynthesize,
   onInjectHuman,
   onOpenPodcast,
+  onReset,
+  onOpenTopics,
   isGenerating,
   isSynthesizing,
   messagesCount,
@@ -130,6 +134,29 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
                 <Pause className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-amber-400" />
                 <span>Pausar</span>
               </button>
+            ) : status === 'concluded' ? (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {onReset && (
+                  <button
+                    onClick={onReset}
+                    className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 sm:gap-2 shadow-md transition-all hover:scale-[1.02]"
+                    title="Reiniciar o debate do início"
+                  >
+                    <RotateCcw className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                    <span>Reiniciar Debate</span>
+                  </button>
+                )}
+                {onOpenTopics && (
+                  <button
+                    onClick={onOpenTopics}
+                    className="h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-xs flex items-center gap-1.5 transition-all"
+                    title="Escolher outro tema para debater"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-blue-400" />
+                    <span className="hidden sm:inline">Novo Tema</span>
+                  </button>
+                )}
+              </div>
             ) : (
               <button
                 onClick={onResume}
@@ -140,7 +167,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
               </button>
             )}
 
-            {status !== 'idle' && (
+            {status !== 'idle' && status !== 'concluded' && (
               <button
                 onClick={onNextTurn}
                 disabled={isGenerating}

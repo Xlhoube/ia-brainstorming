@@ -2,6 +2,17 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.15.4] - 2026-10-22
+
+### Corrigido / Alterado
+- **Desbloqueio Total do Modal de Síntese Pós-Conclusão de Debate:**
+  - **Eliminação do Bloqueio de Ecrã em `page.tsx`:** Removida a expressão `isOpen={isSynthesisModalOpen || Boolean(synthesisResult && !isSynthesizing && status === 'concluded')}` que forçava o modal de síntese a reabrir infinitamente após o término do debate, impedindo o utilizador de o fechar ou de interagir com a aplicação sem recarregar a página.
+  - **Auto-Abertura Não Bloqueante (`autoOpenedSynthesisSessionRef`):** O modal de síntese é despoletado automaticamente uma única vez por sessão quando a conclusão do debate é atingida, permitindo ao utilizador fechar livremente a janela a qualquer momento e continuar a explorar a interface.
+  - **Múltiplas Formas de Fechar o Modal:** Em `SynthesisModal.tsx`, adicionado fecho por clique no fundo exterior (backdrop) com `e.stopPropagation()` no contentor do diálogo, suporte nativo à tecla `Escape` via `useEffect`, e botão proeminente de fecho no cabeçalho e rodapé.
+  - **Barra de Ações no Rodapé do Modal:** Adicionada barra fixa inferior com atalhos de navegação direta: `✕ Fechar e Ver Diálogo`, `Reiniciar Debate` e `Novo Tema`, além de acesso rápido ao estúdio de podcast e exportação em PDF.
+  - **Gestão do Estado `concluded` na `ControlsBar.tsx`:** Quando o debate atinge a sua conclusão, a barra inferior apresenta opções dedicadas de reinício (`Reiniciar Debate`) e de seleção de um novo tópico (`Novo Tema`), eliminando botões ambíguos de retoma de sessões finalizadas.
+- **Validação Automatizada:** Novo script de testes em `scripts/test-synthesis-modal-unlock.mjs` com 5 testes de verificação de desbloqueio, fecho via backdrop e tecla Escape, e opções de navegação pós-conclusão.
+
 ## [0.15.3] - 2026-10-22
 
 ### Corrigido / Alterado

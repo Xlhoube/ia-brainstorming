@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDebate } from '@/hooks/useDebate';
 import { Navbar } from '@/components/Navbar';
 import { AgentRoster } from '@/components/AgentRoster';
@@ -15,6 +15,7 @@ import { PodcastModal } from '@/components/PodcastModal';
 
 export default function HomePage() {
   const {
+    sessionId,
     agents,
     selectedAgentIds,
     toggleAgent,
@@ -60,6 +61,18 @@ export default function HomePage() {
   const [isSynthesisModalOpen, setIsSynthesisModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [isPodcastModalOpen, setIsPodcastModalOpen] = useState(false);
+
+  // Auto-abertura da síntese uma única vez após a conclusão do debate
+  const autoOpenedSynthesisSessionRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (status === 'concluded' && synthesisResult && !isSynthesizing) {
+      if (autoOpenedSynthesisSessionRef.current !== sessionId) {
+        autoOpenedSynthesisSessionRef.current = sessionId;
+        setIsSynthesisModalOpen(true);
+      }
+    }
+  }, [status, synthesisResult, isSynthesizing, sessionId]);
 
   // Agente ativo atual
   const activeAgent = agents.find(a => a.id === activeSpeakerId);
@@ -142,6 +155,8 @@ export default function HomePage() {
         onSynthesize={handleOpenSynthesis}
         onInjectHuman={injectHumanIntervention}
         onOpenPodcast={() => setIsPodcastModalOpen(true)}
+        onReset={resetDebate}
+        onOpenTopics={() => setIsTopicModalOpen(true)}
         isGenerating={isGenerating}
         isSynthesizing={isSynthesizing}
         messagesCount={messages.length}
@@ -163,7 +178,7 @@ export default function HomePage() {
       />
 
       <SynthesisModal
-        isOpen={isSynthesisModalOpen || Boolean(synthesisResult && !isSynthesizing && status === 'concluded')}
+        isOpen={isSynthesisModalOpen}
         onClose={() => setIsSynthesisModalOpen(false)}
         topic={topic}
         synthesis={synthesisResult}
@@ -171,6 +186,14 @@ export default function HomePage() {
         onRefreshSynthesis={synthesizeDebate}
         isSynthesizing={isSynthesizing}
         onOpenPodcast={() => setIsPodcastModalOpen(true)}
+        onResetDebate={() => {
+          setIsSynthesisModalOpen(false);
+          resetDebate();
+        }}
+        onOpenTopics={() => {
+          setIsSynthesisModalOpen(false);
+          setIsTopicModalOpen(true);
+        }}
       />
 
       <HistoryModal

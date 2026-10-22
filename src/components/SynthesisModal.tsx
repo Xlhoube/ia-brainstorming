@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, FileText, CheckCircle2, AlertCircle, HelpCircle, Award, Copy, Check, RefreshCw, Sparkles, Printer, Mic } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, FileText, CheckCircle2, AlertCircle, HelpCircle, Award, Copy, Check, RefreshCw, Sparkles, Printer, Mic, RotateCcw, BookOpen } from 'lucide-react';
 
 interface SynthesisModalProps {
   isOpen: boolean;
@@ -21,6 +21,8 @@ interface SynthesisModalProps {
   onRefreshSynthesis: () => void;
   isSynthesizing: boolean;
   onOpenPodcast?: () => void;
+  onResetDebate?: () => void;
+  onOpenTopics?: () => void;
 }
 
 export const SynthesisModal: React.FC<SynthesisModalProps> = ({
@@ -32,8 +34,21 @@ export const SynthesisModal: React.FC<SynthesisModalProps> = ({
   onRefreshSynthesis,
   isSynthesizing,
   onOpenPodcast,
+  onResetDebate,
+  onOpenTopics,
 }) => {
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !synthesis) return null;
 
@@ -76,8 +91,14 @@ ${synthesis.overallVerdict}
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in no-print">
-      <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] max-h-[90dvh]">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in no-print cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] max-h-[90dvh] cursor-default"
+      >
         {/* Cabeçalho Responsivo */}
         <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/60">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -244,6 +265,58 @@ ${synthesis.overallVerdict}
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed italic">
               &ldquo;{synthesis.overallVerdict}&rdquo;
             </p>
+          </div>
+        </div>
+
+        {/* Rodapé Fixo de Ações para Navegação Livre e Desbloqueio */}
+        <div className="px-4 sm:px-6 py-3 border-t border-slate-800 bg-slate-950/80 flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5"
+            >
+              <span>✕ Fechar e Ver Diálogo</span>
+            </button>
+            {onResetDebate && (
+              <button
+                onClick={onResetDebate}
+                className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-800/60 font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reiniciar Debate</span>
+              </button>
+            )}
+            {onOpenTopics && (
+              <button
+                onClick={onOpenTopics}
+                className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-blue-300 border border-blue-800/60 font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Novo Tema</span>
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            {onOpenPodcast && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenPodcast();
+                }}
+                className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-md flex items-center gap-1.5"
+              >
+                <Mic className="w-3.5 h-3.5" />
+                <span>Podcast</span>
+              </button>
+            )}
+            <button
+              onClick={handlePrintPDF}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs transition-all shadow-md flex items-center gap-1.5"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Exportar PDF</span>
+            </button>
           </div>
         </div>
       </div>
