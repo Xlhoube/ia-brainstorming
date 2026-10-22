@@ -2,6 +2,17 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.17.0] - 2026-10-22
+
+### Adicionado / Alterado
+- **Criação e Gestão de Novos Especialistas Personalizados no Conselho:**
+  - **Componente AddSpecialistModal (`AddSpecialistModal.tsx`):** Novo modal com formulário completo para criar especialistas de raiz: nome, cargo/especialidade, arquétipo dialético (cientista, filósofo, humanista, tecnólogo, economista, psicólogo, moderador ou personalizado), seletor visual de avatares/emojis, paleta de cores de destaque, traço psicológico dominante, filosofia nuclear inegociável e modelo OpenRouter (com foco em `:free`).
+  - **Predefinições Rápidas (1 Clique):** Inclusão de 4 modelos pré-formatados prontos a adicionar instantaneamente: Dra. Clara Silveira (Neurociência Cognitiva), Prof. Vasco Pinto (Economia Comportamental), Dra. Matilde Fontes (Jurista & Bioeticista) e Dr. Tiago Lins (Astrofísica Teórica).
+  - **Persistência Local-First:** Novos métodos em `LocalDatabase.ts` (`getCustomAgents`, `saveCustomAgent`, `deleteCustomAgent`) armazenando os novos especialistas localmente no browser (`ia_brainstorming_custom_agents_v1`), preservados entre sessões e recarregamentos.
+  - **Integração no Hook `useDebate.ts`:** Métodos `addCustomAgent` e `deleteCustomAgent` que registam o especialista, geram o prompt cognitivo e o integram diretamente na mesa redonda ativa.
+  - **Gatilhos Visuais em `AgentRoster.tsx`:** Botões dedicados `+ Especialista` no cabeçalho da barra lateral, botão pontilhado no fim da lista desktop, botão deslizante na faixa mobile e opção de remoção com confirmação para pensadores personalizados (protegendo os 5 canónicos contra remoção acidental).
+  - **Validação Automatizada:** Novo teste automatizado em `scripts/test-add-specialist.mjs` validando 100% dos métodos de persistência, componentes, formulários e integração.
+
 ## [0.16.0] - 2026-10-22
 
 ### Adicionado / Alterado

@@ -1,4 +1,4 @@
-import { DebateMessage, AgentMemory, AgentMemoryEntry, DialecticalOutcome, StructuredMemoryItem } from '@/types/debate';
+import { Agent, DebateMessage, AgentMemory, AgentMemoryEntry, DialecticalOutcome, StructuredMemoryItem } from '@/types/debate';
 
 export interface SavedDebateSession {
   id: string;
@@ -18,6 +18,7 @@ export interface SavedDebateSession {
 
 const STORAGE_KEY_DEBATES = 'ia_brainstorming_debates_v1';
 const STORAGE_KEY_MEMORIES = 'ia_brainstorming_agent_memories_v1';
+const STORAGE_KEY_CUSTOM_AGENTS = 'ia_brainstorming_custom_agents_v1';
 
 export class LocalDatabase {
   public static listSessions(): SavedDebateSession[] {
@@ -236,6 +237,45 @@ export class LocalDatabase {
   public static getStructuredMemories(agentId: string): StructuredMemoryItem[] {
     const all = this.getAgentMemories();
     return all[agentId]?.structuredEntries || [];
+  }
+
+  // --- Gestão de Especialistas Personalizados ---
+  public static getCustomAgents(): Agent[] {
+    if (typeof window === 'undefined') return [];
+    try {
+      const data = localStorage.getItem(STORAGE_KEY_CUSTOM_AGENTS);
+      return data ? JSON.parse(data) : [];
+    } catch (err) {
+      console.error('Erro ao carregar especialistas personalizados locais:', err);
+      return [];
+    }
+  }
+
+  public static saveCustomAgent(agent: Agent): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const list = this.getCustomAgents();
+      const idx = list.findIndex(a => a.id === agent.id);
+      if (idx >= 0) {
+        list[idx] = agent;
+      } else {
+        list.push(agent);
+      }
+      localStorage.setItem(STORAGE_KEY_CUSTOM_AGENTS, JSON.stringify(list));
+    } catch (err) {
+      console.error('Erro ao gravar especialista personalizado:', err);
+    }
+  }
+
+  public static deleteCustomAgent(id: string): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const list = this.getCustomAgents();
+      const updated = list.filter(a => a.id !== id);
+      localStorage.setItem(STORAGE_KEY_CUSTOM_AGENTS, JSON.stringify(updated));
+    } catch (err) {
+      console.error('Erro ao remover especialista personalizado:', err);
+    }
   }
 }
 

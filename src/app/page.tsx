@@ -50,6 +50,8 @@ export default function HomePage() {
     addAgentLearning,
     addStructuredMemoryEntry,
     deleteStructuredMemoryEntry,
+    addCustomAgent,
+    deleteCustomAgent,
     canonicalStages,
     currentStage,
     currentStageIndex,
@@ -129,6 +131,8 @@ export default function HomePage() {
             onAddAgentLearning={addAgentLearning}
             onAddStructuredMemory={addStructuredMemoryEntry}
             onDeleteStructuredMemory={deleteStructuredMemoryEntry}
+            onAddSpecialist={addCustomAgent}
+            onDeleteSpecialist={deleteCustomAgent}
             isDebating={status === 'running'}
           />
         </aside>

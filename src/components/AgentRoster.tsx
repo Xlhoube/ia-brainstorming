@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { Agent, StructuredMemoryCategory, StructuredMemoryItem } from '@/types/debate';
-import { Check, Volume2, Users, X, Sparkles, Brain, Plus, BookmarkCheck, Trash2, Tag, ShieldCheck } from 'lucide-react';
+import { Check, Volume2, Users, X, Sparkles, Brain, Plus, BookmarkCheck, Trash2, Tag, ShieldCheck, UserPlus } from 'lucide-react';
+import { AddSpecialistModal } from './AddSpecialistModal';
 
 interface AgentRosterProps {
   agents: Agent[];
@@ -13,6 +14,8 @@ interface AgentRosterProps {
   onAddAgentLearning?: (agentId: string, insight: string) => void;
   onAddStructuredMemory?: (agentId: string, item: Omit<StructuredMemoryItem, 'id' | 'timestamp'>) => void;
   onDeleteStructuredMemory?: (agentId: string, entryId: string) => void;
+  onAddSpecialist?: (agentData: Omit<Agent, 'id'>) => void;
+  onDeleteSpecialist?: (agentId: string) => void;
 }
 
 export const AgentRoster: React.FC<AgentRosterProps> = ({
@@ -24,7 +27,10 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
   onAddAgentLearning,
   onAddStructuredMemory,
   onDeleteStructuredMemory,
+  onAddSpecialist,
+  onDeleteSpecialist,
 }) => {
+  const [showAddModal, setShowAddModal] = useState(false);
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [activeModalTab, setActiveModalTab] = useState<'profile' | 'memory'>('profile');
   const [newLearningInputs, setNewLearningInputs] = useState<Record<string, string>>({});
@@ -78,17 +84,31 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
             </div>
           </div>
 
-          {/* Botão de Destaque: Painel de Especialistas & Memória */}
-          <button
-            onClick={() => setShowTeamModal(true)}
-            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg bg-indigo-950/50 hover:bg-indigo-900/60 border border-indigo-700/50 hover:border-indigo-500/70 text-[10px] sm:text-[11px] text-indigo-300 font-medium transition-all duration-200 shadow-sm hover:scale-[1.02] flex-shrink-0"
-            title="Ver perfis psicológicos completos e memória profunda dos pensadores"
-          >
-            <Users className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="hidden sm:inline">Perfis & Memória</span>
-            <span className="sm:hidden">Perfis</span>
-            <Sparkles className="w-3 h-3 text-amber-400" />
-          </button>
+          {/* Ações de Gestão de Especialistas */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {/* Botão Novo Especialista */}
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg bg-emerald-950/50 hover:bg-emerald-900/60 border border-emerald-700/50 hover:border-emerald-500/70 text-[10px] sm:text-[11px] text-emerald-300 font-medium transition-all shadow-sm hover:scale-[1.02] flex-shrink-0"
+              title="Adicionar Novo Especialista ao Conselho"
+            >
+              <UserPlus className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden sm:inline">+ Especialista</span>
+              <span className="sm:hidden">+ Novo</span>
+            </button>
+
+            {/* Botão de Destaque: Painel de Especialistas & Memória */}
+            <button
+              onClick={() => setShowTeamModal(true)}
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg bg-indigo-950/50 hover:bg-indigo-900/60 border border-indigo-700/50 hover:border-indigo-500/70 text-[10px] sm:text-[11px] text-indigo-300 font-medium transition-all duration-200 shadow-sm hover:scale-[1.02] flex-shrink-0"
+              title="Ver perfis psicológicos completos e memória profunda dos pensadores"
+            >
+              <Users className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="hidden sm:inline">Perfis & Memória</span>
+              <span className="sm:hidden">Perfis</span>
+              <Sparkles className="w-3 h-3 text-amber-400" />
+            </button>
+          </div>
         </div>
 
         {/* Versão Mobile (< md): Faixa Horizontal Compacta com Scroll */}
@@ -137,6 +157,16 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
               </button>
             );
           })}
+
+          {/* Botão Adicionar Especialista na Faixa Mobile */}
+          <button
+            onClick={() => setShowAddModal(true)}
+            disabled={isDebating}
+            className="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-dashed border-slate-800 hover:border-emerald-600/50 hover:bg-emerald-950/20 text-slate-400 hover:text-emerald-300 transition-all text-xs font-medium flex-shrink-0 w-[125px] snap-start"
+          >
+            <UserPlus className="w-3.5 h-3.5 text-emerald-400" />
+            <span>+ Especialista</span>
+          </button>
         </div>
 
         {/* Versão Desktop (>= md): Lista Vertical Completa de Especialistas na Barra Lateral */}
@@ -231,9 +261,36 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                     <span className="w-0.5 h-full bg-indigo-400 rounded-full animate-bounce" />
                   </div>
                 )}
+
+                {/* Opção de Eliminar Especialista Personalizado */}
+                {!['dr-marcus-vance', 'dra-helena-rostova', 'aura-chen', 'kaelen-voss', 'sophia-veris'].includes(agent.id) && onDeleteSpecialist && !isDebating && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm(`Tens a certeza de que desejas remover o especialista ${agent.name} do Conselho?`)) {
+                        onDeleteSpecialist(agent.id);
+                      }
+                    }}
+                    className="absolute right-2 top-2 p-1 rounded-md text-slate-500 hover:text-rose-400 hover:bg-slate-800/80 transition-colors"
+                    title={`Remover ${agent.name} do Conselho`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </button>
             );
           })}
+
+          {/* Botão Adicionar Especialista na Barra Lateral Desktop */}
+          <button
+            onClick={() => setShowAddModal(true)}
+            disabled={isDebating}
+            className="flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-slate-800 hover:border-emerald-600/60 hover:bg-emerald-950/20 text-slate-400 hover:text-emerald-300 transition-all text-xs font-semibold w-full group shadow-xs"
+          >
+            <UserPlus className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+            <span>+ Adicionar Novo Especialista ao Conselho</span>
+          </button>
         </div>
 
         {/* Rodapé da Barra Lateral com Dica Estratégica (Desktop) */}
@@ -697,6 +754,17 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
           </div>
         </div>
       )}
+
+      {/* Modal de Criação de Novos Especialistas */}
+      <AddSpecialistModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAddSpecialist={agentData => {
+          if (onAddSpecialist) {
+            onAddSpecialist(agentData);
+          }
+        }}
+      />
     </>
   );
 };

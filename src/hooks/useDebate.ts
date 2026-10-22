@@ -107,6 +107,20 @@ export function useDebate() {
         }
       }
 
+      // Carregar especialistas personalizados guardados localmente
+      const customAgents = LocalDatabase.getCustomAgents();
+      if (customAgents && customAgents.length > 0) {
+        setAgents(prev => {
+          const combined = [...prev];
+          for (const ca of customAgents) {
+            if (!combined.some(x => x.id === ca.id)) {
+              combined.push(ca);
+            }
+          }
+          return combined;
+        });
+      }
+
       // Carregar memórias guardadas locais e mesclar com os agentes
       const savedMemories = LocalDatabase.getAgentMemories();
       if (savedMemories && Object.keys(savedMemories).length > 0) {
@@ -598,6 +612,37 @@ export function useDebate() {
     });
   };
 
+  // --- Gestão de Especialistas Personalizados ---
+  const addCustomAgent = (agentData: Omit<Agent, 'id'> | Agent): Agent => {
+    const newId = 'id' in agentData && agentData.id ? agentData.id : `agent-custom-${Date.now()}`;
+    const newAgent: Agent = {
+      ...agentData,
+      id: newId,
+    };
+    LocalDatabase.saveCustomAgent(newAgent);
+    setAgents(prev => {
+      const idx = prev.findIndex(a => a.id === newId);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = newAgent;
+        return copy;
+      }
+      return [...prev, newAgent];
+    });
+    setSelectedAgentIds(prev => Array.from(new Set([...prev, newId])));
+    return newAgent;
+  };
+
+  const deleteCustomAgent = (agentId: string): void => {
+    // Proteção dos especialistas canónicos da Bíblia The Five
+    const isCanonical = DEFAULT_AGENTS.some(a => a.id === agentId);
+    if (isCanonical) return;
+
+    LocalDatabase.deleteCustomAgent(agentId);
+    setAgents(prev => prev.filter(a => a.id !== agentId));
+    setSelectedAgentIds(prev => prev.filter(id => id !== agentId));
+  };
+
 
   const startDebate = (newTopic?: string, newDescription?: string) => {
     if (newTopic) setTopic(newTopic);
@@ -923,6 +968,8 @@ export function useDebate() {
     addAgentMemoryEntry,
     addStructuredMemoryEntry,
     deleteStructuredMemoryEntry,
+    addCustomAgent,
+    deleteCustomAgent,
     // Protocolo Canónico em 5 Etapas (The Five)
     canonicalStages,
     currentStageIndex,
