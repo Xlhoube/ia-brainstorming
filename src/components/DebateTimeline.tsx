@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Agent, DebateMessage, DebateStage } from '@/types/debate';
-import { Copy, Check, Volume2, User, Brain, Sparkles, CheckCircle2, ChevronRight, Layers } from 'lucide-react';
+import { Copy, Check, Volume2, User, Brain, Sparkles, ChevronRight } from 'lucide-react';
 import { cleanAgentResponsePrefix } from '@/lib/ai/openrouter';
 
 interface DebateTimelineProps {
@@ -71,6 +71,7 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                 </p>
               )}
             </div>
+
             <button
               onClick={onOpenTopics}
               className="flex-shrink-0 text-[11px] sm:text-xs text-indigo-400 hover:text-indigo-300 font-medium px-2 sm:px-2.5 py-1 rounded-lg bg-indigo-950/30 hover:bg-indigo-950/50 border border-indigo-800/40 transition-colors"
@@ -79,67 +80,6 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
             </button>
           </div>
         </div>
-
-        {/* Stepper Visual das 5 Etapas Canónicas (The Five Protocol) */}
-        {canonicalStages && canonicalStages.length > 0 && (
-          <div className="rounded-xl sm:rounded-2xl bg-slate-900/70 border border-slate-800/80 p-3 sm:p-4 backdrop-blur-sm shadow-lg">
-            <div className="flex items-center justify-between mb-2 sm:mb-2.5">
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Protocolo Canónico em 5 Etapas</span>
-              </span>
-              <span className="text-[10px] font-mono text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40">
-                Etapa {currentStageIndex + 1} de {canonicalStages.length}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2">
-              {canonicalStages.map((stage, idx) => {
-                const isCurrent = idx === currentStageIndex;
-                const isPassed = idx < currentStageIndex;
-
-                return (
-                  <button
-                    key={stage.id}
-                    onClick={() => onSelectStage && onSelectStage(idx)}
-                    disabled={!onSelectStage}
-                    className={`relative flex flex-col items-start p-2 sm:p-2.5 rounded-xl border text-left transition-all ${
-                      isCurrent
-                        ? 'bg-indigo-950/80 border-indigo-500 shadow-md shadow-indigo-500/20 ring-1 ring-indigo-400'
-                        : isPassed
-                        ? 'bg-slate-900/90 border-emerald-900/60 text-slate-300 hover:border-emerald-700'
-                        : 'bg-slate-950/40 border-slate-800/60 text-slate-500 opacity-60 hover:opacity-90'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between w-full mb-1">
-                      <span
-                        className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
-                          isCurrent
-                            ? 'bg-indigo-500 text-white'
-                            : isPassed
-                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60'
-                            : 'bg-slate-800 text-slate-400'
-                        }`}
-                      >
-                        0{idx + 1}
-                      </span>
-                      {isPassed && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
-                      {isCurrent && (
-                        <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
-                      )}
-                    </div>
-                    <span className="text-[11px] sm:text-xs font-semibold text-white truncate w-full">
-                      {stage.name}
-                    </span>
-                    <span className="text-[9px] text-slate-400 line-clamp-1 mt-0.5 hidden xs:block">
-                      {stage.description}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Mensagens do Debate */}
         {messages.length === 0 ? (

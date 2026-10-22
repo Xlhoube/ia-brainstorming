@@ -2,7 +2,7 @@
 
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
-- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.17.0
+- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.17.1
 - **Data da Última Atualização:** 2026-10-22
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
@@ -63,10 +63,12 @@
 - **[2026-10-22] ADR-030:** Desbloqueio e Fecho Livre do Modal de Síntese Pós-Conclusão de Debate: Eliminação da condição de bloqueio infinito `isOpen={isSynthesisModalOpen || Boolean(...)}` em `src/app/page.tsx`, substituída por auto-abertura controlada uma única vez por sessão (`autoOpenedSynthesisSessionRef`). Adicionado fecho universal ao `SynthesisModal.tsx` via backdrop overlay e tecla Escape, barra de rodapé com atalhos de navegação (`Fechar e Ver Diálogo`, `Reiniciar Debate`, `Novo Tema`), e opções claras de reinício na `ControlsBar.tsx` quando `status === 'concluded'`.
 - **[2026-10-22] ADR-031:** Novo Layout Dividido (Split UI: Especialistas de um Lado e Diálogo do Outro): Substituição do layout empilhado verticalmente por um contentor semântico com duas colunas (`flex-col md:flex-row min-h-0 overflow-hidden`), onde os especialistas ocupam uma barra lateral dedicada `<aside>` (`AgentRoster.tsx`) e o diálogo ocupa o ecrã central `<main>` (`DebateTimeline.tsx`). Os especialistas passam a dispor de cartões verticais ricos com avatares de alta definição, indicadores de som dinâmicos, seletores de presença no conselho e atalho para o painel de psicologia e memória, enquanto os dispositivos móveis mantêm uma faixa horizontal deslizante compacta para máxima usabilidade.
 - **[2026-10-22] ADR-032:** Criação e Gestão de Novos Especialistas Personalizados no Conselho: Implementação do subsistema completo de criação e expansão da mesa redonda. Inclusão do modal `AddSpecialistModal.tsx` com predefinições de 1 clique (Neurociência, Economia Comportamental, Bioética e Astrofísica) e formulário customizável (nome, cargo, arquétipo, avatar, cor, traço dominante, filosofia nuclear e modelo de IA `:free`). Armazenamento local persistente em `LocalDatabase.ts` (`getCustomAgents`, `saveCustomAgent`, `deleteCustomAgent`), integração reativa em `useDebate.ts` e botões de ação e eliminação (com salvaguarda dos 5 canónicos) em `AgentRoster.tsx`.
+- **[2026-10-22] ADR-033:** Remoção do Banner Redundante do Protocolo em 5 Etapas na Timeline: Eliminação do componente visual com as 5 caixas horizontais no topo de `DebateTimeline.tsx`. A etapa ativa e a progressão do protocolo canónico mantêm-se visíveis na barra superior de navegação (`🧭 Etapa X/5: Nome · Ciclo Y`) e no distintivo em cada mensagem, despoluindo significativamente a interface e dedicando 100% do espaço vertical à leitura das intervenções e réplicas.
 
 ---
 
-## ✅ O Que Já Funciona (v0.17.0)
+## ✅ O Que Já Funciona (v0.17.1)
+- [x] **Limpeza Visual da Timeline (ADR-033):** Remoção do banner redundante das 5 etapas da timeline, mantendo a contextualização elegante na navbar e nos cartões de mensagem.
 - [x] **Criação e Gestão de Novos Especialistas (ADR-032):** Adição de novos pensadores de raiz ou através de 4 templates rápidos com 1 clique; persistência automática em `localStorage` local-first; ativação imediata no debate e eliminação segura de perfis personalizados.
 - [x] **Layout Dividido Split UI (ADR-031):** Especialistas numa coluna lateral dedicada e diálogo na coluna central principal, otimizado tanto para ecrãs de computador e tablet como para telemóveis.
 - [x] **Desbloqueio e Fecho do Modal de Síntese Pós-Conclusão (ADR-030):** Eliminação total do bloqueio de ecrã após o término do debate; o modal fecha com botão, backdrop ou tecla Escape, permitindo ao utilizador continuar a navegar, reiniciar ou escolher novo tema sem recarregar a página.

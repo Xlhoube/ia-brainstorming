@@ -2,6 +2,14 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.17.1] - 2026-10-22
+
+### Removido / Limpeza de UI
+- **Remoção do Banner Visual do Protocolo Canónico em 5 Etapas na Timeline:**
+  - **Eliminação de Elemento Redundante em `DebateTimeline.tsx`:** Removido o bloco visual com as 5 caixas horizontais ("01 Compreender", "02 Análise independente", "03 Confronto", etc.) que ocupava espaço vertical valioso no topo do ecrã de diálogo.
+  - **Manutenção dos Indicadores Essenciais:** A etapa ativa do debate continua visível de forma elegante e contextual na barra superior de navegação (`🧭 Etapa X/5: Nome · Ciclo Y`) e no distintivo de cada mensagem proferida (`🧭 Nome da Etapa`), preservando toda a lógica interna de orquestração canónica e conferindo máximo destaque e espaço de leitura às mensagens e intervenções dos especialistas.
+  - **Limpeza de Dependências:** Removidos imports de ícones não utilizados (`Layers`, `CheckCircle2`) no componente.
+
 ## [0.17.0] - 2026-10-22
 
 ### Adicionado / Alterado
