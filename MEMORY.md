@@ -2,7 +2,7 @@
 
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
-- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.18.0
+- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.18.1
 - **Data da Última Atualização:** 2026-10-22
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
@@ -66,10 +66,12 @@
 - **[2026-10-22] ADR-033:** Remoção do Banner Redundante do Protocolo em 5 Etapas na Timeline: Eliminação do componente visual com as 5 caixas horizontais no topo de `DebateTimeline.tsx`. A etapa ativa e a progressão do protocolo canónico mantêm-se visíveis na barra superior de navegação (`🧭 Etapa X/5: Nome · Ciclo Y`) e no distintivo em cada mensagem, despoluindo significativamente a interface e dedicando 100% do espaço vertical à leitura das intervenções e réplicas.
 - **[2026-10-22] ADR-034:** Compactação do Banner do Tema Ativo na Timeline: Redução da pegada vertical do cabeçalho de tema em `DebateTimeline.tsx` em mais de 65%. Substituição do cartão com padding amplo e tipografia grande por uma barra horizontal esguia (`px-3.5 py-2 sm:px-4 sm:py-2.5`), título truncado de tamanho equilibrado (`text-xs sm:text-sm font-semibold`), descrição compacta e botão minimalista "Mudar Tema", priorizando o espaço útil para o fluxo dialético.
 - **[2026-10-22] ADR-035:** Protocolo de Retirada por Incompetência Temática (Humildade Epistemológica): Implementação da diretriz canónica que confere a cada especialista a autoridade e honestidade deontológica para se retirar da mesa redonda (`[RETIRO_ME: motivo]`) quando avaliar que a matéria técnica em debate ultrapassa a sua especialidade. O motor de avaliação (`evaluateAgentCompetence`) deteta incompatibilidades estritas e o hook `useDebate.ts` rastreia os especialistas retirados (`withdrawnAgentIds`), excluindo-os da pool ativa para as etapas e rondas seguintes, com distintivo específico na timeline, indicador no painel e função de re-convite manual pelo utilizador.
+- **[2026-10-22] ADR-036:** Remoção do Botão de Configuração de API da Barra de Navegação: Eliminação do botão e indicador `🔑 API Conectada` / `Ligar OpenRouter` em `Navbar.tsx`. Dado que a arquitetura do projeto foi calibrada para operar com modelos 100% gratuitos (`:free`) ou com o motor dialético local dinâmico, o indicador de API era redundante e ocupava espaço no cabeçalho. As credenciais e o chaveamento permanecem geridos de forma transparente e segura via variáveis de ambiente no servidor (.env.local), despoluindo a barra de navegação.
 
 ---
 
-## ✅ O Que Já Funciona (v0.18.0)
+## ✅ O Que Já Funciona (v0.18.1)
+- [x] **Remoção do Botão de API da Barra de Navegação (ADR-036):** Despoluição da navbar através da eliminação do botão "API Conectada", alinhado com a utilização 100% gratuita (:free) dos modelos.
 - [x] **Protocolo de Retirada por Incompetência Temática (ADR-035):** Especialistas retiram-se autonomamente da mesa quando o assunto em causa está fora da sua especialidade; badge de humildade epistemológica na timeline; status no roster de especialistas e possibilidade de re-convite.
 - [x] **Compactação do Banner do Tema Ativo (ADR-034):** Redução substancial da altura vertical do banner de tema na timeline para um formato discreto e elegante, maximizando a área de leitura e conversa.
 - [x] **Limpeza Visual da Timeline (ADR-033):** Remoção do banner redundante das 5 etapas da timeline, mantendo a contextualização elegante na navbar e nos cartões de mensagem.

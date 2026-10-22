@@ -2,6 +2,14 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.18.1] - 2026-10-22
+
+### Removido / Limpeza de UI
+- **Remoção do Botão de Configuração de API da Barra de Navegação (`Navbar.tsx`):**
+  - **Eliminação do Indicador Suérfluo:** Removido o botão e indicador `🔑 API Conectada` / `Ligar OpenRouter` da barra de navegação superior, uma vez que a plataforma opera nativamente em modelos 100% gratuitos (`:free`) ou via motor dialético dinâmico local.
+  - **Despoluição Visual do Cabeçalho:** O espaço no topo do ecrã fica dedicado exclusivamente às funções essenciais (Voz, Histórico, Temas e Reiniciar Debate), eliminando ruído desnecessário.
+  - **Limpeza de Imports:** Removido o ícone `Key` e tornadas opcionais as propriedades `onOpenSettings` e `apiKey` em `NavbarProps`.
+
 ## [0.18.0] - 2026-10-22
 
 ### Adicionado / Cognitivo & Dialético

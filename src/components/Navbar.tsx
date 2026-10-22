@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Volume2, VolumeX, History, Key, BookOpen, RotateCcw, BrainCircuit, Sparkles, GraduationCap } from 'lucide-react';
+import { Volume2, VolumeX, History, BookOpen, RotateCcw, BrainCircuit, Sparkles, GraduationCap } from 'lucide-react';
 import { LanguageTone } from '@/types/debate';
 
 interface NavbarProps {
-  onOpenSettings: () => void;
+  onOpenSettings?: () => void;
   onOpenTopics: () => void;
   onOpenHistory: () => void;
   onReset: () => void;
@@ -14,7 +14,7 @@ interface NavbarProps {
   onToggleAudio: () => void;
   tone: LanguageTone;
   onToggleTone: () => void;
-  apiKey: string;
+  apiKey?: string;
   status: string;
   currentRound: number;
   maxRounds: number;
@@ -158,22 +158,6 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <BookOpen className="w-3.5 h-3.5 text-blue-400" />
           <span className="hidden sm:inline">Temas</span>
-        </button>
-
-        {/* Definições de API */}
-        <button
-          onClick={onOpenSettings}
-          className={`flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-lg border text-xs font-medium transition-all shadow-sm flex-shrink-0 ${
-            apiKey
-              ? 'bg-emerald-950/30 border-emerald-800/60 text-emerald-300 hover:bg-emerald-950/50'
-              : 'bg-indigo-950/40 border-indigo-700/50 text-indigo-300 hover:bg-indigo-900/40'
-          }`}
-          title="Configuração de Motores & OpenRouter"
-        >
-          <Key className="w-3.5 h-3.5" />
-          <span className="hidden lg:inline">
-            {apiKey ? 'API Conectada' : 'Ligar OpenRouter'}
-          </span>
         </button>
 
         {status !== 'idle' && (
