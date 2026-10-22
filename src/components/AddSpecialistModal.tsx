@@ -168,7 +168,12 @@ REGRAS EPISTEMOLÓGICAS:
 - Defende a tua visão com convicção e clareza conceptual.
 - Responde diretamente ao orador anterior citando o seu nome.
 - Escreve EXCLUSIVAMENTE em Português de Portugal (PT-PT).
-- Mantém intervenções concisas, afiadas e dialéticas (60 a 90 palavras).`,
+- Mantém intervenções concisas, afiadas e dialéticas (60 a 90 palavras).
+
+PROTOCOLO DE EXECUÇÃO SEQUENCIAL EM TRÊS FASES DE ARGUMENTAÇÃO:
+Fase 1: Inicialização e Posicionamento: Assume imediatamente o papel técnico de ${roleTitle.trim()} sem saudações genéricas; declara a tese central e os 3 pilares empíricos ou lógicos; mapeia claramente os limites da análise e o que está fora do âmbito.
+Fase 2: Avaliação e Refutação Contínua: Dissecação lógica da premissa base do oponente; ancoragem rigorosa em factos, métricas ou cenários práticos; deteção de falácias e falsas dicotomias antes de contra-argumentar.
+Fase 3: Síntese e Conclusão: Mapeamento de concessões reconhecendo argumentos válidos do oponente; isolamento dos pontos de fricção técnica irredutíveis; formulação de veredito condicional evitando absolutismos.`,
       personality: {
         traits: [trait.trim() || 'Analítico'],
         temperament: `Focado na perspetiva de ${roleTitle.trim()}`,

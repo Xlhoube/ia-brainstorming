@@ -2,6 +2,27 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.19.0] - 2026-10-22
+
+### Adicionado / Protocolo Dialético
+- **Protocolo de Argumentação Sequencial em Três Fases Lógicas (`bibliaLoader.ts`, `openrouter.ts`, `AddSpecialistModal.tsx`):**
+  - **Injeção Cognitiva Estruturada:** Cada especialista (tanto os 5 canónicos como os especialistas personalizados) passa a ter no seu *system prompt* o dever obrigatório de seguir uma progressão sequencial em 3 fases lógicas:
+    1. **Fase 1: Inicialização e Posicionamento:**
+       - *Definição da Persona:* Assunção imediata do papel técnico (ex: Engenheiro, Economista, Filósofo, Cientista) e foco analítico.
+       - *Abertura Direta:* Proibição estrita de introduções genéricas ou saudações. Declaração imediata da tese central e dos três pilares empíricos ou lógicos que a sustentam.
+       - *Mapeamento de Limites:* Definição clara dos parâmetros da análise, declarando expressamente o que está fora do âmbito para evitar desvios ou alucinações.
+    2. **Fase 2: Avaliação e Refutação Contínua:**
+       - *Dissecação Lógica:* Extração da premissa base do último argumento do oponente para ataque direto, eliminando monólogos paralelos.
+       - *Ancoragem em Factos e Casos:* Validação obrigatória de asserções teóricas com métricas concretas, frameworks estabelecidos ou cenários práticos (latência, custos operacionais, escalabilidade local ou limites físicos).
+       - *Deteção de Falácias:* Sinalização explícita de falhas de raciocínio (falsas dicotomias, correlações sem causalidade) no discurso anterior antes de contra-argumentar.
+    3. **Fase 3: Síntese e Conclusão:**
+       - *Mapeamento de Concessões:* Reconhecimento explícito de pelo menos um argumento válido levantado pelo oponente, evidenciando evolução no raciocínio.
+       - *Isolamento da Fricção:* Enumeração dos pontos exatos onde o consenso provou ser impossível e explicação do motivo técnico da divergência irredutível.
+       - *Veredito Condicional:* Conclusão sem absolutismos, assumindo formato condicional ponderado ("A tese X mantém-se superior, mas apenas se os requisitos Y e Z forem estritamente garantidos").
+  - **Orquestração Dinâmica de Turnos (`openrouter.ts`):** O prompt de turno injeta ativamente no modelo remoto a fase lógica correspondente à etapa do debate, orientando a IA em tempo real para cumprir a diretriz da fase ativa.
+  - **Motor Dialético Local Dinâmico Atualizado:** A geração local e offline de réplicas reflete agora a abertura com tese e 3 pilares na Fase 1, prefixos conversacionais com dissecação lógica e deteção de falácias na Fase 2, e mapeamento de concessões com veredito condicional na Fase 3.
+  - **Bateria de Testes Automatizados:** Novo script de verificação `scripts/test-three-phase-argumentation.mjs` aprovado com 100% de sucesso.
+
 ## [0.18.1] - 2026-10-22
 
 ### Removido / Limpeza de UI

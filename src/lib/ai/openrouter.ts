@@ -138,6 +138,24 @@ ${structuredMemoriesSection}
 ${stageInstructions}
 ${toneInstructions}
 
+ESTRUTURA DE EXECUÇÃO SEQUENCIAL EM TRÊS FASES LÓGICAS DE ARGUMENTAÇÃO:
+O teu raciocínio e todas as tuas intervenções no debate devem obedecer estritamente a três fases lógicas sequenciais:
+
+Fase 1: Inicialização e Posicionamento (Abertura e Análise Independente)
+- Definição da Persona: Assume imediatamente o teu papel técnico (${agent.roleTitle}) e o teu foco analítico.
+- Abertura Direta: Proibição estrita de introduções genéricas ou saudações. A primeira intervenção deve declarar imediatamente a tese central e os três pilares empíricos ou lógicos que a sustentam.
+- Mapeamento de Limites: Define claramente os parâmetros da tua análise, declarando expressamente o que consideras fora do âmbito da discussão para evitar desvios ou alucinações.
+
+Fase 2: Avaliação e Refutação Contínua (Confronto e Verificação)
+- Dissecação Lógica: Extrai a premissa base do último argumento do oponente e ataca-a diretamente, evitando monólogos paralelos.
+- Ancoragem em Factos e Casos: Qualquer afirmação teórica tem de ser validada com métricas concretas, frameworks estabelecidos ou cenários práticos (ex: latência, custos operacionais, escalabilidade ou dados físicos).
+- Deteção de Falácias: Sinaliza falhas de raciocínio (falsas dicotomias, correlações sem causalidade) na intervenção anterior antes de avançar.
+
+Fase 3: Síntese e Conclusão (Encerramento e Veredito)
+- Mapeamento de Concessões: Reconhece de forma explícita pelo menos um argumento válido levantado pelo oponente, simulando uma evolução real no raciocínio.
+- Isolamento da Fricção: Lista os pontos exatos onde o consenso provou ser impossível e explica o motivo técnico da divergência irredutível.
+- Veredito Condicional: Evita absolutismos. A intervenção final deve assumir um formato condicional ("A tese X mantém-se superior, mas apenas se os requisitos Y e Z forem estritamente garantidos"), entregando uma decisão ponderada ao utilizador da aplicação.
+
 DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
 1. FOCO TEMÁTICO RIGOROSO E PROIBIÇÃO DE DESVIO PARA IA:
    O debate atual é ESTRITAMENTE e EXCLUSIVAMENTE sobre o tema proposto: "${topic}".
@@ -164,6 +182,30 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
    [CONCLUSAO_ATINGIDA: Sintese] ou [CONCLUSAO_ATINGIDA: Consenso] ou [CONCLUSAO_ATINGIDA: Aporia]
    seguida da tua síntese ou diagnóstico final. Se consideras que a discussão ainda tem arestas ou paradoxos por desvendar, NÃO uses esta tag e continua a debater normalmente.`;
 
+  // Identificação da fase lógica ativa com base na etapa canónica e no progresso do agente
+  const isFirstTurnForAgent = !messages.some(m => m.agentId === agent.id);
+  const isPhase1 = stage?.name === 'Compreender' || stage?.name === 'Análise independente' || (isFirstTurnForAgent && stage?.name !== 'Síntese');
+  const isPhase3 = stage?.name === 'Síntese';
+  const isPhase2 = !isPhase1 && !isPhase3;
+
+  let activePhasePrompt = '';
+  if (isPhase1) {
+    activePhasePrompt = `[FASE ATIVA DO TEU DISCURSO: Fase 1: Inicialização e Posicionamento]
+- Definição da Persona: Assume imediatamente o teu papel de ${agent.roleTitle} e foco analítico.
+- Abertura Direta: Proibição estrita de saudações ou rodriguinhos. Declara de imediato a tua tese central e os 3 pilares empíricos ou lógicos que a sustentam.
+- Mapeamento de Limites: Define claramente os parâmetros da tua análise e o que declaras fora do âmbito.`;
+  } else if (isPhase2) {
+    activePhasePrompt = `[FASE ATIVA DO TEU DISCURSO: Fase 2: Avaliação e Refutação Contínua]
+- Dissecação Lógica: Extrai a premissa base do último argumento do teu oponente e ataca-a diretamente (sem monólogos paralelos).
+- Ancoragem em Factos e Casos: Valida as tuas teses com métricas concretas, frameworks estabelecidos ou cenários práticos (latência, custos, limites materiais).
+- Deteção de Falácias: Sinaliza falhas de raciocínio (falsas dicotomias, correlações espúrias) no argumento anterior antes de prosseguir.`;
+  } else {
+    activePhasePrompt = `[FASE ATIVA DO TEU DISCURSO: Fase 3: Síntese e Conclusão]
+- Mapeamento de Concessões: Reconhece expressamente pelo menos um argumento válido levantado pelo oponente.
+- Isolamento da Fricção: Lista os pontos exatos onde o consenso foi impossível com o motivo técnico da divergência irredutível.
+- Veredito Condicional: Conclui em formato condicional ("A tese X mantém-se superior, mas apenas se os requisitos Y e Z forem estritamente garantidos").`;
+  }
+
   const promptMessages = [
     { role: 'system', content: systemInstructions },
     ...messages.slice(-8).map(msg => ({
@@ -173,7 +215,7 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
     })),
     {
       role: 'user',
-      content: `É a tua vez de falar na mesa, ${agent.name}. O debate é rigorosamente sobre "${topic}". ${stage ? `Estamos na etapa "${stage.name}" (Diretriz: ${stage.instruction}). ` : ''}Ouve o que o último orador acabou de dizer e responde diretamente a ele de forma viva e afiada em 1 ou 2 parágrafos curtos, cumprindo a diretriz desta etapa. Se avaliares que não percebes suficientemente do assunto técnico em debate por ser fora da tua área de especialidade (${agent.roleTitle}), deves retirar-te da mesa incluindo a tag [RETIRO_ME: motivo]. ${stage?.name === 'Síntese' ? 'Apresenta a síntese ou declara a conclusão dialética da mesa com a tag [CONCLUSAO_ATINGIDA: Sintese|Consenso|Aporia].' : 'Avalia se o debate ainda deve avançar ou se já é hora de declarar conclusão.'} Não desvies o assunto para inteligência artificial se o tema for outro. Nunca escrevas o teu próprio nome no início.`,
+      content: `É a tua vez de falar na mesa, ${agent.name}. O debate é rigorosamente sobre "${topic}". ${stage ? `Estamos na etapa "${stage.name}" (Diretriz: ${stage.instruction}). ` : ''}\n${activePhasePrompt}\nOuve o que o último orador acabou de dizer e responde de forma viva e afiada em 1 ou 2 parágrafos curtos, cumprindo rigorosamente a diretriz da fase e da etapa ativa. Se avaliares que não percebes suficientemente do assunto técnico em debate por ser fora da tua área de especialidade (${agent.roleTitle}), deves retirar-te da mesa incluindo a tag [RETIRO_ME: motivo]. ${stage?.name === 'Síntese' ? 'Apresenta a síntese ou declara a conclusão dialética da mesa com a tag [CONCLUSAO_ATINGIDA: Sintese|Consenso|Aporia] e veredito condicional.' : 'Avalia se o debate ainda deve avançar ou se já é hora de declarar conclusão.'} Não desvies o assunto para inteligência artificial se o tema for outro. Nunca escrevas o teu próprio nome no início.`,
     },
   ];
 
@@ -781,29 +823,25 @@ export function generateOrganicSimulatedResponse(
     return `Atentem na inquietação que a nossa voz humana acabou de colocar perante a mesa: "${recentHumanMsg.content}". Isto não é teoria abstrata de gabinete; é o impacto real que ${subjectNoun} tem na vida diária. Desafio todos os colegas a responderem diretamente a este ponto antes de prosseguirmos.`;
   }
 
-  // 2. Abertura da Mesa Redonda na Etapa "Compreender"
+  // 2. Abertura da Mesa Redonda na Etapa "Compreender" (Fase 1: Inicialização e Posicionamento)
   if (stage?.name === 'Compreender') {
     if (agent.category === 'moderador' || !lastMsg) {
-      return `Declaro aberta a mesa redonda sobre "${topic}". O nosso objetivo nesta etapa de enquadramento inicial é identificar com clareza a pergunta central, as restrições reais e os critérios de validação com que avaliaremos as soluções em torno de ${subjectNoun}. Convido cada pensador a avançar com a sua análise independente.`;
+      return `Declaro aberta a mesa redonda sobre "${topic}". Como moderadora técnica, assumo o foco analítico da deliberação. A nossa avaliação assenta em três pilares: 1) enquadramento rigoroso da pergunta central; 2) identificação das restrições materiais e éticas; e 3) definição de critérios objetivos de validação em torno de ${subjectNoun}. Mapeamento de limites: declaro expressamente fora do âmbito da discussão palpites sem fundamentação e desvios descontextualizados. Convido cada especialista à análise independente.`;
     }
   }
 
-  // 3. Etapa "Síntese" (Sophia Veris fecha com autonomia dialética)
+  // 3. Etapa "Síntese" (Fase 3: Síntese e Conclusão com Sophia Veris ou desfecho do debate)
   if (stage?.name === 'Síntese' || (agent.category === 'moderador' && history.length >= 8)) {
     if (agent.category === 'moderador') {
-      const syntheses = DOMAIN_DISCOURSE_BANK[domain].moderador;
-      const conclusionSpeech = syntheses[syntheses.length - 1];
-      if (!isAlreadySpoken(conclusionSpeech)) {
-        return conclusionSpeech;
-      }
-      return `[CONCLUSAO_ATINGIDA: Sintese] Sophia Veris conclui: o Conselho atingiu a maturidade da sua deliberação sobre ${subjectNoun}. Ficou comprovado que a sustentabilidade de qualquer solução reside em articular a audácia da inovação técnica com as salvaguardas invioláveis da dignidade e do método empírico. Lavro aqui o encerramento da nossa sessão.`;
+      return `[CONCLUSAO_ATINGIDA: Sintese] Sophia Veris conclui: o Conselho atingiu a maturidade dialética sobre ${subjectNoun}. Mapeamento de concessões: reconheço de forma explícita que os colegas demonstraram argumentos válidos quanto aos limites empíricos e à urgência de inovar. Isolamento da fricção: o ponto de divergência irredutível reside na primazia das garantias éticas versus velocidade de execução técnica. Veredito condicional: a tese mantém-se superior, mas apenas se os requisitos de verificação empírica, salvaguarda da dignidade e sustentabilidade forem estritamente garantidos.`;
     }
   }
 
-  // 4. Se não há mensagens anteriores (abertura fora de etapa formal)
+  // 4. Se não há mensagens anteriores (Fase 1: Inicialização e Posicionamento - Abertura Direta)
   if (!lastMsg) {
     const roleDiscourses = DOMAIN_DISCOURSE_BANK[domain][agent.category as 'filosofo'] || DOMAIN_DISCOURSE_BANK.geral[agent.category as 'filosofo'];
-    return roleDiscourses[0] || `Declaro aberta a reflexão independente sobre "${topic}". Que cada especialista avance com a sua análise.`;
+    const baseDiscourse = roleDiscourses[0] || `A minha análise técnica sobre "${topic}" assenta em fundamentos sólidos.`;
+    return `Assumo de imediato o meu papel técnico de ${agent.roleTitle} e foco analítico. A minha tese central sobre ${subjectNoun} sustenta-se em três pilares fundamentais: 1) ${baseDiscourse.slice(0, 90)}...; 2) rigor na verificação de viabilidade prática; e 3) salvaguarda de princípios estruturantes. Mapeamento de limites: declaro expressamente fora do âmbito desta análise qualquer deriva especulativa sem correspondência técnica ou factual.`;
   }
 
   // 5. Réplica dialética direta com Escuta Ativa Anti-Repetição
@@ -874,42 +912,42 @@ export function generateOrganicSimulatedResponse(
         break;
     }
   } else {
-    // Rotação dinâmica de prefixos naturais para nunca repetir
+    // Rotação dinâmica de prefixos com Dissecação Lógica, Deteção de Falácias e Ancoragem em Factos
     const prefixOptions: Record<'filosofo' | 'cientista' | 'humanista' | 'tecnologo' | 'moderador', string[]> = {
       filosofo: [
-        `Repara na premissa que estás a assumir como garantida, ${speakerName}. `,
-        `Compreendo a tua linha de raciocínio, ${speakerName}, mas olha para a tensão oculta: `,
-        `${speakerName}, esse argumento soa reconfortante, mas desmorona-se perante uma análise rigorosa: `,
-        `Paremos um instante para dissecar o que disseste, ${speakerName}: `,
-        `${speakerName}, a coerência lógica da tua proposta exige que respondas a uma dúvida elementar: `,
+        `Dissecando a premissa base do teu argumento, ${speakerName}: assumes como garantida uma falsa dicotomia entre progresso e imperativo ético. `,
+        `Compreendo a tua linha de raciocínio, ${speakerName}, mas há uma correlação sem causalidade na tua dedução lógica: `,
+        `${speakerName}, esse argumento soa sedutor, mas desmorona-se perante uma dissecação rigorosa das suas premissas: `,
+        `Paremos um instante para dissecar logicamente o que disseste, ${speakerName}: estás a derivar um dever moral de uma mera conveniência pragmática. `,
+        `${speakerName}, a coerência lógica da tua proposta exige ancoragem em princípios universais, e não em premissas contingentes: `,
       ],
       cientista: [
-        `${speakerName}, a tua hipótese soa sedutora, mas faltam-lhe dados verificáveis e limites materiais. `,
-        `Precisamos de rigor metodológico, ${speakerName}. Não podemos confundir intenções com viabilidade real: `,
-        `${speakerName}, os modelos teóricos são úteis, mas têm de sobreviver aos testes empíricos de bancada: `,
-        `Distingamos com clareza o que é facto demonstrado do que é mera extrapolação, ${speakerName}: `,
-        `${speakerName}, em ciência o ónus da prova recai sobre quem afirma a possibilidade: `,
+        `Dissecando a premissa empírica da tua tese, ${speakerName}: faltam-lhe métricas concretas, limites materiais e validação experimental reprodutível. `,
+        `${speakerName}, assinalo uma falha evidente de raciocínio: confundir correlação observada com causalidade mecânica demonstrada. `,
+        `Ancorando esta questão em factos e dados mensuráveis, ${speakerName}: modelos teóricos têm de resistir aos testes de bancada e balanços de conservação: `,
+        `Distingamos com clareza o que é facto verificado do que é extrapolação teórica, ${speakerName}. O ónus da prova recai sobre a viabilidade prática: `,
+        `${speakerName}, perante as métricas operacionais e a margem de erro laboratorial, a tua asserção não cumpre o critério de falseabilidade: `,
       ],
       humanista: [
-        `${speakerName}, ouço a tua segurança técnica, mas pergunto-me onde ficam as pessoas comuns nessa equação: `,
-        `Não podemos aceitar isso com ligeireza, ${speakerName}. A dignidade humana não é negociável: `,
-        `${speakerName}, as tuas razões são ponderadas, mas quem suportará as consequências se as coisas correrem mal? `,
-        `Olhemos para os rostos de quem vai viver com as decisões que estamos aqui a discutir, ${speakerName}: `,
-        `${speakerName}, a técnica tem de ser serva da compaixão e da justiça comunitária, e não o seu senhor: `,
+        `Dissecando a premissa da tua intervenção, ${speakerName}: assumes implicitamente que métricas de eficiência técnica justificam a vulnerabilidade das pessoas. `,
+        `Recuso essa falsa dicotomia, ${speakerName}: a dignidade e a autodeterminação humana não podem ser subordinadas a imperativos de velocidade ou custo: `,
+        `${speakerName}, as tuas razões parecem ponderadas, mas quem suporta os custos operacionais e sociais no terreno se o modelo falhar? `,
+        `Ancorando o debate em cenários humanos concretos, ${speakerName}: olhemos para os rostos de quem vai viver com as consequências destas escolhas: `,
+        `${speakerName}, a técnica tem de ser serva da compaixão e da justiça comunitária, e não uma abstração desprovida de sensibilidade social: `,
       ],
       tecnologo: [
-        `Compreendo a tua prudência, ${speakerName}, mas o custo da inação perante este desafio é muito superior ao risco de experimentar: `,
-        `Mas repara, ${speakerName}: os problemas concretos não se resolvem esperando por consensos perfeitos, mas iterando com audácia: `,
-        `${speakerName}, o medo do novo é natural, mas a história humana constrói-se com quem ousa desenhar ferramentas: `,
-        `Não tenhamos medo da nossa própria capacidade de aprender com os erros práticos, ${speakerName}: `,
-        `${speakerName}, em vez de congelarmos as decisões em debates infindáveis, testemos uma solução mensurável: `,
+        `Dissecando a premissa de prudência que avanças, ${speakerName}: o custo da inação e a falta de escalabilidade acarretam riscos operacionais muito superiores. `,
+        `${speakerName}, estás a cair na falácia de exigir garantias absolutas prévias antes de testar em ambiente real com salvaguardas iterativas: `,
+        `Ancorando a arquitetura em métricas de latência, capacidade e custos operacionais, ${speakerName}: os desafios de engenharia resolvem-se desenhando soluções melhores: `,
+        `Não tenhamos medo da nossa própria capacidade de medir, errar e otimizar com métricas tangíveis, ${speakerName}: `,
+        `${speakerName}, em vez de congelarmos as decisões em abstrações teóricas, apliquemos um framework pragmático com redundâncias verificáveis: `,
       ],
       moderador: [
-        `A tensão na mesa é nítida com a intervenção de ${speakerName}. `,
-        `Ouvindo a posição de ${speakerName}, vemos onde a linha de fratura dialética se aprofunda: `,
-        `${speakerName} traz para o centro do debate uma exigência que não podemos contornar: `,
-        `Registo o argumento de ${speakerName} e coloco à consideração dos restantes colegas: `,
-        `O debate ganha maturidade com o ponto levantado por ${speakerName}: `,
+        `Registo a dissecação lógica formulada por ${speakerName} e a exigência de ancoragem em factos e métricas concretas. `,
+        `Ouvindo a posição de ${speakerName}, a mesa é desafiada a superar falsas dicotomias e a expor as suas premissas essenciais: `,
+        `${speakerName} traz para o centro do debate uma ancoragem factual que não podemos contornar: `,
+        `Registo a objeção de ${speakerName} e coloco à deliberação do Conselho este teste crítico de coerência: `,
+        `O debate atinge maturidade analítica com a refutação fundamentada levantada por ${speakerName}: `,
       ],
     };
 
