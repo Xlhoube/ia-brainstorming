@@ -84,17 +84,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2.5">
-            <div className="flex items-center gap-2 text-indigo-300 text-xs font-semibold">
-              <Cpu className="w-3.5 h-3.5" />
-              <span>Multi-Modelos Conectados</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-indigo-300 text-xs font-semibold">
+                <Cpu className="w-3.5 h-3.5" />
+                <span>Multi-Modelos Conectados (Famílias Rivais)</span>
+              </div>
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-950/70 text-emerald-300 border border-emerald-700/50">
+                100% Gratuito (:free)
+              </span>
             </div>
             <div className="text-[11px] text-slate-400 space-y-1">
-              <p>• <strong>Dr. Marcus:</strong> Claude 3.5 Sonnet (Anthropic)</p>
-              <p>• <strong>Dra. Helena:</strong> DeepSeek V3 (DeepSeek)</p>
-              <p>• <strong>Aura Chen:</strong> GPT-4o (OpenAI)</p>
-              <p>• <strong>Kaelen Voss:</strong> Llama 3.3 70B (Meta)</p>
+              <p>• <strong>Dr. Marcus Vance:</strong> Gemini 2.0 Flash (Google)</p>
+              <p>• <strong>Dra. Helena Rostova:</strong> Llama 3.3 70B Instruct (Meta)</p>
+              <p>• <strong>Aura Chen:</strong> Qwen 2.5 72B Instruct (Alibaba)</p>
+              <p>• <strong>Kaelen Voss:</strong> Mistral Small 24B (Mistral AI)</p>
               <p>• <strong>Sophia Veris:</strong> Gemini 2.0 Flash (Google)</p>
             </div>
+            <p className="text-[10px] text-slate-500 pt-1 border-t border-slate-800/60 leading-relaxed">
+              💡 Cada pensador tem a sua IA distinta, personalidade e memórias. Com chave OpenRouter ativa, comunicam diretamente com estes modelos sem custos de saldo.
+            </p>
           </div>
 
           <div className="flex items-center gap-2 text-slate-400 text-[11px]">
