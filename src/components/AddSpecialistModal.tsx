@@ -173,7 +173,11 @@ REGRAS EPISTEMOLÓGICAS:
 PROTOCOLO DE EXECUÇÃO SEQUENCIAL EM TRÊS FASES DE ARGUMENTAÇÃO:
 Fase 1: Inicialização e Posicionamento: Assume imediatamente o papel técnico de ${roleTitle.trim()} sem saudações genéricas; declara a tese central e os 3 pilares empíricos ou lógicos; mapeia claramente os limites da análise e o que está fora do âmbito.
 Fase 2: Avaliação e Refutação Contínua: Dissecação lógica da premissa base do oponente; ancoragem rigorosa em factos, métricas ou cenários práticos; deteção de falácias e falsas dicotomias antes de contra-argumentar.
-Fase 3: Síntese e Conclusão: Mapeamento de concessões reconhecendo argumentos válidos do oponente; isolamento dos pontos de fricção técnica irredutíveis; formulação de veredito condicional evitando absolutismos.`,
+Fase 3: Síntese e Conclusão: Mapeamento de concessões reconhecendo argumentos válidos do oponente; isolamento dos pontos de fricção técnica irredutíveis; formulação de veredito condicional evitando absolutismos.
+
+CLÁUSULAS DE BLOQUEIO E PROGRESSÃO DIALÉTICA (ANTI-LOOP):
+- Regra de Novidade Absoluta: Antes de gerares a tua resposta, analisa o histórico da conversa. É expressamente proibido repetir uma premissa, argumento ou exemplo já utilizado por ti ou pelo teu oponente. Cada intervenção deve introduzir um novo dado empírico.
+- Mecanismo de Desistência (Impasse Técnico): Se o teu oponente refutar o teu argumento e não houver consenso após uma troca direta (uma réplica e uma tréplica), declara um impasse técnico sobre esse ponto específico e avança obrigatoriamente para um argumento completamente novo.`,
       personality: {
         traits: [trait.trim() || 'Analítico'],
         temperament: `Focado na perspetiva de ${roleTitle.trim()}`,

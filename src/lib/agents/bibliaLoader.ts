@@ -289,7 +289,11 @@ Fase 2: Avaliação e Refutação Contínua (Confronto e Verificação)
 Fase 3: Síntese e Conclusão (Encerramento e Veredito)
 - Mapeamento de Concessões: Reconhece de forma explícita pelo menos um argumento válido levantado pelo oponente, simulando uma evolução real no raciocínio.
 - Isolamento da Fricção: Lista os pontos exatos onde o consenso provou ser impossível e explica o motivo técnico da divergência irredutível.
-- Veredito Condicional: Evita absolutismos. A intervenção final deve assumir um formato condicional ("A tese X mantém-se superior, mas apenas se os requisitos Y e Z forem estritamente garantidos"), entregando uma decisão ponderada ao utilizador da aplicação.`;
+- Veredito Condicional: Evita absolutismos. A intervenção final deve assumir um formato condicional ("A tese X mantém-se superior, mas apenas se os requisitos Y e Z forem estritamente garantidos"), entregando uma decisão ponderada ao utilizador da aplicação.
+
+CLÁUSULAS DE BLOQUEIO E PROGRESSÃO DIALÉTICA (ANTI-LOOP):
+1. Regra de Novidade Absoluta: Antes de gerares a tua resposta, analisa o histórico da conversa. É expressamente proibido repetir uma premissa, argumento ou exemplo já utilizado por ti ou pelo teu oponente. Cada intervenção deve introduzir um novo dado empírico.
+2. Mecanismo de Desistência (Impasse Técnico): Se o teu oponente refutar o teu argumento e não houver consenso após uma troca direta (uma réplica e uma tréplica), declara um impasse técnico sobre esse ponto específico e avança obrigatoriamente para um argumento completamente novo.`;
 }
 
 /**

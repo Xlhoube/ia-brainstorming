@@ -2,6 +2,18 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.19.1] - 2026-10-22
+
+### Otimizado / Parâmetros de API & Anti-Loop
+- **Ajuste Matemático de Parâmetros na Chamada à API (`openrouter.ts`):**
+  - **Penalização de Presença (`presence_penalty = 0.45`):** Configurada penalização entre 0.3 e 0.6 para forçar o abandono de tópicos e eixos já debatidos, estimulando a introdução de novos subtemas e ângulos de análise.
+  - **Penalização de Frequência (`frequency_penalty = 0.35`):** Configurada penalização entre 0.2 e 0.5 para penalizar a reciclagem de tokens repetidos, reduzindo a repetição de frases, fórmulas e estruturas sintáticas.
+  - **Temperatura Equilibrada (`temperature = 0.75`):** Calibrada entre 0.6 e 0.8 para assegurar a criatividade necessária para novos ângulos de ataque analítico sem descurar a coerência técnica e lógica.
+- **Cláusulas de Bloqueio Anti-Loop nos Prompts (`bibliaLoader.ts`, `openrouter.ts`, `AddSpecialistModal.tsx`):**
+  - **Regra de Novidade Absoluta:** Obrigatoriedade de analisar o histórico e proibição expressa de repetir premissas, argumentos ou exemplos anteriores (do próprio agente ou do oponente), exigindo um novo dado empírico em cada intervenção.
+  - **Mecanismo de Desistência (Impasse Técnico):** Declaração explícita de impasse técnico quando não houver consenso após uma troca direta (réplica e tréplica), forçando o avanço obrigatório para um novo ponto lógico da discussão.
+  - **Bateria de Testes Automatizados:** Novo script de validação `scripts/test-anti-loop-parameters-and-clauses.mjs` aprovado com 100% de sucesso.
+
 ## [0.19.0] - 2026-10-22
 
 ### Adicionado / Protocolo Dialético

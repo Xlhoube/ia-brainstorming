@@ -156,6 +156,10 @@ Fase 3: Síntese e Conclusão (Encerramento e Veredito)
 - Isolamento da Fricção: Lista os pontos exatos onde o consenso provou ser impossível e explica o motivo técnico da divergência irredutível.
 - Veredito Condicional: Evita absolutismos. A intervenção final deve assumir um formato condicional ("A tese X mantém-se superior, mas apenas se os requisitos Y e Z forem estritamente garantidos"), entregando uma decisão ponderada ao utilizador da aplicação.
 
+CLÁUSULAS DE BLOQUEIO E PROGRESSÃO DIALÉTICA (ANTI-LOOP):
+1. Regra de Novidade Absoluta: Antes de gerares a tua resposta, analisa o histórico da conversa. É expressamente proibido repetir uma premissa, argumento ou exemplo já utilizado por ti ou pelo teu oponente. Cada intervenção deve introduzir um novo dado empírico.
+2. Mecanismo de Desistência (Impasse Técnico): Se o teu oponente refutar o teu argumento e não houver consenso após uma troca direta (uma réplica e uma tréplica), declara um impasse técnico sobre esse ponto específico e avança obrigatoriamente para um argumento completamente novo.
+
 DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
 1. FOCO TEMÁTICO RIGOROSO E PROIBIÇÃO DE DESVIO PARA IA:
    O debate atual é ESTRITAMENTE e EXCLUSIVAMENTE sobre o tema proposto: "${topic}".
@@ -206,6 +210,10 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
 - Veredito Condicional: Conclui em formato condicional ("A tese X mantém-se superior, mas apenas se os requisitos Y e Z forem estritamente garantidos").`;
   }
 
+  const antiLoopTurnReminder = `CLÁUSULAS DE BLOQUEIO ANTI-LOOP:
+- Regra de Novidade Absoluta: Antes de gerares a tua resposta, analisa o histórico da conversa. É expressamente proibido repetir uma premissa, argumento ou exemplo já utilizado por ti ou pelo teu oponente. Cada intervenção deve introduzir um novo dado empírico.
+- Mecanismo de Desistência (Impasse Técnico): Se o teu oponente refutar o teu argumento e não houver consenso após uma troca direta (uma réplica e uma tréplica), declara um impasse técnico sobre esse ponto específico e avança obrigatoriamente para um argumento completamente novo.`;
+
   const promptMessages = [
     { role: 'system', content: systemInstructions },
     ...messages.slice(-8).map(msg => ({
@@ -215,7 +223,7 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
     })),
     {
       role: 'user',
-      content: `É a tua vez de falar na mesa, ${agent.name}. O debate é rigorosamente sobre "${topic}". ${stage ? `Estamos na etapa "${stage.name}" (Diretriz: ${stage.instruction}). ` : ''}\n${activePhasePrompt}\nOuve o que o último orador acabou de dizer e responde de forma viva e afiada em 1 ou 2 parágrafos curtos, cumprindo rigorosamente a diretriz da fase e da etapa ativa. Se avaliares que não percebes suficientemente do assunto técnico em debate por ser fora da tua área de especialidade (${agent.roleTitle}), deves retirar-te da mesa incluindo a tag [RETIRO_ME: motivo]. ${stage?.name === 'Síntese' ? 'Apresenta a síntese ou declara a conclusão dialética da mesa com a tag [CONCLUSAO_ATINGIDA: Sintese|Consenso|Aporia] e veredito condicional.' : 'Avalia se o debate ainda deve avançar ou se já é hora de declarar conclusão.'} Não desvies o assunto para inteligência artificial se o tema for outro. Nunca escrevas o teu próprio nome no início.`,
+      content: `É a tua vez de falar na mesa, ${agent.name}. O debate é rigorosamente sobre "${topic}". ${stage ? `Estamos na etapa "${stage.name}" (Diretriz: ${stage.instruction}). ` : ''}\n${activePhasePrompt}\n${antiLoopTurnReminder}\nOuve o que o último orador acabou de dizer e responde de forma viva e afiada em 1 ou 2 parágrafos curtos, cumprindo rigorosamente a diretriz da fase e da etapa ativa. Se avaliares que não percebes suficientemente do assunto técnico em debate por ser fora da tua área de especialidade (${agent.roleTitle}), deves retirar-te da mesa incluindo a tag [RETIRO_ME: motivo]. ${stage?.name === 'Síntese' ? 'Apresenta a síntese ou declara a conclusão dialética da mesa com a tag [CONCLUSAO_ATINGIDA: Sintese|Consenso|Aporia] e veredito condicional.' : 'Avalia se o debate ainda deve avançar ou se já é hora de declarar conclusão.'} Não desvies o assunto para inteligência artificial se o tema for outro. Nunca escrevas o teu próprio nome no início.`,
     },
   ];
 
@@ -234,7 +242,9 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
         body: JSON.stringify({
           model,
           messages: promptMessages,
-          temperature: 0.85,
+          temperature: 0.75,
+          presence_penalty: 0.45,
+          frequency_penalty: 0.35,
           max_tokens: 300,
         }),
       });
