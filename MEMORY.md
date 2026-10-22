@@ -2,7 +2,7 @@
 
 ## 📌 Contexto Atual do Projeto
 - **Nome:** IA Brain Storming
-- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.15.1
+- **Objetivo:** Plataforma web interativa de diálogo, debate e confronto dialético entre agentes de Inteligência Artificial para analisar temas complexos, teorias, dilemas éticos, problemas e - **Versão:** v0.15.2
 - **Data da Última Atualização:** 2026-10-22
 - **Nível de Risco:** 1 (Lazer / Exploração criativa)
 - **Ritmo:** Desenvolvimento sólido (arquitetura robusta e modular)
@@ -57,10 +57,12 @@
 - **[2026-10-22] ADR-025:** Síntese Executiva 100% Gratuita (:free) no OpenRouter: Eliminação do modelo comercial pago `google/gemini-2.0-flash-001` em `src/app/api/debate/synthesize/route.ts` e substituição por cascata de contingência com modelos gratuitos (`google/gemini-2.0-flash-exp:free`, `meta-llama/llama-3.3-70b-instruct:free`, `qwen/qwen-2.5-72b-instruct:free`, `mistralai/mistral-small-24b-instruct-2501:free`). Implementação de higienização de fences de código JSON markdown e fallback automático e transparente para síntese local dinâmica caso todos os modelos estejam em sobrecarga temporária.
 - **[2026-10-22] ADR-026:** Memória Cognitiva Individual e Persistente dos Especialistas (The Five): Expansão da arquitetura de memória cognitiva em três pilares integrados: (1) Auto-registo de memórias no desfecho de cada debate para todos os especialistas participantes; (2) Sincronização e persistência na nuvem via Appwrite Cloud (`AppwriteDatabaseService.saveAgentMemories` e `getAgentMemories`) em arquitetura híbrida Local-First; (3) Enriquecimento da estrutura com categorias canónicas de Linhas Vermelhas Éticas (`ethical_red_lines`) e Dúvidas Intelectuais (`intellectual_doubts`), além de atributos contextuais (`emotionalImpact`, `relatedColleague`, `topicContext`). Atualização da barra de filtros em `AgentRoster.tsx` e reforço das diretrizes de respeito deontológico nos prompts OpenRouter.
 - **[2026-10-22] ADR-027:** Motor Dialético Dinâmico Multidomínio & Transparência Visual: Substituição integral das réplicas simuladas estáticas por motor semântico dinâmico (`detectThematicDomain` e `DOMAIN_DISCOURSE`) cobrindo 9 domínios canónicos e tópicos personalizados, eliminando repetições de temas iniciais. Interpelação direta com escuta ativa ao orador precedente, incorporação das linhas vermelhas éticas e dúvidas intelectuais dos pensadores, reordenação de modelos gratuitos de contingência (`meta-llama/llama-3.3-70b-instruct:free`) e exibição de distintivo visual (`⚙️ Motor Dialético Local` vs `⚡ IA Remota: [modelo]`) em `DebateTimeline.tsx`.
+- **[2026-10-22] ADR-028:** Eliminação Total de Repetições no Mesmo Debate (Motor Dialético Local): Fim do seletor de módulo estático (`turnsCount % 2`) e introdução do `DOMAIN_DISCOURSE_BANK` com mais de 250 argumentos progressivos por etapa canónica, guarda anti-repetição de histórico (`isAlreadySpoken`), escuta ativa com reflexão semântica das palavras do interlocutor e gerador procedimental combinatório para debates longos (15+ turnos), garantindo que nenhuma fala substancial é repetida dentro da mesma sessão.
 
 ---
 
-## ✅ O Que Já Funciona (v0.15.0)
+## ✅ O Que Já Funciona (v0.15.2)
+- [x] **Independência Temática e Zero Repetições no Mesmo Debate (ADR-027 e ADR-028):** Motor dialético dinâmico sem clichés iniciais fixos, banco de 250+ argumentos em 10 domínios, de-duplicação estrita de histórico e gerador procedimental anti-repetição.
 - [x] **Memória Individual e Persistente dos Especialistas (ADR-026):** Auto-registo pós-debate, sincronização híbrida com Appwrite Cloud, categorias de Linhas Vermelhas Éticas e Dúvidas Intelectuais, atributos contextuais e barra de filtros no painel.
 - [x] **Síntese Executiva 100% Gratuita no OpenRouter (ADR-025):** Eliminação de custos de API na síntese com suporte a cascata de modelos `:free` e higienização robusta de JSON.
 - [x] **Memória Estruturada Canónica (Fase E):** Separação cognitiva em 6 categorias (`confirmed_facts`, `explicit_preferences`, `decisions`, `open_hypotheses`, `lessons_learned`, `conversation_summaries`) com persistência, injeção nos prompts de IA e gestão CRUD visual no modal dos agentes.

@@ -2,6 +2,16 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.15.2] - 2026-10-22
+
+### Corrigido / Alterado
+- **Eliminação Total de Repetições no Mesmo Debate (Motor Dialético Local):**
+  - **Fim do Ciclo de Módulo Rígido:** Substituído o seletor cíclico `turnsCount % 2` que repetia as falas a cada 2 turnos por um banco progressivo multi-estágio (`DOMAIN_DISCOURSE_BANK`) com mais de 250 argumentos únicos (mínimo de 6 teses progressivas por pensador em cada um dos 10 domínios).
+  - **Guarda Anti-Repetição no Histórico (`isAlreadySpoken`):** O motor valida todas as frases candidatas contra o histórico completo do debate em curso, garantindo matematicamente que nenhuma fala substancial é repetida pelo mesmo pensador ou na mesma sala.
+  - **Escuta Ativa com Reflexão Semântica:** O orador analisa as palavras reais proferidas pelo interlocutor anterior (ex.: dados empíricos, custos humanos, aceleração técnica ou pressupostos lógicos) e formula o prefácio conversacional em resposta direta a esse conceito.
+  - **Gerador Procedimental Dialético:** Para debates longos (15 a 50+ intervenções), um gerador combinatório sintetiza novas teses entrelaçando a psicologia da personagem, a tensão do tema e um desafio epistemológico ao último orador, sem nunca reciclar textos passados.
+- **Validação Automatizada:** Novo script de testes em `scripts/test-no-in-debate-repetition.mjs` que comprovou 0 repetições ao longo de 15 turnos consecutivos.
+
 ## [0.15.1] - 2026-10-22
 
 ### Corrigido / Alterado
