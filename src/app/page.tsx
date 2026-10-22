@@ -18,6 +18,8 @@ export default function HomePage() {
     sessionId,
     agents,
     selectedAgentIds,
+    withdrawnAgentIds,
+    reinviteAgent,
     toggleAgent,
     topic,
     setTopic,
@@ -126,8 +128,10 @@ export default function HomePage() {
           <AgentRoster
             agents={agents}
             selectedIds={selectedAgentIds}
+            withdrawnAgentIds={withdrawnAgentIds}
             activeSpeakerId={activeSpeakerId}
             onToggleAgent={toggleAgent}
+            onReinviteAgent={reinviteAgent}
             onAddAgentLearning={addAgentLearning}
             onAddStructuredMemory={addStructuredMemoryEntry}
             onDeleteStructuredMemory={deleteStructuredMemoryEntry}

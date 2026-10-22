@@ -8,8 +8,10 @@ import { AddSpecialistModal } from './AddSpecialistModal';
 interface AgentRosterProps {
   agents: Agent[];
   selectedIds: string[];
+  withdrawnAgentIds?: string[];
   activeSpeakerId: string | null;
   onToggleAgent: (id: string) => void;
+  onReinviteAgent?: (id: string) => void;
   isDebating: boolean;
   onAddAgentLearning?: (agentId: string, insight: string) => void;
   onAddStructuredMemory?: (agentId: string, item: Omit<StructuredMemoryItem, 'id' | 'timestamp'>) => void;
@@ -21,8 +23,10 @@ interface AgentRosterProps {
 export const AgentRoster: React.FC<AgentRosterProps> = ({
   agents,
   selectedIds,
+  withdrawnAgentIds = [],
   activeSpeakerId,
   onToggleAgent,
+  onReinviteAgent,
   isDebating,
   onAddAgentLearning,
   onAddStructuredMemory,
@@ -115,17 +119,26 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
         <div className="md:hidden flex overflow-x-auto p-2 gap-2 scrollbar-none snap-x border-b border-slate-800/60 bg-slate-950/60 flex-shrink-0">
           {agents.map(agent => {
             const isSelected = selectedIds.includes(agent.id);
+            const isWithdrawn = withdrawnAgentIds.includes(agent.id);
             const isSpeaking = activeSpeakerId === agent.id;
             const hasImage = Boolean(agent.image && !failedImages[agent.id]);
 
             return (
               <button
                 key={agent.id}
-                onClick={() => onToggleAgent(agent.id)}
-                disabled={isDebating}
+                onClick={() => {
+                  if (isWithdrawn && onReinviteAgent) {
+                    onReinviteAgent(agent.id);
+                  } else {
+                    onToggleAgent(agent.id);
+                  }
+                }}
+                disabled={isDebating && !isWithdrawn}
                 className={`group relative flex items-center gap-2 p-1.5 rounded-xl border text-left transition-all duration-300 flex-shrink-0 w-[170px] snap-start ${
                   isSpeaking
                     ? 'bg-indigo-950/50 border-indigo-500 ring-2 ring-indigo-500/50 shadow-lg shadow-indigo-500/25 scale-[1.02]'
+                    : isWithdrawn
+                    ? 'bg-amber-950/20 border-amber-800/50 opacity-75'
                     : isSelected
                     ? 'bg-slate-900/80 border-slate-700/70 hover:border-slate-600 hover:bg-slate-900'
                     : 'bg-slate-950/40 border-slate-800/40 opacity-40 hover:opacity-75'
@@ -153,6 +166,11 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] font-semibold text-slate-200 truncate">{agent.name}</p>
                   <p className="text-[9px] text-slate-400 truncate">{agent.roleTitle}</p>
+                  {isWithdrawn && (
+                    <span className="inline-block text-[8px] font-semibold text-amber-300 bg-amber-950/80 px-1 py-0.2 rounded border border-amber-700/50 mt-0.5">
+                      🚪 Retirou-se
+                    </span>
+                  )}
                 </div>
               </button>
             );
@@ -173,17 +191,26 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
         <div className="hidden md:flex flex-col flex-1 overflow-y-auto p-3 space-y-2.5 min-h-0 scrollbar-thin">
           {agents.map(agent => {
             const isSelected = selectedIds.includes(agent.id);
+            const isWithdrawn = withdrawnAgentIds.includes(agent.id);
             const isSpeaking = activeSpeakerId === agent.id;
             const hasImage = Boolean(agent.image && !failedImages[agent.id]);
 
             return (
               <button
                 key={agent.id}
-                onClick={() => onToggleAgent(agent.id)}
-                disabled={isDebating}
+                onClick={() => {
+                  if (isWithdrawn && onReinviteAgent) {
+                    onReinviteAgent(agent.id);
+                  } else {
+                    onToggleAgent(agent.id);
+                  }
+                }}
+                disabled={isDebating && !isWithdrawn}
                 className={`group relative flex items-start gap-3 p-2.5 rounded-xl border text-left transition-all duration-300 w-full ${
                   isSpeaking
                     ? 'bg-gradient-to-r from-indigo-950/80 to-slate-900/90 border-indigo-500 ring-2 ring-indigo-500/50 shadow-lg shadow-indigo-500/25 scale-[1.01]'
+                    : isWithdrawn
+                    ? 'bg-amber-950/20 border-amber-800/50 opacity-75 hover:opacity-100 shadow-sm'
                     : isSelected
                     ? 'bg-slate-900/80 border-slate-700/80 hover:border-slate-600 hover:bg-slate-900 shadow-sm'
                     : 'bg-slate-950/40 border-slate-800/40 opacity-40 hover:opacity-75'
@@ -221,19 +248,33 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({
                     {/* Checkbox de Ativação / Presença */}
                     <span
                       className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
-                        isSelected
+                        isWithdrawn
+                          ? 'bg-amber-900/60 border-amber-600/70 text-amber-300 shadow-xs'
+                          : isSelected
                           ? 'bg-indigo-600 border-indigo-500 text-white shadow-xs'
                           : 'border-slate-700 bg-slate-950/60 text-transparent'
                       }`}
-                      title={isSelected ? 'Ativo no debate' : 'Desativado'}
+                      title={
+                        isWithdrawn
+                          ? 'Retirou-se da mesa por falta de competência técnica. Clica para reconvidar.'
+                          : isSelected
+                          ? 'Ativo no debate'
+                          : 'Desativado'
+                      }
                     >
-                      <Check className="w-3 h-3" />
+                      {isWithdrawn ? <span className="text-[10px]">🚪</span> : <Check className="w-3 h-3" />}
                     </span>
                   </div>
 
                   <p className="text-[10px] text-slate-400 truncate mt-0.5 font-medium">
                     {agent.roleTitle}
                   </p>
+
+                  {isWithdrawn && (
+                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-600/50 flex items-center gap-1 w-fit mt-1 shadow-xs">
+                      🚪 Retirou-se da Mesa (Fora da Especialidade)
+                    </span>
+                  )}
 
                   {/* Badges de Temperamento e Memórias */}
                   <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">

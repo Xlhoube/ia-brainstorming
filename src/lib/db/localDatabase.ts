@@ -6,6 +6,7 @@ export interface SavedDebateSession {
   topicDescription: string;
   messages: DebateMessage[];
   selectedAgentIds: string[];
+  withdrawnAgentIds?: string[];
   currentRound: number;
   currentStageIndex?: number;
   currentStageName?: string;

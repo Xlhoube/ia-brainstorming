@@ -2,6 +2,19 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.18.0] - 2026-10-22
+
+### Adicionado / Cognitivo & Dialético
+- **Protocolo de Retirada por Incompetência Temática (Humildade Epistemológica dos Especialistas):**
+  - **Decisão Autónoma de Retirada (`openrouter.ts` & `the_five_biblia_personagens_v1.json`):** Adicionada a regra epistemológica canónica que determina que, se um pensador ou especialista avaliar que não domina ou não tem competência sobre a matéria técnica em apreço, deve retirar-se da mesa com a tag `[RETIRO_ME: motivo]`, abstendo-se de palpites superficiais e deixando a palavra a quem domina a matéria.
+  - **Motor de Avaliação Temática (`evaluateAgentCompetence`):** Mapeamento semântico de incompatibilidades estritas (ex.: física teórica relativista ou astrofísica cósmica pura para sociólogos/economistas; cirurgia médica ou farmacologia estrita para engenheiros de sistemas puros; engenharia financeira e mercados de derivados para cientistas naturais sem componente de dados/economia).
+  - **Exclusão Ativa de Rondas Subsequentes (`useDebate.ts`):** Rastreio de especialistas retirados (`withdrawnAgentIds`), excluindo-os automaticamente da pool de oradores ativos (`activeAgents`) nas etapas e rondas seguintes do debate ativo.
+  - **Função de Re-convite (`reinviteAgent`):** Possibilidade de o utilizador humano re-convidar manualmente para a mesa redonda qualquer especialista que se tenha retirado, caso pretenda a sua perspetiva mesmo fora do domínio primário.
+  - **Destaque Visual na Linha do Tempo (`DebateTimeline.tsx`):** Mensagem de despedida do especialista com moldura âmbar e distintivo de prestígio: `🚪 Retirou-se da Mesa · Humildade Epistemológica` com indicação do motivo técnico apresentado.
+  - **Estado Visual no Painel de Especialistas (`AgentRoster.tsx`):** Indicador âmbar `🚪 Retirou-se da Mesa (Fora da Especialidade)` tanto na lista vertical de desktop como na faixa deslizante de telemóvel, com ícone interativo para reconvidar.
+  - **Persistência de Sessão (`LocalDatabase.ts`):** `SavedDebateSession` preserva os especialistas retirados entre recarregamentos e sessões guardadas.
+  - **Bateria de Testes Automatizados:** Novo teste de validação e integridade em `scripts/test-specialist-withdrawal.mjs` aprovado com 100% de sucesso.
+
 ## [0.17.2] - 2026-10-22
 
 ### Otimizado / Design de UI

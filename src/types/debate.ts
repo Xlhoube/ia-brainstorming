@@ -135,6 +135,8 @@ export interface DebateMessage {
   replyToAgentName?: string;
   keyPoints?: string[];
   dialecticalConclusion?: DialecticalOutcome;
+  isWithdrawal?: boolean;
+  withdrawalReason?: string;
   isSimulated?: boolean;
   modelUsed?: string;
 }
@@ -169,6 +171,7 @@ export interface DebateState {
   activeSpeakerId: string | null;
   speedDelayMs: number;
   selectedAgentIds: string[];
+  withdrawnAgentIds?: string[];
   messages: DebateMessage[];
   tone: LanguageTone;
   conclusionSummary?: string;

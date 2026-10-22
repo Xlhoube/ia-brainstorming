@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateAgentResponse, extractDialecticalConclusion } from '@/lib/ai/openrouter';
+import { generateAgentResponse, extractDialecticalConclusion, extractAgentWithdrawal } from '@/lib/ai/openrouter';
 import { Agent, DebateMessage, LanguageTone } from '@/types/debate';
 
 export async function POST(req: NextRequest) {
@@ -42,7 +42,8 @@ export async function POST(req: NextRequest) {
     const isSimulated = typeof result === 'object' ? result.isSimulated : false;
     const modelUsed = typeof result === 'object' ? result.modelUsed : undefined;
 
-    const { cleanText, dialecticalConclusion } = extractDialecticalConclusion(textToClean);
+    const { cleanText: textAfterWithdrawal, isWithdrawal, withdrawalReason } = extractAgentWithdrawal(textToClean);
+    const { cleanText, dialecticalConclusion } = extractDialecticalConclusion(textAfterWithdrawal);
 
     const newMessage: DebateMessage = {
       id: 'msg-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
@@ -58,6 +59,8 @@ export async function POST(req: NextRequest) {
       stageIndex: typeof stageIndex === 'number' ? stageIndex : undefined,
       timestamp: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
       dialecticalConclusion,
+      isWithdrawal,
+      withdrawalReason,
       isSimulated,
       modelUsed,
     };
@@ -66,6 +69,8 @@ export async function POST(req: NextRequest) {
       success: true,
       message: newMessage,
       dialecticalConclusion,
+      isWithdrawal,
+      withdrawalReason,
       isSimulated,
       modelUsed,
     });

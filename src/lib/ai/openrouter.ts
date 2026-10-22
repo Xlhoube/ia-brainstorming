@@ -148,7 +148,13 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
 5. PROIBIÇÃO ABSOLUTA DE CLICHÉS: Proibido dizer "Relativamente ao tópico", "Gostaria de acrescentar", "Concordo em parte com X". Entra diretamente na resposta.
 6. LINGUAGEM EM PORTUGUÊS DE PORTUGAL (PT-PT): Estritamente sem termos ou gerúndios brasileiros.
 7. PROIBIÇÃO ABSOLUTA DE IDENTIFICAÇÃO PESSOAL: NUNCA comeces a tua resposta com o teu próprio nome ou cargo (É ESTRITAMENTE PROIBIDO escrever "[${agent.name} - ${agent.roleTitle}]:" ou "${agent.name}:"). O teu cartão e foto já mostram quem está a falar. Começa logo na primeira palavra a falar com o teu colega (exemplo: "Kaelen, repara...", ou "Helena, os teus dados...").
-8. DIALÉTICA LIVRE E MATURIDADE DE CONCLUSÃO:
+8. HUMILDADE EPISTEMOLÓGICA E RETIRADA DA MESA:
+   Se avaliares honestamente que o tema central ("${topic}") está inteiramente fora da tua área de competência, especialidade (${agent.roleTitle}) ou formação, e sentires que não percebes suficientemente do assunto em causa para dar um contributo rigoroso e fundamentado, NÃO finjas saber nem inventes palpites superficiais.
+   Nesse caso, tens o direito e o dever de te retirar da mesa!
+   Para te retirares, inclui no teu texto a tag:
+   [RETIRO_ME: <razão curta da falta de especialidade técnica neste assunto>]
+   seguida de uma declaração cordial, lúcida e humilde aos teus pares (1 a 2 parágrafos concisos) explicando com honestidade que este assunto excede a tua especialidade e que te retiras da discussão para dar espaço a quem realmente domina a matéria.
+9. DIALÉTICA LIVRE E MATURIDADE DE CONCLUSÃO:
    Este debate NÃO tem limites fixos de turnos ou rondas. Vocês, especialistas, têm autonomia total para debater durante o tempo que for necessário, explorando tensões, paradoxos e desafios reais.
    Contudo, se após várias intervenções (pelo menos 6 a 8 falas no histórico global) sentires que a discussão atingiu a sua maturidade e alcançou:
    - Um Consenso ou Síntese fecunda entre as posições divergentes; OU
@@ -167,7 +173,7 @@ DIRETRIZES FUNDAMENTAIS PARA UM DIÁLOGO ORGÂNICO E PENSADO:
     })),
     {
       role: 'user',
-      content: `É a tua vez de falar na mesa, ${agent.name}. O debate é rigorosamente sobre "${topic}". ${stage ? `Estamos na etapa "${stage.name}" (Diretriz: ${stage.instruction}). ` : ''}Ouve o que o último orador acabou de dizer e responde diretamente a ele de forma viva e afiada em 1 ou 2 parágrafos curtos, cumprindo a diretriz desta etapa. ${stage?.name === 'Síntese' ? 'Apresenta a síntese ou declara a conclusão dialética da mesa com a tag [CONCLUSAO_ATINGIDA: Sintese|Consenso|Aporia].' : 'Avalia se o debate ainda deve avançar ou se já é hora de declarar conclusão.'} Não desvies o assunto para inteligência artificial se o tema for outro. Nunca escrevas o teu próprio nome no início.`,
+      content: `É a tua vez de falar na mesa, ${agent.name}. O debate é rigorosamente sobre "${topic}". ${stage ? `Estamos na etapa "${stage.name}" (Diretriz: ${stage.instruction}). ` : ''}Ouve o que o último orador acabou de dizer e responde diretamente a ele de forma viva e afiada em 1 ou 2 parágrafos curtos, cumprindo a diretriz desta etapa. Se avaliares que não percebes suficientemente do assunto técnico em debate por ser fora da tua área de especialidade (${agent.roleTitle}), deves retirar-te da mesa incluindo a tag [RETIRO_ME: motivo]. ${stage?.name === 'Síntese' ? 'Apresenta a síntese ou declara a conclusão dialética da mesa com a tag [CONCLUSAO_ATINGIDA: Sintese|Consenso|Aporia].' : 'Avalia se o debate ainda deve avançar ou se já é hora de declarar conclusão.'} Não desvies o assunto para inteligência artificial se o tema for outro. Nunca escrevas o teu próprio nome no início.`,
     },
   ];
 
@@ -745,6 +751,12 @@ export function generateOrganicSimulatedResponse(
     return historyTextsLower.some(h => h.includes(signature));
   };
 
+  // Verificação de competência temática: Se o especialista reconhece que não percebe do assunto, retira-se da mesa
+  const competence = evaluateAgentCompetence(agent, topic, topicDescription);
+  if (!competence.isCompetent) {
+    return `[RETIRO_ME: ${competence.reason}] ${competence.withdrawalStatement || `Reconheço que a matéria excede a minha área de especialidade em ${agent.roleTitle}. Retiro-me da mesa redonda.`}`;
+  }
+
   // 1. Intervenção do Utilizador Humano
   if (recentHumanMsg) {
     const raw = recentHumanMsg.content.toLowerCase();
@@ -1015,6 +1027,101 @@ export function extractDialecticalConclusion(text: string): {
 }
 
 /**
+ * Extrai a tag de retirada de especialista ([RETIRO_ME: ...])
+ * e limpa o texto para apresentação fluida.
+ */
+export function extractAgentWithdrawal(text: string): {
+  cleanText: string;
+  isWithdrawal: boolean;
+  withdrawalReason?: string;
+} {
+  if (!text) return { cleanText: '', isWithdrawal: false };
+
+  const match = text.match(/\[RETIRO_ME:\s*([^\]]+)\]/i);
+  if (match) {
+    const withdrawalReason = match[1].trim();
+    const cleanText = text.replace(/\[RETIRO_ME:\s*[^\]]+\]\s*/gi, '').trim();
+    return {
+      cleanText,
+      isWithdrawal: true,
+      withdrawalReason,
+    };
+  }
+
+  return { cleanText: text, isWithdrawal: false };
+}
+
+/**
+ * Avalia se o especialista tem competência temática legítima para debater o assunto em causa.
+ * Se considerar com honestidade que não domina a matéria técnica, retira-se da mesa redonda.
+ */
+export interface CompetenceEvaluation {
+  isCompetent: boolean;
+  reason?: string;
+  withdrawalStatement?: string;
+}
+
+export function evaluateAgentCompetence(
+  agent: Agent,
+  topic: string,
+  description?: string
+): CompetenceEvaluation {
+  const combined = `${topic} ${description || ''}`.toLowerCase();
+  const role = (agent.category || '').toLowerCase();
+  const title = (agent.roleTitle || '').toLowerCase();
+
+  // Sophia Veris é a moderadora/orquestradora da mesa redonda, nunca se retira por incompetência técnica
+  if (agent.id === 'sophia-veris' || role === 'moderador') {
+    return { isCompetent: true };
+  }
+
+  // 1. Astrofísica / Cosmologia Teórica Estrita (sem dimensão social ou de trabalho)
+  const isAstrofisicaPura = /buraco negro|radia[çc][aã]o hawking|ondas gravitaciona|horizonte de eventos|cosmologia relativ|singularidade gravit/i.test(combined);
+  if (isAstrofisicaPura) {
+    if (role === 'humanista' || role === 'economista' || title.includes('soci[oó]log') || title.includes('economi')) {
+      return {
+        isCompetent: false,
+        reason: `Astrofísica teórica e física relativista ultrapassam a especialidade de ${agent.roleTitle}`,
+        withdrawalStatement: `Colegas, ouvi com atenção o enquadramento deste debate sobre "${topic}". Com rigor deontológico e humildade intelectual, reconheço que a física teórica de singularidades cósmicas excede em absoluto a minha formação em ${agent.roleTitle}. Para não emitir palpites superficiais nem desvirtuar o debate técnico, retiro-me da mesa e deixo a reflexão aos colegas da área científica.`
+      };
+    }
+  }
+
+  // 2. Cirurgia Clínica / Medicina Neonatal / Farmacocinética Estrita
+  const isMedicinaEstrita = /cirurgia|hemodin[aâ]mica|pediatr|farmacocin[eé]tica|dosagem cl[íi]nica|oncologia molecular/i.test(combined);
+  if (isMedicinaEstrita) {
+    if (role === 'tecnologo' && !title.includes('m[eé]dic') && !title.includes('bio')) {
+      return {
+        isCompetent: false,
+        reason: `Medicina clínica e procedimentos cirúrgicos estão fora da especialidade de ${agent.roleTitle}`,
+        withdrawalStatement: `Caros colegas, perante o tema "${topic}", a honestidade intelectual exige que assuma os meus limites. Como especialista em ${agent.roleTitle}, não possuo competência clínica ou farmacológica para validar protocolos médicos complexos. Retiro-me da mesa para que o Conselho não se apoie em especulações não habilitadas.`
+      };
+    }
+    if ((role === 'economista' || role === 'filosofo') && !/ética|dilema|custo|aloca[çc][aã]o|justi[çc]a|moral/i.test(combined)) {
+      return {
+        isCompetent: false,
+        reason: `Procedimentos clínicos estritos sem componente bioética ou económica declarada`,
+        withdrawalStatement: `A honestidade deontológica obriga-me a admitir que não domino a técnica clínica de ${topic}. Não sendo a minha especialidade ${agent.roleTitle}, retiro-me da mesa e dou espaço aos especialistas que possuem conhecimento direto da matéria.`
+      };
+    }
+  }
+
+  // 3. Mercados Financeiros / Derivados / Política Monetária Estrita
+  const isFinancasEstritas = /mercado de derivados|swap|taxa interbanc[aá]ria|hedge fund|arbitragem cambial|liquidez banc[aá]ria/i.test(combined);
+  if (isFinancasEstritas) {
+    if ((role === 'cientista' || role === 'humanista') && !title.includes('econom') && !title.includes('dados')) {
+      return {
+        isCompetent: false,
+        reason: `Instrumentos de engenharia financeira e derivados bancários fora da área de ${agent.roleTitle}`,
+        withdrawalStatement: `Com franqueza intelectual, admito que a engenharia financeira e a dinâmica de derivados bancários estão fora da minha área de conhecimento em ${agent.roleTitle}. Para manter a integridade da discussão, retiro-me da mesa neste tema.`
+      };
+    }
+  }
+
+  return { isCompetent: true };
+}
+
+/**
  * Higieniza o texto gerado por modelos LLM, removendo prefixos de identificação teatral
  * como "[Dra. Helena Rostova - A Cientista Empírica]:" ou "Dr. Marcus Vance:"
  */
@@ -1022,8 +1129,9 @@ export function cleanAgentResponsePrefix(text: string, agentName?: string): stri
   if (!text) return '';
   let cleaned = text.trim();
 
-  // Remove eventuais tags de conclusão no início
+  // Remove eventuais tags de conclusão ou de retirada
   cleaned = cleaned.replace(/\[CONCLUSAO_ATINGIDA:\s*(?:consenso|aporia|s[íi]ntese)\]:?\s*/gi, '');
+  cleaned = cleaned.replace(/\[RETIRO_ME:\s*[^\]]+\]:?\s*/gi, '');
 
   // Remove prefixos entre colchetes do tipo [Nome - Cargo]: ou [Nome]:
   cleaned = cleaned.replace(/^\[[^\]\n]+\]:\s*/, '');
@@ -1040,3 +1148,4 @@ export function cleanAgentResponsePrefix(text: string, agentName?: string): stri
 
   return cleaned.trim();
 }
+

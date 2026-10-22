@@ -23,6 +23,7 @@ export function useDebate() {
     'kaelen-voss',
     'sophia-veris',
   ]);
+  const [withdrawnAgentIds, setWithdrawnAgentIds] = useState<string[]>([]);
 
   const [topic, setTopic] = useState<string>('A consciência humana pode ser transferida ou replicada por máquinas?');
   const [topicDescription, setTopicDescription] = useState<string>(
@@ -206,6 +207,7 @@ export function useDebate() {
         topicDescription,
         messages,
         selectedAgentIds,
+        withdrawnAgentIds,
         currentRound,
         currentStageIndex,
         currentStageName: currentStage.name,
@@ -215,7 +217,7 @@ export function useDebate() {
         updatedAt: Date.now(),
       });
     }
-  }, [messages, synthesisResult, sessionId, topic, topicDescription, selectedAgentIds, currentRound, currentStageIndex, currentStage.name, maxRounds]);
+  }, [messages, synthesisResult, sessionId, topic, topicDescription, selectedAgentIds, withdrawnAgentIds, currentRound, currentStageIndex, currentStage.name, maxRounds]);
 
   const setTone = (newTone: LanguageTone) => {
     setToneState(newTone);
@@ -277,7 +279,7 @@ export function useDebate() {
     setIsWaitingForNextTurn(false);
     speechService.stop();
 
-    const activeAgents = agents.filter(a => selectedAgentIds.includes(a.id));
+    const activeAgents = agents.filter(a => selectedAgentIds.includes(a.id) && !withdrawnAgentIds.includes(a.id));
     if (activeAgents.length === 0) return;
 
     const moderator = activeAgents.find(a => a.id === 'sophia-veris' || a.category === 'moderador');
@@ -337,6 +339,11 @@ export function useDebate() {
         // Se estiver na etapa 4 (Síntese) e nenhum desfecho veio indicado no texto, atribuir desfecho de síntese
         if (stageIdx === 4 && !data.message.dialecticalConclusion) {
           data.message.dialecticalConclusion = 'sintese';
+        }
+
+        // Se o especialista declarou retirada por falta de competência técnica no assunto
+        if (data.message.isWithdrawal || data.isWithdrawal) {
+          setWithdrawnAgentIds(prev => Array.from(new Set([...prev, currentAgent.id])));
         }
 
         setMessages(prev => [...prev, data.message]);
@@ -490,7 +497,7 @@ export function useDebate() {
     } finally {
       setIsGenerating(false);
     }
-  }, [agents, selectedAgentIds, isGenerating, topic, topicDescription, messages, apiKey, tone]);
+  }, [agents, selectedAgentIds, withdrawnAgentIds, isGenerating, topic, topicDescription, messages, apiKey, tone]);
 
   const addAgentLearning = (agentId: string, insight: string) => {
     if (!insight.trim()) return;
@@ -644,12 +651,18 @@ export function useDebate() {
   };
 
 
+  const reinviteAgent = useCallback((agentId: string) => {
+    setWithdrawnAgentIds(prev => prev.filter(id => id !== agentId));
+    setSelectedAgentIds(prev => Array.from(new Set([...prev, agentId])));
+  }, []);
+
   const startDebate = (newTopic?: string, newDescription?: string) => {
     if (newTopic) setTopic(newTopic);
     if (newDescription) setTopicDescription(newDescription);
     const newId = 'session-' + Date.now();
     setSessionId(newId);
     setMessages([]);
+    setWithdrawnAgentIds([]);
     setCurrentRound(1);
     setCurrentStageIndex(0);
     currentStageIndexRef.current = 0;
@@ -688,6 +701,7 @@ export function useDebate() {
     setStatus('idle');
     setSessionId('session-' + Date.now());
     setMessages([]);
+    setWithdrawnAgentIds([]);
     setCurrentRound(1);
     setCurrentStageIndex(0);
     currentStageIndexRef.current = 0;
@@ -709,6 +723,7 @@ export function useDebate() {
     setTopicDescription(saved.topicDescription || '');
     setMessages(saved.messages || []);
     setSelectedAgentIds(saved.selectedAgentIds || selectedAgentIds);
+    setWithdrawnAgentIds(saved.withdrawnAgentIds || []);
     setCurrentRound(saved.currentRound || 1);
     setMaxRounds(saved.maxRounds || 4);
     const loadedStageIdx = saved.currentStageIndex ?? (saved.messages?.length ? (saved.messages[saved.messages.length - 1].stageIndex ?? 0) : 0);
@@ -752,7 +767,7 @@ export function useDebate() {
     speechService.stop();
 
     // Despoletar reação imediata e audível de um dos especialistas na sala
-    const activeAgents = agents.filter(a => selectedAgentIds.includes(a.id));
+    const activeAgents = agents.filter(a => selectedAgentIds.includes(a.id) && !withdrawnAgentIds.includes(a.id));
     if (activeAgents.length === 0) return;
 
     let respondingAgent = activeAgents[currentSpeakerIndexRef.current % activeAgents.length];
@@ -927,6 +942,8 @@ export function useDebate() {
     sessionId,
     agents,
     selectedAgentIds,
+    withdrawnAgentIds,
+    reinviteAgent,
     toggleAgent,
     topic,
     setTopic,

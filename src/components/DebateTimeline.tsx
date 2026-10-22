@@ -135,6 +135,8 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                   className={`group relative rounded-xl sm:rounded-2xl p-3.5 sm:p-5 transition-all duration-200 border ${
                     isHuman
                       ? 'bg-blue-950/30 border-blue-800/60 shadow-lg shadow-blue-500/5'
+                      : msg.isWithdrawal
+                      ? 'bg-gradient-to-b from-amber-950/30 to-slate-900/80 border-amber-800/50 shadow-md shadow-amber-950/20 backdrop-blur-sm'
                       : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700/80 shadow-md backdrop-blur-sm'
                   }`}
                 >
@@ -282,6 +284,21 @@ export const DebateTimeline: React.FC<DebateTimelineProps> = ({
                           ? 'Consenso Emergente Declarado pelo Orador'
                           : 'Aporia / Divergência Irreconciliável Declarada'}
                       </span>
+                    </div>
+                  )}
+
+                  {/* Distintivo de Retirada da Mesa por Falta de Competência no Assunto */}
+                  {msg.isWithdrawal && (
+                    <div className="mb-2.5 sm:mb-3 px-3 py-2 rounded-xl border border-amber-600/50 bg-amber-950/50 text-amber-200 text-[11px] sm:text-xs font-semibold flex items-center justify-between gap-2 shadow-md">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">🚪</span>
+                        <span>Retirou-se da Mesa · Humildade Epistemológica</span>
+                      </div>
+                      {msg.withdrawalReason && (
+                        <span className="text-[10px] font-normal text-amber-300/80 italic truncate max-w-[220px]" title={msg.withdrawalReason}>
+                          {msg.withdrawalReason}
+                        </span>
+                      )}
                     </div>
                   )}
 
