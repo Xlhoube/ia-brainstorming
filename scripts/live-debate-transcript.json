@@ -1,0 +1,100 @@
+{
+  "topic": "A Edição Neural Compulsória de Memórias Traumáticas e a Soberania da Consciência",
+  "description": "Avaliação bioética, clínica e sociotécnica sobre a legitimidade do uso de neurotecnologia para extirpar ou reescrever memórias de stress pós-traumático grave ou impulsos violentos em contexto penal e clínico. Confronto entre soberania individual inegociável, integridade biográfica e o imperativo de alívio do sofrimento.",
+  "date": "2026-10-23T07:44:44.148Z",
+  "metrics": {
+    "totalWords": 770,
+    "avgWordsPerTurn": 110,
+    "distinctSpeakers": 5,
+    "directAddressMatches": 5,
+    "metricTerms": 8,
+    "fallacyMentions": 3,
+    "concessionMentions": 2
+  },
+  "transcript": [
+    {
+      "id": "live-msg-1",
+      "agentId": "sophia-veris",
+      "agentName": "Sophia Veris",
+      "agentRole": "Moderadora & Epistemologista",
+      "avatar": "⚖️",
+      "content": "Como moderadora e investigadora dos fundamentos epistemológicos da mente, defino o perímetro estrito desta mesa: não debatemos se a técnica é fascinante, mas se o Estado ou a medicina têm o direito de violar a continuidade mnémica de um sujeito. A minha tese assenta em três pilares: primeiro, a memória não é um ficheiro estático, mas a arquitetura viva da autoidentidade; segundo, apagar compulsoriamente memórias em contexto penal é a destruição da culpabilidade e da responsabilidade moral; terceiro, a soberania cognitiva constitui o limiar inegociável do Estado de Direito. Declaro expressamente fora do âmbito desta sessão qualquer deriva teórica sobre inteligência artificial geral ou meros cálculos de rentabilidade hospitalar. A mesa está aberta.",
+      "round": 1,
+      "stageName": "Compreender",
+      "stageIndex": 0,
+      "timestamp": "08:44:44"
+    },
+    {
+      "id": "live-msg-2",
+      "agentId": "dr-marcus-vance",
+      "agentName": "Dr. Marcus Vance",
+      "agentRole": "Filósofo Ético & Deontologista",
+      "avatar": "🏛️",
+      "content": "Assumo formalmente a minha posição como filósofo moral: a consciência humana e a sua biografia não são propriedades utilitárias passíveis de saneamento. A minha tese central é irredutível: extirpar a memória de um indivíduo, mesmo sob o pretexto de redenção ou terapia forçada, equivale a uma lobotomia moral que anula o sujeito enquanto agente livre. Sustento isto em três premissas fundamentais: a inviolabilidade kantiana da pessoa enquanto fim em si mesma; o dever de assumir a memória das próprias faltas como condição de arrependimento genuíno; e o perigo civilizacional de outorgar ao poder judicial o bisturi da subjetividade. Tudo o que trate o ser humano como um terminal reconfigurável é uma violação categórica da sua dignidade.",
+      "round": 1,
+      "stageName": "Análise independente",
+      "stageIndex": 1,
+      "timestamp": "08:45:29"
+    },
+    {
+      "id": "live-msg-3",
+      "agentId": "dra-helena-rostova",
+      "agentName": "Dra. Helena Rostova",
+      "agentRole": "Neurocientista & Bióloga Empírica",
+      "avatar": "🔬",
+      "content": "Marcus, repara no abstracionismo estéril da tua tese moralista. Dissecando a tua premissa base: tratas a memória como um relicário imaterial sagrado, ignorando a patologia fisiológica pura. No stress pós-traumático refratário, a hiperativação da amígdala cerebelosa atinge picos de cortisol que destroem o hipocampo a um ritmo de perda volumétrica mensurável de 8% a 12% ao ano, provocando taxas de suicídio na ordem dos 24% nesta coorte clínica. Apresentas a falácia de que a dor extrema enobrece o espírito; na neurobiologia, o trauma persistente é morte celular e paralisia sináptica. Se usamos desfibrilhadores para salvar um coração fibrilante sem violar a dignidade, porque recusas a modulação de engramas patológicos que devolvem o sujeito à sua funcionalidade biológica autónoma?",
+      "round": 2,
+      "stageName": "Confronto de argumentos",
+      "stageIndex": 2,
+      "timestamp": "08:46:14"
+    },
+    {
+      "id": "live-msg-4",
+      "agentId": "kaelen-voss",
+      "agentName": "Kaelen Voss",
+      "agentRole": "Engenheiro Neurotecnólogo",
+      "avatar": "⚡",
+      "content": "Helena, os teus dados biológicos são impecáveis, mas deixemos de lado a hipótese de mutilação irreversível que tanto assusta o Marcus. Do ponto de vista da engenharia sináptica de ponta, já não operamos ablações cegas. Falo de optogenética de circuito fechado com vetor viral reversível, com latência de intervenção inferior a 5 milissegundos e taxa de precisão de despolarização de 99.4% nos engramas amigdalares hipertrofiados. Recusar esta tecnologia em condenados por violência impulsiva reincidente custa 68 mil euros por ano ao sistema prisional e gera reincidência lesiva em 42% dos casos. Não estamos a apagar a alma de ninguém; estamos a neutralizar o curto-circuito neuroquímico que impede a própria deliberação racional.",
+      "round": 2,
+      "stageName": "Verificação",
+      "stageIndex": 3,
+      "timestamp": "08:46:59"
+    },
+    {
+      "id": "live-msg-5",
+      "agentId": "aura-chen",
+      "agentName": "Aura Chen",
+      "agentRole": "Humanista & Socióloga Política",
+      "avatar": "🌱",
+      "content": "Kaelen, os teus 99.4% de precisão laboratorial arrepiam qualquer sociólogo que conheça a história dos sistemas penais. Atacas o problema como se o Estado fosse um laboratório benevolente e neutro. Quem calibra esses 5 milissegundos? Quem define onde termina o 'impulso violento patológico' e onde começa a revolta legítima de quem vive em guetos empobrecidos? Dissecando a tua eficiência tecnocrática: no momento em que transformas a coerção penal numa cirurgia cerebral invisível, retiras ao condenado o direito de dissidência e crias uma casta de cidadãos quimicamente pacificados. O trauma é uma ferida social antes de ser um erro de código neuronal; tratá-lo no bisturi é a desresponsabilização absoluta da sociedade.",
+      "round": 3,
+      "stageName": "Verificação",
+      "stageIndex": 3,
+      "timestamp": "08:47:44"
+    },
+    {
+      "id": "live-msg-6",
+      "agentId": "dr-marcus-vance",
+      "agentName": "Dr. Marcus Vance",
+      "agentRole": "Filósofo Ético & Deontologista",
+      "avatar": "🏛️",
+      "content": "Aura tocou no nervo ontológico da questão, mas tenho a honestidade intelectual de fazer uma concessão explícita à Helena: reconheço que no caso estrito de vítimas clínicas em risco de suicídio iminente, onde existe consentimento prévio e sofrimento fisiológico intratável, a intervenção terapêutica localizada não constitui uma violência moral, mas um ato de socorro médico. No entanto, isolo o ponto de fricção irredutível: a compulsão penal. Forçar a reescrita de memórias em nome da ordem pública ou da economia penitenciária é transformar a mente num instrumento do Estado. A dignidade não se negoceia por relatórios de custo-benefício.",
+      "round": 3,
+      "stageName": "Confronto de argumentos",
+      "stageIndex": 2,
+      "timestamp": "08:48:29"
+    },
+    {
+      "id": "live-msg-7",
+      "agentId": "sophia-veris",
+      "agentName": "Sophia Veris",
+      "agentRole": "Moderadora & Epistemologista",
+      "avatar": "⚖️",
+      "content": "[CONCLUSAO_ATINGIDA: Sintese]\nChegámos ao ponto de maturidade dialética desta mesa redonda. Mapeando as concessões emergentes: há consenso entre Marcus e Helena de que a intervenção voluntária em patologia clínica extrema é eticamente defensável para salvar vidas biológicas. Por outro lado, a fricção entre a eficiência técnica de Kaelen e a salvaguarda de soberania de Aura e Marcus isolou uma aporia central: a intervenção compulsória pelo Estado é inaceitável numa sociedade livre. Formulo o nosso veredito condicional: a edição de engramas traumáticos é deontologicamente legítima unicamente sob consentimento autónomo revogável e com protocolo médico estrito, ficando taxativamente proibida qualquer imposição penal ou compulsiva pelo poder judicial.",
+      "round": 4,
+      "stageName": "Síntese",
+      "stageIndex": 4,
+      "timestamp": "08:49:14"
+    }
+  ]
+}
