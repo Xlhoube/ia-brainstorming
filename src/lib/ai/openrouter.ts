@@ -321,6 +321,7 @@ export type ThematicDomain =
   | 'interfaces'
   | 'superinteligencia'
   | 'consciencia'
+  | 'saude'
   | 'geral';
 
 interface ThematicAnalysis {
@@ -334,6 +335,11 @@ interface ThematicAnalysis {
 export function detectThematicDomain(topic: string, description?: string): ThematicAnalysis {
   const combined = `${topic} ${description || ''}`.toLowerCase();
 
+  const cleanedTopic = topic
+    .replace(/[?!.:;]+$/g, '')
+    .replace(/^(o|a|os|as|como|será que|pode|podem|qual|sobre|o debate sobre)\s+/i, '')
+    .trim();
+
   if (/coloniz|marte|espa[çc]o|planeta|multiplanet|astron[oó]|cosmos|outros mundos/i.test(combined)) {
     return { domain: 'espaco', subjectNoun: 'a expansão multiplanetária e a sustentabilidade da Terra' };
   }
@@ -346,8 +352,11 @@ export function detectThematicDomain(topic: string, description?: string): Thema
   if (/qu[aá]ntic|causalidade|flecha do tempo|livre-arb[ií]trio|wheeler|determinismo|entrela[çc]amento/i.test(combined)) {
     return { domain: 'quantica', subjectNoun: 'a computação quântica e as leis da causalidade física' };
   }
-  if (/gen[eé]tic|biolog|crispr|genoma|adn|sint[eé]tic|transumanis|organismos sint[eé]ticos/i.test(combined)) {
+  if (/gen[eé]tic|crispr|adn|sint[eé]tic|transumanis|organismos sint[eé]ticos/i.test(combined)) {
     return { domain: 'genetica', subjectNoun: 'a edição genética humana e a engenharia da vida' };
+  }
+  if (/doen[çc]|cura|sa[úu]de|medic|patolog|cancro|terapia|hospital|cl[íi]nic|paliativ|farmac|paciente|enferm|biom[eé]dic|imunol|infec|terap[eê]ut/i.test(combined)) {
+    return { domain: 'saude', subjectNoun: `o tratamento e a procura de cura para "${cleanedTopic || topic}"` };
   }
   if (/desinforma[çc]|fake news|express[aã]o|censura|verdade|deepfake|filtros/i.test(combined)) {
     return { domain: 'desinformacao', subjectNoun: 'o combate à desinformação algorítmica e a liberdade' };
@@ -363,14 +372,9 @@ export function detectThematicDomain(topic: string, description?: string): Thema
   }
 
   // Tópico genérico ou personalizado
-  const cleanedTopic = topic
-    .replace(/[?!.:;]+$/g, '')
-    .replace(/^(o|a|os|as|como|será que|pode|podem|qual)\s+/i, '')
-    .trim();
-
   return {
     domain: 'geral',
-    subjectNoun: `o debate sobre "${cleanedTopic || topic}"`,
+    subjectNoun: `a questão de "${cleanedTopic || topic}"`,
   };
 }
 
@@ -760,6 +764,48 @@ export const DOMAIN_DISCOURSE_BANK: Record<
       `[CONCLUSAO_ATINGIDA: Sintese] Sophia Veris conclui: a assembleia afirma que, qualquer que seja o nível de sofisticação e utilidade das inteligências computacionais, a responsabilidade ética, a vulnerabilidade e o dever moral permanecem uma incumbência intransmissível dos seres biológicos conscientes, orientando o progresso para a dignidade de quem vive e sente.`,
     ],
   },
+  saude: {
+    filosofo: [
+      `Perante patologias graves e doenças sem cura, o primeiro dever da reflexão ética é questionar a tentação da obstinação cega versus a aceitação lúcida da vulnerabilidade. O valor da vida humana não se mede pelo adiamento mecânico da morte biológica a qualquer custo, mas pela preservação da dignidade e da integridade da pessoa.`,
+      `A mercantilização da esperança médica é uma das mais dolorosas derivas morais da nossa época. Quando o desespero de doentes e famílias é transformado num mercado lucrativo de promessas sem validação, o imperativo deontológico exige denunciar a exploração da fragilidade humana.`,
+      `Existe uma distinção moral intransponível entre capitulação perante o sofrimento e discernimento ético perante a futilidade terapêutica. Prolongar artificialmente funções vitais vegetativas desprovidas de consciência ou conforto não é defender a vida; é desrespeitar o mistério da sua finitude.`,
+      `O princípio da autonomia do paciente tem de prevalecer sobre o paternalismo clínico ou as pressões institucionais. Qualquer intervenção com terapias experimentais invasivas exige consentimento plenamente esclarecido, garantindo que o doente permanece o sujeito soberano da sua própria história.`,
+      `Na etapa de verificação metodológica: que critérios objetivos e independentes de bioética separam a inovação terapêutica corajosa da experimentação abusiva em populações vulneráveis sem alternativa clínica? Sem salvaguardas claras, a fronteira é perigosamente permeável.`,
+      `Em síntese conclusiva: a nobreza da medicina reside no clássico aforismo — curar quando possível, aliviar com frequência e consolar sempre. A procura obstinada de curas futuras nunca pode justificar o abandono compassivo do doente no presente.`,
+    ],
+    cientista: [
+      `A biologia das doenças crónicas e degenerativas refratárias expõe a complexidade assombrosa dos mecanismos celulares: heterogeneidade clonal, escape imunológico e cascatas inflamatórias sistémicas que tornam ineficazes as intervenções monoterapêuticas simplistas.`,
+      `O método científico não aceita atalhos motivados por urgência emocional: sem ensaios clínicos randomizados, controlados por placebo, duplo-cegos e com amostragem estatisticamente robusta, declarar que um tratamento funciona é precipitação que pode custar vidas por toxicidade desconhecida.`,
+      `Distingamos com rigor a correlação laboratorial in vitro da eficácia terapêutica in vivo no organismo humano. Eliminar células tumorais ou agregados proteicos numa placa de Petri é trivial; o desafio monumental da farmacocinética é atingir os tecidos-alvo sem desencadear falência multiorgânica.`,
+      `A barreira hematoencefálica e os equilíbrios homeostáticos protegem o nosso organismo com eficácia milenar, mas representam barreiras biofísicas reais à entrega de macromoléculas e vetores terapêuticos. Precisamos de biomarcadores validados e farmacodinâmica comprovada antes de gerar falsas expectativas.`,
+      `Nesta etapa de verificação empírica: exijo a apresentação de curvas de sobrevivência de Kaplan-Meier e dados brutos de toxicidade de fase 3 auditados por pares internacionais. A esperança legítima só sobrevive quando assenta em evidências reprodutíveis.`,
+      `Para a síntese científica: o parecer médico assenta na convergência da biologia molecular, terapias celulares combinadas e rastreio precoce. O caminho sólido é a medicina baseada em evidência, aliando a sofisticação da imunoterapia à humildade metodológica perante a biologia.`,
+    ],
+    humanista: [
+      `A maior tragédia perante as doenças sem cura não é apenas o limite do conhecimento biológico, mas a assimetria socioeconómica que determina quem tem acesso aos tratamentos de suporte e quem é abandonado à própria sorte por falta de recursos financeiros.`,
+      `Os cuidados paliativos de excelência não são uma derrota da ciência, mas a afirmação mais luminosa do humanismo. Garantir alívio da dor, acolhimento psicológico e presença afetiva calorosa nos momentos mais difíceis é o dever sagrado de qualquer comunidade civilizada.`,
+      `Pensemos no isolamento e na sobrecarga invisível dos cuidadores informais — familiares que esgotam a saúde mental, o sustento e as forças para acompanhar quem amam. Uma sociedade que não apoia as famílias dos doentes crónicos falhou na sua missão primordial de solidariedade.`,
+      `A defesa dos sistemas públicos e universais de saúde é a única garantia de que as terapias inovadoras pertencem à humanidade e não apenas aos acionistas de monopólios farmacêuticos. O direito à vida e à dignidade não pode depender da conta bancária de um paciente.`,
+      `Na etapa de verificação humana: pergunto diretamente — que redes comunitárias de apoio domiciliário e que garantias de acesso gratuito a analgésicos essenciais estão asseguradas para os doentes nos bairros mais desfavorecidos e no interior do país?`,
+      `Concluo na síntese: a medida moral de uma nação afere-se pelo carinho, pelo respeito e pelos recursos dedicados aos que enfrentam doenças incuráveis. A tecnologia médica só cumpre o seu propósito quando abraça a compaixão e não deixa ninguém para trás.`,
+    ],
+    tecnologo: [
+      `A modelação molecular computacional, o rastreio de alto débito de compostos químicos e a bioengenharia de precisão estão a comprimir processos de descoberta de novos fármacos de décadas para meros meses. A história mostra que o 'incurável' de ontem é a vacina trivial de hoje.`,
+      `Vejam os avanços da nanotecnologia médica e das terapias de ARN mensageiro: estamos a aprender a programar respostas imunitárias direcionadas que ensinam o próprio organismo a destruir patógenos e células doentes sem danificar tecidos saudáveis.`,
+      `A engenharia de tecidos e os microssistemas biomiméticos (organ-on-a-chip) permitem testar milhares de combinações terapêuticas em células humanas vivas em tempo real, eliminando anos de ensaios preliminares e acelerando a chegada de soluções aos hospitais.`,
+      `A inação e o pessimismo burocrático são os maiores inimigos da cura. Se a nossa espécie tivesse aceitado a inevitabilidade das doenças, a varíola e a poliomielite ainda estariam a dizimar civilizações. A nossa obrigação moral perante quem sofre é inovar com audácia, método e urgência.`,
+      `Na verificação técnica: já operamos ensaios adaptativos em circuito fechado e plataformas de sequenciação genómica ultrarrápida que personalizam os protocolos terapêuticos à assinatura molecular específica de cada doente com tolerância monitorizada em tempo real.`,
+      `Para fechar em síntese: a tecnologia afirma com esperança inabalável que nenhuma barreira biológica é invencível. Com investimento continuado, ciência aberta e determinação de engenharia, transformaremos patologias hoje devastadoras em condições geríveis e curáveis.`,
+    ],
+    moderador: [
+      `A mesa delimitou com clareza o horizonte deste debate: a esperança legítima na descoberta de novas curas articulada com o imperativo ético inegociável da dignidade, do cuidado e do respeito pelos doentes.`,
+      `Identifico uma convergência fundamental entre todos os pensadores: ninguém abdica da procura de soluções terapêuticas de fronteira, mas toda a assembleia subscreve a primazia absoluta dos cuidados paliativos humanizados e do acesso equitativo à saúde.`,
+      `A tensão fecunda reside na velocidade e nos métodos: o rigor metodológico da Helena e a prudência deontológica do Marcus servem de bússola indispensável à ambição inovadora do Kaelen e à exigência de justiça social da Aura.`,
+      `Aprofundámos a responsabilidade coletiva: perante doenças sem cura conhecida, o compromisso da sociedade é redobrar a investigação científica séria sem nunca descurar o conforto humano e o afeto imediato a quem sofre hoje.`,
+      `Na etapa de verificação: separámos com firmeza os ensaios clínicos controlados de fase 3 das meras extrapolações pré-clínicas, reafirmando a evidência empírica como único critério seguro de validação médica.`,
+      `[CONCLUSAO_ATINGIDA: Sintese] Sophia Veris conclui: a assembleia afirma que o combate a patologias graves e sem cura exige unir o rigor metódico e a audácia da biologia molecular à salvaguarda compassiva da dignidade humana. O progresso médico verdadeiro mede-se não apenas pelas curas que descobre para o futuro, mas pelo carinho, equidade e excelência paliativa com que cuida de cada vida no presente.`,
+    ],
+  },
   geral: {
     filosofo: [
       `Quando examinamos este problema com rigor, a nossa primeira obrigação é identificar os pressupostos ocultos tratados levianamente como verdades absolutas. Que premissas estamos aqui a ignorar?`,
@@ -820,7 +866,7 @@ export function generateOrganicSimulatedResponse(
   topicDescription?: string
 ): string {
   const lastMsg = history[history.length - 1];
-  const recentHumanMsg = history.slice(-2).find(m => m.isHuman);
+  const recentHumanMsg = lastMsg?.isHuman ? lastMsg : undefined;
   const thematic = detectThematicDomain(topic, topicDescription);
   const domain = thematic.domain;
   const subjectNoun = thematic.subjectNoun;
@@ -884,11 +930,11 @@ export function generateOrganicSimulatedResponse(
     }
   }
 
-  // 4. Se não há mensagens anteriores (Fase 1: Inicialização e Posicionamento - Abertura Direta)
-  if (!lastMsg) {
+  // 4. Se não há mensagens anteriores ou se estamos na Etapa 1 ("Análise independente") (Fase 1: Inicialização e Posicionamento - Abertura Direta)
+  if (!lastMsg || stage?.name === 'Análise independente') {
     const roleDiscourses = DOMAIN_DISCOURSE_BANK[domain][agent.category as 'filosofo'] || DOMAIN_DISCOURSE_BANK.geral[agent.category as 'filosofo'];
-    const baseDiscourse = roleDiscourses[0] || `A minha análise técnica sobre "${topic}" assenta em fundamentos sólidos.`;
-    return `Assumo de imediato o meu papel técnico de ${agent.roleTitle} e foco analítico. A minha tese central sobre ${subjectNoun} sustenta-se em três pilares fundamentais: 1) ${baseDiscourse.slice(0, 90)}...; 2) rigor na verificação de viabilidade prática; e 3) salvaguarda de princípios estruturantes. Mapeamento de limites: declaro expressamente fora do âmbito desta análise qualquer deriva especulativa sem correspondência técnica ou factual.`;
+    const selectedArg = roleDiscourses.find(candidate => !isAlreadySpoken(candidate)) || roleDiscourses[0];
+    return `Como ${agent.roleTitle}, a minha tese central sobre ${subjectNoun} assenta numa análise direta: ${selectedArg} Sustento esta posição em três pilares fundamentais: primeiro, o exame rigoroso dos pressupostos lógicos e materiais; segundo, a verificação de viabilidade prática com dados mensuráveis; e terceiro, a salvaguarda inegociável de princípios éticos estruturantes. Mapeamento de limites: declaro expressamente fora do âmbito desta análise qualquer deriva especulativa sem correspondência factual.`;
   }
 
   // 5. Réplica dialética direta com Escuta Ativa Anti-Repetição

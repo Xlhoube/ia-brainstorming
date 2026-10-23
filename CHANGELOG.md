@@ -2,6 +2,23 @@
 
 Todas as alterações relevantes a este projeto serão documentadas neste ficheiro.
 
+## [0.20.1] - 2026-10-23
+
+### Corrigido / Resolução de Stale Closure no `useDebate`, Anti-Loop e Domínio de Saúde
+- **Resolução de Stale Closure no Hook `useDebate.ts`:**
+  - Introdução de `messagesRef` e `runNextTurnRef` sincronizados para que as invocações assíncronas do debate via `setTimeout` consumam sempre o histórico real e não um estado `messages: []` congelado na closure inicial.
+  - Eliminação do loop de repetição do Dr. Marcus Vance na Etapa 1 (Análise independente), garantindo que todos os pensadores falam sequencialmente na ordem devida.
+  - Salvaguarda anti-repetição consecutiva nas Etapas 2 e 3 (`lastMsg.agentId === nextAgent.id`).
+- **Eliminação de Truncagem Mecânica e Frases Cortadas (`openrouter.ts`):**
+  - Remoção do corte arbitrário `${baseDiscourse.slice(0, 90)}...` que amputava palavras a meio (ex: `"os pre..."`).
+  - Erradicação de prefixos mecânicos e repetitivos (`Assumo de imediato o meu papel técnico...`).
+  - Limpeza de redundâncias sintáticas em `detectThematicDomain` (evitando expressões do tipo `"sobre o debate sobre"`).
+- **Expansão do Domínio Semântico de Saúde & Medicina (`saude`):**
+  - Adição do domínio temático `saude` para debates sobre doenças sem cura, cancro, patologias crónicas, terapias experimentais e cuidados paliativos.
+  - Banco de 30 argumentos especializados (6 por especialista) com pureza temática absoluta (0 contaminação por termos de IA) e fundamentação biomédica e ética sólida.
+- **Bateria de Testes Automatizados:**
+  - Criação do script `scripts/test-debate-loop-and-health-domain.mjs` com validação a 100%.
+
 ## [0.20.0] - 2026-10-22
 
 ### Adicionado / Arquitetura de Memória Híbrida & State Tracking

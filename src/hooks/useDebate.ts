@@ -44,6 +44,12 @@ export function useDebate() {
   const [activeSpeakerId, setActiveSpeakerId] = useState<string | null>(null);
   const [speedDelayMs, setSpeedDelayMs] = useState<number>(2500);
   const [messages, setMessages] = useState<DebateMessage[]>([]);
+  const messagesRef = useRef<DebateMessage[]>([]);
+  messagesRef.current = messages;
+
+  const isGeneratingRef = useRef<boolean>(false);
+  const runNextTurnRef = useRef<() => Promise<void>>(() => Promise.resolve());
+
   const [apiKey, setApiKey] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isSynthesizing, setIsSynthesizing] = useState<boolean>(false);
@@ -270,7 +276,7 @@ export function useDebate() {
 
   // Turno atómico com gestão humana de cadência e leitura com progressão nas 5 etapas canónicas
   const runNextTurn = useCallback(async () => {
-    if (isGenerating) return;
+    if (isGeneratingRef.current) return;
 
     // Cancela quaisquer contagens ou temporizadores de leitura pendentes
     if (readingTimerRef.current) clearTimeout(readingTimerRef.current);
@@ -287,6 +293,7 @@ export function useDebate() {
 
     const stageIdx = currentStageIndexRef.current;
     const stageObj = canonicalStages[stageIdx] || canonicalStages[0];
+    const currentMessages = messagesRef.current;
 
     // Determinação do orador adequado conforme a etapa canónica (The Five)
     let currentAgent: Agent;
@@ -297,7 +304,7 @@ export function useDebate() {
     } else if (stageIdx === 1) {
       // Etapa 1: Análise independente (Cada pensador expressa primeiro a sua visão autónoma)
       const targetPool = nonModerators.length > 0 ? nonModerators : activeAgents;
-      const spokenStage1 = messages.filter(m => m.stageIndex === 1).map(m => m.agentId);
+      const spokenStage1 = currentMessages.filter(m => m.stageIndex === 1).map(m => m.agentId);
       const pendingStage1 = targetPool.filter(a => !spokenStage1.includes(a.id));
       currentAgent = pendingStage1[0] || targetPool[currentSpeakerIndexRef.current % targetPool.length];
     } else if (stageIdx === 4) {
@@ -305,11 +312,18 @@ export function useDebate() {
       currentAgent = moderator || activeAgents[0];
     } else {
       // Etapa 2 (Confronto de argumentos) e Etapa 3 (Verificação)
-      currentAgent = activeAgents[currentSpeakerIndexRef.current % activeAgents.length];
+      let nextAgent = activeAgents[currentSpeakerIndexRef.current % activeAgents.length];
+      const lastMsg = currentMessages[currentMessages.length - 1];
+      if (lastMsg && lastMsg.agentId === nextAgent.id && activeAgents.length > 1) {
+        currentSpeakerIndexRef.current += 1;
+        nextAgent = activeAgents[currentSpeakerIndexRef.current % activeAgents.length];
+      }
+      currentAgent = nextAgent;
     }
 
     currentSpeakerIndexRef.current += 1;
     setActiveSpeakerId(currentAgent.id);
+    isGeneratingRef.current = true;
     setIsGenerating(true);
 
     try {
@@ -321,7 +335,7 @@ export function useDebate() {
           topic,
           topicDescription,
           allAgents: activeAgents,
-          messages,
+          messages: currentMessages,
           apiKey,
           tone,
           stage: stageObj,
@@ -331,7 +345,7 @@ export function useDebate() {
 
       const data = await res.json();
       if (data.success && data.message) {
-        if (!data.message.stageName) {
+        if (typeof data.message.stageIndex !== 'number') {
           data.message.stageName = stageObj.name;
           data.message.stageIndex = stageIdx;
         }
@@ -346,7 +360,9 @@ export function useDebate() {
           setWithdrawnAgentIds(prev => Array.from(new Set([...prev, currentAgent.id])));
         }
 
-        setMessages(prev => [...prev, data.message]);
+        const updatedMessages = [...currentMessages, data.message];
+        messagesRef.current = updatedMessages;
+        setMessages(updatedMessages);
 
         if (currentSpeakerIndexRef.current % activeAgents.length === 0) {
           setCurrentRound(r => r + 1);
@@ -360,21 +376,21 @@ export function useDebate() {
         } else if (stageIdx === 1) {
           // Quando todos os pensadores tiverem formulado a sua análise independente, passa ao Confronto
           const targetPool = nonModerators.length > 0 ? nonModerators : activeAgents;
-          const stage1Count = [...messages, data.message].filter(m => m.stageIndex === 1).length;
+          const stage1Count = updatedMessages.filter(m => m.stageIndex === 1).length;
           if (stage1Count >= targetPool.length) {
             setCurrentStageIndex(2);
             currentStageIndexRef.current = 2;
           }
         } else if (stageIdx === 2) {
           // Após pelo menos 1 ciclo de confronto entre os pensadores, avança para Verificação
-          const stage2Count = [...messages, data.message].filter(m => m.stageIndex === 2).length;
+          const stage2Count = updatedMessages.filter(m => m.stageIndex === 2).length;
           if (stage2Count >= Math.max(activeAgents.length, 3)) {
             setCurrentStageIndex(3);
             currentStageIndexRef.current = 3;
           }
         } else if (stageIdx === 3) {
           // Após intervenções de verificação empírica, avança para Síntese
-          const stage3Count = [...messages, data.message].filter(m => m.stageIndex === 3).length;
+          const stage3Count = updatedMessages.filter(m => m.stageIndex === 3).length;
           if (stage3Count >= Math.min(activeAgents.length, 2)) {
             setCurrentStageIndex(4);
             currentStageIndexRef.current = 4;
@@ -396,10 +412,10 @@ export function useDebate() {
 
             // Registo automático de aprendizagens e memória estruturada para cada pensador presente
             activeAgents.forEach(ag => {
-              const agentMsgs = [...messages, data.message].filter(m => m.agentId === ag.id);
+              const agentMsgs = updatedMessages.filter(m => m.agentId === ag.id);
               const lastSpeak = agentMsgs[agentMsgs.length - 1];
               const summary = lastSpeak ? lastSpeak.content.slice(0, 160) + '...' : `Defendeu a sua posição sobre "${topic}"`;
-              const prevSpeaker = messages.length > 0 ? messages[messages.length - 1].agentName : undefined;
+              const prevSpeaker = currentMessages.length > 0 ? currentMessages[currentMessages.length - 1].agentName : undefined;
 
               LocalDatabase.recordAutomaticDebateConclusionMemory(
                 ag.id,
@@ -483,7 +499,7 @@ export function useDebate() {
             setReadingCountdown(null);
             setActiveSpeakerId(null);
             if (statusRef.current === 'running') {
-              runNextTurn();
+              runNextTurnRef.current();
             }
           }, delayMs);
         };
@@ -495,9 +511,15 @@ export function useDebate() {
       console.error('Erro ao gerar turno do agente:', err);
       setActiveSpeakerId(null);
     } finally {
+      isGeneratingRef.current = false;
       setIsGenerating(false);
     }
-  }, [agents, selectedAgentIds, withdrawnAgentIds, isGenerating, topic, topicDescription, messages, apiKey, tone]);
+  }, [agents, selectedAgentIds, withdrawnAgentIds, topic, topicDescription, apiKey, tone]);
+
+  runNextTurnRef.current = runNextTurn;
+  useEffect(() => {
+    runNextTurnRef.current = runNextTurn;
+  });
 
   const addAgentLearning = (agentId: string, insight: string) => {
     if (!insight.trim()) return;
@@ -675,8 +697,9 @@ export function useDebate() {
     if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
 
     // Dispara a intervenção de abertura da mesa redonda na Etapa 0 (Compreender)
+    messagesRef.current = [];
     setTimeout(() => {
-      runNextTurn();
+      runNextTurnRef.current();
     }, 200);
   };
 
@@ -692,14 +715,15 @@ export function useDebate() {
   const resumeDebate = () => {
     setStatus('running');
     // Se não estiver já a gerar nem em contagem ativa, retoma o próximo turno
-    if (!isGenerating && !isSpeakingAudio && !readingCountdown) {
-      runNextTurn();
+    if (!isGeneratingRef.current && !isSpeakingAudio && !readingCountdown) {
+      runNextTurnRef.current();
     }
   };
 
   const resetDebate = () => {
     setStatus('idle');
     setSessionId('session-' + Date.now());
+    messagesRef.current = [];
     setMessages([]);
     setWithdrawnAgentIds([]);
     setCurrentRound(1);
@@ -721,6 +745,7 @@ export function useDebate() {
     setSessionId(saved.id);
     setTopic(saved.topic);
     setTopicDescription(saved.topicDescription || '');
+    messagesRef.current = saved.messages || [];
     setMessages(saved.messages || []);
     setSelectedAgentIds(saved.selectedAgentIds || selectedAgentIds);
     setWithdrawnAgentIds(saved.withdrawnAgentIds || []);
@@ -734,7 +759,7 @@ export function useDebate() {
   };
 
   const injectHumanIntervention = async (content: string) => {
-    if (!content.trim()) return;
+    if (!content.trim() || isGeneratingRef.current) return;
 
     const raw = content.trim();
     const isGreeting = /boa noite|bom dia|boa tarde|ol[aá]|oi|boas|como est[aã]o|tudo bem/i.test(raw);
@@ -755,7 +780,9 @@ export function useDebate() {
       isHuman: true,
     };
 
-    const nextMessages = [...messages, humanMsg];
+    const currentMessages = messagesRef.current;
+    const nextMessages = [...currentMessages, humanMsg];
+    messagesRef.current = nextMessages;
     setMessages(nextMessages);
     setStatus('running');
 
@@ -780,6 +807,7 @@ export function useDebate() {
     currentSpeakerIndexRef.current += 1;
 
     setActiveSpeakerId(respondingAgent.id);
+    isGeneratingRef.current = true;
     setIsGenerating(true);
 
     try {
@@ -801,7 +829,14 @@ export function useDebate() {
 
       const data = await res.json();
       if (data.success && data.message) {
-        setMessages(prev => [...prev, data.message]);
+        if (typeof data.message.stageIndex !== 'number') {
+          data.message.stageName = currentStageObj.name;
+          data.message.stageIndex = currentStageIndexRef.current;
+        }
+
+        const updatedMessages = [...nextMessages, data.message];
+        messagesRef.current = updatedMessages;
+        setMessages(updatedMessages);
 
         const conclusion = data.message.dialecticalConclusion || data.dialecticalConclusion;
         if (conclusion) {
@@ -816,7 +851,7 @@ export function useDebate() {
               : (rawConclusion.includes('consenso') ? 'consenso' : 'sintese');
 
             activeAgents.forEach(ag => {
-              const agentMsgs = [...nextMessages, data.message].filter(m => m.agentId === ag.id);
+              const agentMsgs = updatedMessages.filter(m => m.agentId === ag.id);
               const lastSpeak = agentMsgs[agentMsgs.length - 1];
               const summary = lastSpeak ? lastSpeak.content.slice(0, 160) + '...' : `Defendeu a sua posição sobre "${topic}"`;
               const prevSpeaker = nextMessages.length > 0 ? nextMessages[nextMessages.length - 1].agentName : undefined;
@@ -895,7 +930,7 @@ export function useDebate() {
             setReadingCountdown(null);
             setActiveSpeakerId(null);
             if (statusRef.current === 'running') {
-              runNextTurn();
+              runNextTurnRef.current();
             }
           }, delayMs);
         };
@@ -906,13 +941,15 @@ export function useDebate() {
       console.error('Erro ao responder à fala humana na sala:', err);
       setActiveSpeakerId(null);
     } finally {
+      isGeneratingRef.current = false;
       setIsGenerating(false);
     }
   };
 
 
   const synthesizeDebate = async () => {
-    if (messages.length === 0) return;
+    const currentMessages = messagesRef.current;
+    if (currentMessages.length === 0) return;
     setIsSynthesizing(true);
 
     try {
@@ -921,7 +958,7 @@ export function useDebate() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           topic,
-          messages,
+          messages: currentMessages,
           apiKey,
           tone,
         }),
